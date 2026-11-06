@@ -379,7 +379,7 @@
       </div>
     </div>
 
-    <div class="sec-h">Peek History (Real Spectator Times)</div>
+    <div class="sec-h">Peek History (Spectator Times)</div>
     <div class="card">
       <div class="history-box" id="peekHistoryBox">No stops recorded yet.</div>
     </div>
@@ -698,15 +698,15 @@ function computeForcedMs(realMs, isLap = false){
   return (minPartCs + realSec * 100 + forcedCs) * 10;
 }
 
-function recordPeek(type, realMs, shownMs){
-  const rCs = Math.floor(realMs / 10) % 100;
-  const rSec = Math.floor(realMs / 1000) % 60;
+function recordPeek(type, shownMs){
+  const sCs = Math.floor(shownMs / 10) % 100;
+  const sSec = Math.floor(shownMs / 1000) % 60;
   const entry = {
     type,
-    realFormatted: formatMs(realMs),
     shownFormatted: formatMs(shownMs),
-    realSec: rSec,
-    realCs: rCs,
+    largeInt: timeToLargeInt(shownMs),
+    sec: sSec,
+    cs: sCs,
     at: new Date().toLocaleTimeString()
   };
   S.peekLog.unshift(entry);
@@ -792,7 +792,7 @@ function handleStartStop(){
     elStartBtn.className = "sw-btn start";
     elLapBtn.textContent = "Reset";
     elLapBtn.className = "sw-btn";
-    recordPeek("STOP", realTotalMs, shownTotalMs);
+    recordPeek("STOP", shownTotalMs);
     renderLaps();
   }
 }
@@ -820,11 +820,9 @@ function handleLapReset(){
     S.laps.push({
       num: S.laps.length + 1,
       splitMs: shownSplitMs,
-      totalMs: shownTotalMs,
-      realSplitMs,
-      realTotalMs
+      totalMs: shownTotalMs
     });
-    recordPeek(`LAP ${S.laps.length}`, realSplitMs, shownSplitMs);
+    recordPeek(`LAP ${S.laps.length}`, shownSplitMs);
     renderLaps();
   } else if (S.displayedMs > 0){
     // Emergence Peek: when someone presses Reset after stopping, lock their final stopped time into the 3-slot memory
@@ -838,11 +836,13 @@ function handleLapReset(){
     S.emergenceList.push(item);
     const totalSum = S.emergenceList.reduce((acc, it) => acc + it.largeInt, 0);
     pushPeekTelemetry({
-      type: `RESET #${S.emergenceList.length} (SUM: ${totalSum})`,
-      realFormatted: S.emergenceList.map(it => it.formatted).join(" — "),
-      shownFormatted: `${item.formatted} (${item.largeInt})`,
-      realSec: Math.floor(stoppedMs / 1000) % 60,
-      realCs: Math.floor(stoppedMs / 10) % 100,
+      type: `RESET #${S.emergenceList.length}`,
+      shownFormatted: item.formatted,
+      largeInt: item.largeInt,
+      emergenceSum: totalSum,
+      emergenceSlots: S.emergenceList.map(it => it.formatted).join(" — "),
+      sec: Math.floor(stoppedMs / 1000) % 60,
+      cs: Math.floor(stoppedMs / 10) % 100,
       at: new Date().toLocaleTimeString()
     });
 
@@ -1052,10 +1052,8 @@ kpGrid.addEventListener("pointerdown", e => {
         elPkSub.textContent = S.emergenceList.map(it => it.formatted).join(" — ");
       }
     } else if (S.displayedMs > 0 && !S.running){
-      // If currently stopped before hitting Reset, show the current stopped time & real time
-      const last = S.peekLog[0];
       elPkMain.textContent = String(timeToLargeInt(S.displayedMs));
-      elPkSub.textContent = last ? `${formatMs(S.displayedMs)} (Real ${last.realFormatted})` : formatMs(S.displayedMs);
+      elPkSub.textContent = formatMs(S.displayedMs);
     } else {
       const modeDesc = CFG.mode === "single"
         ? `1-NUM: .${p2(CFG.singleTarget)}`
@@ -1180,7 +1178,7 @@ function openSettings(){
 
   if (S.peekLog.length){
     peekHistoryBox.textContent = S.peekLog.map(
-      e => `[${e.at}] ${e.type}: Real ${e.realFormatted} → Shown ${e.shownFormatted}`
+      e => `[${e.at}] ${e.type}: ${e.shownFormatted} (${e.largeInt})`
     ).join("\n");
   } else {
     peekHistoryBox.textContent = "No stops recorded yet.";
