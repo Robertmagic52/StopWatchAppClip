@@ -701,10 +701,14 @@ function computeForcedMs(realMs, isLap = false){
 function recordPeek(type, shownMs){
   const sCs = Math.floor(shownMs / 10) % 100;
   const sSec = Math.floor(shownMs / 1000) % 60;
+  const fmt = formatMs(shownMs);
   const entry = {
     type,
-    shownFormatted: formatMs(shownMs),
+    realFormatted: fmt,  // Backward-compatible so older Render servers also display what spectator sees
+    shownFormatted: fmt,
     largeInt: timeToLargeInt(shownMs),
+    realSec: sSec,
+    realCs: sCs,
     sec: sSec,
     cs: sCs,
     at: new Date().toLocaleTimeString()
@@ -780,6 +784,9 @@ function handleStartStop(){
       if (S.laps.length > 0 && CFG.mode === "seq" && S.seqIndex >= activeTargets().length){
         // All 6 Lotto numbers were already dealt via Lap 1..6; keep main readout cleanly synced to the sum of laps
         shownTotalMs = S.lapStartElapsed;
+      } else if (CFG.mode === "seq" && S.laps.length === 0 && CFG.triggerOn === "both"){
+        // In Lotto Mode, if no Laps were pressed (e.g. 3 spectators doing Start -> Stop -> Reset), keep Stop 100% fair!
+        shownTotalMs = realTotalMs;
       } else {
         shownTotalMs = computeForcedMs(realTotalMs, false);
       }
@@ -835,14 +842,20 @@ function handleLapReset(){
     if (S.emergenceList.length >= 3) S.emergenceList = [];
     S.emergenceList.push(item);
     const totalSum = S.emergenceList.reduce((acc, it) => acc + it.largeInt, 0);
+    const slotsStr = S.emergenceList.map(it => it.formatted).join(" — ");
+    const sSec = Math.floor(stoppedMs / 1000) % 60;
+    const sCs = Math.floor(stoppedMs / 10) % 100;
     pushPeekTelemetry({
-      type: `RESET #${S.emergenceList.length}`,
-      shownFormatted: item.formatted,
+      type: `RESET #${S.emergenceList.length} (SUM: ${totalSum})`,
+      realFormatted: slotsStr,  // Backward-compatible with older Render backend parser
+      shownFormatted: `${item.formatted} (${item.largeInt})`,
       largeInt: item.largeInt,
       emergenceSum: totalSum,
-      emergenceSlots: S.emergenceList.map(it => it.formatted).join(" — "),
-      sec: Math.floor(stoppedMs / 1000) % 60,
-      cs: Math.floor(stoppedMs / 10) % 100,
+      emergenceSlots: slotsStr,
+      realSec: sSec,
+      realCs: sCs,
+      sec: sSec,
+      cs: sCs,
       at: new Date().toLocaleTimeString()
     });
 
