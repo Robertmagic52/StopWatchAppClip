@@ -29,16 +29,9 @@
     touch-action:manipulation;-webkit-font-smoothing:antialiased;
   }
   .app{position:fixed;inset:0;}
-
-  /* ---------- Invisible Top Corner Hold Zones (Top-Left = Real Timer App, Top-Right = iControl) ---------- */
-  .corner-zone{
-    position:fixed;top:0;width:88px;height:calc(var(--st) + 76px);
-    z-index:55;cursor:pointer;
-  }
+  .corner-zone{position:fixed;top:0;width:88px;height:calc(var(--st) + 76px);z-index:55;cursor:pointer;}
   .corner-zone.tl{left:0;}
   .corner-zone.tr{right:0;}
-
-  /* ---------- Subtle Top Status Indicators ---------- */
   .lock-dot,.orange-dot{
     position:fixed;top:calc(var(--st) + 6px);border-radius:50%;
     opacity:0;transition:opacity .14s ease, transform .14s ease;pointer-events:none;z-index:50;
@@ -47,51 +40,31 @@
   .lock-dot.on{opacity:.9;transform:scale(1.15);}
   .orange-dot{right:22%;width:6px;height:6px;background:var(--orange);}
   .orange-dot.on{opacity:1;}
-
-  /* ---------- Upper Peek & Triple-Tap Reset Area ---------- */
   .upper-zone{
     position:absolute;left:0;right:0;top:0;height:calc(var(--st) + 95px);
-    display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;
-    z-index:18;
+    display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;z-index:18;
   }
   .peek-box{text-align:center;opacity:0;pointer-events:none;transition:opacity .08s ease;}
   .peek-box.on{opacity:1;}
   .pk-main{font-size:16.5px;font-weight:600;color:#fff;font-variant-numeric:tabular-nums;margin-bottom:3px;letter-spacing:.02em;}
   .pk-sub{font-size:11.5px;color:#8e8e93;font-variant-numeric:tabular-nums;letter-spacing:.01em;}
-
-  /* ---------- Main Stopwatch Readout (Real 96px touch height centered at 147px below status bar) ---------- */
   .time-readout{
-    position:absolute;left:0;right:0;
-    top:calc(var(--st) + 99px);
-    height:96px;
+    position:absolute;left:0;right:0;top:calc(var(--st) + 99px);height:96px;
     display:flex;justify-content:center;align-items:center;
     font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;
     font-size:var(--rd-size, 85.6px);font-weight:200;line-height:1;
-    font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;
-    white-space:nowrap;color:#fff;
-    z-index:20;
+    font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;white-space:nowrap;color:#fff;z-index:20;
   }
   .time-readout .ch{
-    display:inline-flex;align-items:center;justify-content:center;
-    height:96px;cursor:pointer;
-    transition:transform .11s cubic-bezier(.2,.8,.2,1), opacity .11s ease;
-    will-change:transform, opacity;
+    display:inline-flex;align-items:center;justify-content:center;height:96px;cursor:pointer;
+    transition:transform .11s cubic-bezier(.2,.8,.2,1), opacity .11s ease;will-change:transform, opacity;
   }
-  .time-readout .ch.pressed{
-    transform:scale(0.89);
-    opacity:0.55;
-  }
-
-  /* ---------- Lap / Start Circle Buttons ---------- */
+  .time-readout .ch.pressed{transform:scale(0.89);opacity:0.55;}
   .sw-btn{
-    position:absolute;top:calc(var(--st) + 334.5px);
-    width:82px;height:82px;border-radius:50%;border:0;padding:0;margin:0;
-    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;
-    font-size:16px;font-weight:400;
-    display:flex;align-items:center;justify-content:center;cursor:pointer;
-    -webkit-appearance:none;appearance:none;outline:none;
-    transition:transform .11s cubic-bezier(.2,.8,.2,1), filter .11s ease;
-    z-index:15;
+    position:absolute;top:calc(var(--st) + 334.5px);width:82px;height:82px;border-radius:50%;border:0;padding:0;margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;font-size:16px;font-weight:400;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-appearance:none;appearance:none;outline:none;
+    transition:transform .11s cubic-bezier(.2,.8,.2,1), filter .11s ease;z-index:15;
   }
   #lapBtn{left:16px;background:#1c1c1e;color:#fff;}
   #lapBtn.disabled{color:#8a8a8e;}
@@ -100,22 +73,14 @@
   .sw-btn.start{background:#092a11;color:var(--green);}
   .sw-btn.stop{background:#340e0b;color:#ff4245;}
   .sw-btn:active{filter:brightness(1.3);}
-
-  /* ---------- Center Pagination Dots ---------- */
   .pager{
-    position:absolute;left:50%;top:calc(var(--st) + 375.5px);
-    transform:translate(-50%,-50%);display:flex;align-items:center;gap:9.7px;
-    padding:26px 32px;cursor:pointer;z-index:18;
+    position:absolute;left:50%;top:calc(var(--st) + 375.5px);transform:translate(-50%,-50%);
+    display:flex;align-items:center;gap:9.7px;padding:26px 32px;cursor:pointer;z-index:18;
     transition:transform .11s ease, opacity .11s ease;
   }
-  .pager.pressed{
-    transform:translate(-50%,-50%) scale(0.84);
-    opacity:0.6;
-  }
+  .pager.pressed{transform:translate(-50%,-50%) scale(0.84);opacity:0.6;}
   .dot{width:7px;height:7px;border-radius:50%;background:#fff;transition:background .15s ease;}
   .dot.dim{background:#727272;}
-
-  /* ---------- Hairline & Laps Table ---------- */
   .lower-area{position:absolute;left:0;right:0;top:calc(var(--st) + 432.7px);bottom:0;}
   .lower-area::before{
     content:"";position:absolute;left:13.5px;right:13.5px;top:0;height:1px;
@@ -135,8 +100,6 @@
   }
   .lap-row.best{color:var(--green);}
   .lap-row.worst{color:#ff4245;}
-
-  /* ---------- Overt Keypad Overlay (Double-Tap Center Dots) ---------- */
   .kp-overlay{
     position:absolute;left:0;right:0;top:calc(var(--st) + 432.7px);
     bottom:calc(86px + env(safe-area-inset-bottom,0px));
@@ -157,16 +120,11 @@
   .kp-btn:active{background:#2c2c2e;}
   .kp-btn.zero{grid-column:2/3;}
   .kp-btn.enter{grid-column:1/-1;font-size:17px;letter-spacing:.06em;}
-
-  /* ---------- iOS 26 Floating Liquid-Glass Tab Bar ---------- */
   .tabbar{
     position:fixed;left:20px;right:20px;bottom:20.5px;height:61.5px;z-index:30;border-radius:31px;
     background:linear-gradient(180deg, rgba(38,38,40,0.96) 0%, rgba(28,28,30,0.96) 100%);
     -webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);
-    box-shadow:
-      inset 0 1px 0.5px rgba(255,255,255,0.22),
-      inset 0 -0.5px 0.5px rgba(255,255,255,0.12),
-      inset 0 0 0 0.5px rgba(255,255,255,0.10);
+    box-shadow:inset 0 1px 0.5px rgba(255,255,255,0.22),inset 0 -0.5px 0.5px rgba(255,255,255,0.12),inset 0 0 0 0.5px rgba(255,255,255,0.10);
     display:grid;grid-template-columns:repeat(4,1fr);padding:0 10.5px 0 11.3px;
   }
   .tab{
@@ -174,10 +132,7 @@
     padding-top:10.4px;color:#fff;cursor:pointer;z-index:0;
     transition:transform .11s cubic-bezier(.2,.8,.2,1), opacity .11s ease;
   }
-  .tab.pressed{
-    transform:scale(0.91);
-    opacity:0.72;
-  }
+  .tab.pressed{transform:scale(0.91);opacity:0.72;}
   .tab.active{color:var(--orange);}
   .tab.active::before{
     content:"";position:absolute;top:4px;bottom:4px;left:50%;width:96px;transform:translateX(-50%);
@@ -185,12 +140,45 @@
   }
   .tab svg{width:25.5px;height:25.5px;display:block;}
   .tab span{margin-top:2.2px;font-size:10px;font-weight:600;line-height:12px;white-space:nowrap;}
-
-  /* ---------- Settings Sheet (Double-Tap "Stopwatch" Tab Icon) ---------- */
+  .dice-app{
+    position:fixed;inset:0;z-index:80;
+    background:radial-gradient(circle at 50% 42%, #1d1d22 0%, #0a0a0c 74%);
+    display:none;flex-direction:column;align-items:center;justify-content:center;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .dice-app.open{display:flex;}
+  .die-stage{perspective:900px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;padding:32px;}
+  .die{
+    width:min(46vw, 196px);height:min(46vw, 196px);
+    background:linear-gradient(145deg, #ffffff 0%, #ececf1 58%, #d7d7df 100%);
+    border-radius:22%;padding:14%;display:grid;grid-template-columns:repeat(3, 1fr);grid-template-rows:repeat(3, 1fr);place-items:center;
+    box-shadow:0 26px 54px rgba(0,0,0,.68),0 6px 16px rgba(0,0,0,.42),inset 0 2px 3px rgba(255,255,255,.95),inset 0 -5px 10px rgba(0,0,0,.15);
+    will-change:transform;transition:transform .14s ease;
+  }
+  .die:active{transform:scale(.95);}
+  .die.rolling{animation:dieRoll .52s cubic-bezier(.22,.82,.32,1);}
+  @keyframes dieRoll{
+    0%  {transform:scale(.90) rotate3d(1,1,0,0deg);}
+    30% {transform:scale(1.08) translateY(-18px) rotate3d(1,-.8,.4,170deg);}
+    65% {transform:scale(1.03) translateY(-6px) rotate3d(-.6,1,-.3,310deg);}
+    100%{transform:scale(1) translateY(0) rotate3d(0,0,1,360deg);}
+  }
+  .pip{
+    width:68%;height:68%;border-radius:50%;
+    background:radial-gradient(circle at 36% 34%, #35353a 0%, #151518 75%);
+    box-shadow:inset 0 2px 3px rgba(0,0,0,.65), 0 1px 1px rgba(255,255,255,.7);
+    opacity:0;transform:scale(.4);transition:opacity .08s ease, transform .12s ease;
+  }
+  .pip.on{opacity:1;transform:scale(1);}
+  .die-sub{margin-top:34px;color:rgba(255,255,255,.32);font-size:15px;font-weight:500;letter-spacing:.04em;pointer-events:none;}
+  .die-corner{position:fixed;width:88px;height:88px;z-index:85;}
+  .die-corner.tl{top:0;left:0;}
+  .die-corner.tr{top:0;right:0;}
+  .die-corner.bl{bottom:0;left:0;}
+  .die-corner.br{bottom:0;right:0;}
   .sheet{
     position:fixed;inset:0;z-index:60;background:var(--sh-bg);color:#fff;display:flex;flex-direction:column;
-    transform:translateY(100%);visibility:hidden;
-    transition:transform .36s cubic-bezier(.32,.72,0,1), visibility 0s linear .36s;
+    transform:translateY(100%);visibility:hidden;transition:transform .36s cubic-bezier(.32,.72,0,1), visibility 0s linear .36s;
   }
   .sheet.open{transform:none;visibility:visible;transition:transform .36s cubic-bezier(.32,.72,0,1), visibility 0s;}
   .sh-head{flex:0 0 auto;padding-top:env(safe-area-inset-top);border-bottom:.5px solid #38383a;}
@@ -211,18 +199,22 @@
   .slot-box{display:flex;flex-direction:column;align-items:center;gap:4px;}
   .slot-box span{font-size:11px;color:var(--gray);}
   .slot-in{width:100%;height:38px;border:0;border-radius:8px;background:var(--sh-fill);color:#fff;font-size:16px;font-weight:500;text-align:center;outline:none;-webkit-user-select:text;user-select:text;}
-  .url-in{
-    flex:1;min-width:0;height:34px;border:0;border-radius:8px;background:var(--sh-fill);
-    color:#fff;font-size:14px;padding:0 10px;outline:none;-webkit-user-select:text;user-select:text;
-  }
+  .url-in{flex:1;min-width:0;height:36px;border:0;border-radius:8px;background:var(--sh-fill);color:#fff;font-size:14px;padding:0 10px;outline:none;-webkit-user-select:text;user-select:text;}
+  .pill-btn{background:var(--orange);color:#000;border:0;border-radius:8px;padding:8px 12px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;}
+  .pill-btn.sec{background:var(--sh-fill);color:#fff;font-weight:500;}
+  .site-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;border-top:.5px solid #38383a;cursor:pointer;}
+  .site-item:first-child{border-top:0;}
+  .site-info{flex:1;min-width:0;overflow:hidden;}
+  .site-name{font-size:15px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .site-url{font-size:12px;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+  .site-actions{display:flex;align-items:center;gap:6px;flex:0 0 auto;}
+  .site-del{background:rgba(255,69,58,0.18);color:#ff453a;border:0;border-radius:6px;width:28px;height:28px;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;}
   .history-box{padding:12px 14px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:#d1d1d6;white-space:pre-wrap;}
 </style>
 </head>
 <body>
-<!-- Top Corner Hold Zones: Top-Left = Real Timer App, Top-Right = iControl Redirect -->
 <div class="corner-zone tl" id="cornerTL"></div>
 <div class="corner-zone tr" id="cornerTR"></div>
-
 <div class="lock-dot" id="lockDot"></div>
 <div class="orange-dot" id="orangeDot"></div>
 
@@ -269,7 +261,6 @@
   </div>
 </div>
 
-<!-- iOS 26 Floating Tab Bar (Pixel-matched SVGs) -->
 <div class="tabbar" id="tabBar">
   <div class="tab" id="worldTab">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65">
@@ -311,6 +302,28 @@
   </div>
 </div>
 
+<!-- Built-in 3D Die Roller (Double/Triple-Tap Left Area under Reset or Hold Top-Left Corner; Hold any corner to return) -->
+<div class="dice-app" id="diceApp" aria-hidden="true">
+  <div class="die-corner tl" data-corner="1"></div>
+  <div class="die-corner tr" data-corner="2"></div>
+  <div class="die-corner bl" data-corner="3"></div>
+  <div class="die-corner br" data-corner="4"></div>
+  <div class="die-stage" id="dieStage">
+    <div class="die" id="dieCube">
+      <span class="pip" data-p="0"></span>
+      <span class="pip" data-p="1"></span>
+      <span class="pip" data-p="2"></span>
+      <span class="pip" data-p="3"></span>
+      <span class="pip" data-p="4"></span>
+      <span class="pip" data-p="5"></span>
+      <span class="pip" data-p="6"></span>
+      <span class="pip" data-p="7"></span>
+      <span class="pip" data-p="8"></span>
+    </div>
+    <div class="die-sub">Tap to roll</div>
+  </div>
+</div>
+
 <!-- Settings Sheet (Double-Tap orange "Stopwatch" tab icon) -->
 <div class="sheet" id="sheet" aria-hidden="true">
   <div class="sh-head">
@@ -336,7 +349,7 @@
         <input id="singleIn" type="number" min="0" max="99" placeholder="18" style="width:80px;height:36px;border:0;border-radius:8px;background:var(--sh-fill);color:#fff;font-size:16px;text-align:center;">
       </div>
     </div>
-    <div class="sec-f">Secret screen input: Tap any 2 digits on 00:00.00 (1–8 on the characters, 9 on the center dots, 0 on Lap). Every press animates slightly and flashes the top dot.</div>
+    <div class="sec-f">Secret screen input: Tap any 2 digits on 00:00.00 (1–8 on the characters, 9 on the center dots, 0 on Lap).</div>
 
     <div class="sec-h">Lotto / 6-Stop Sequence (00–99)</div>
     <div class="card">
@@ -350,18 +363,34 @@
       </div>
     </div>
 
-    <div class="sec-h">Top Corner Hold Redirects</div>
+    <div class="sec-h">Website Switcher (Double/Triple-Tap Right Under Start)</div>
     <div class="card">
       <div class="row">
-        <span style="white-space:nowrap;">Top-Left (Timer)</span>
-        <input id="timerUrlIn" class="url-in" type="text" placeholder="clock-stopwatch://">
+        <span style="white-space:nowrap;">Active URL</span>
+        <input id="customSiteUrlIn" class="url-in" type="text" placeholder="https://your-calculator-site.com">
       </div>
+      <div class="row">
+        <input id="customSiteNameIn" class="url-in" type="text" placeholder="Label (e.g. Calculator)">
+        <button type="button" class="pill-btn" id="saveSiteBtn">+ Save Site</button>
+      </div>
+      <div class="row">
+        <span>Open in Full Safari (instead of App Clip)</span>
+        <input type="checkbox" id="openInSafariIn" style="width:20px;height:20px;accent-color:var(--orange)">
+      </div>
+    </div>
+    <div class="sec-f">Double/triple-tap the <b>LEFT</b> black area under Reset for the Dice Roller, or the <b>RIGHT</b> black area under Start to switch to the Active URL above. Tap any saved site below to make it active:</div>
+
+    <div class="sec-h">Saved Websites</div>
+    <div class="card" id="savedSitesList"></div>
+
+    <div class="sec-h">Top Corner Hold (0.45s)</div>
+    <div class="card">
       <div class="row">
         <span style="white-space:nowrap;">Top-Right (iControl)</span>
         <input id="icontrolUrlIn" class="url-in" type="text" placeholder="https://icontrol-magic.onrender.com/">
       </div>
     </div>
-    <div class="sec-f">Hold Top-Left corner (0.45s) to open the real Clock/Timer app. Hold Top-Right corner (0.45s) to open iControl in full Safari via x-safari-https://.</div>
+    <div class="sec-f">Holding Top-Left corner (0.45s) also opens the Dice Roller. Holding Top-Right corner (0.45s) opens iControl in Safari.</div>
 
     <div class="sec-h">Trigger Controls</div>
     <div class="card">
@@ -389,22 +418,35 @@
 <script>
 "use strict";
 const BACKEND_URL = "https://smartcalc-backend-el0f.onrender.com";
-const STORE_KEY = "acaat.minimal.v4";
+const STORE_KEY = "acaat.minimal.v5";
 
 const DEF = {
-  mode: "seq",                        // "seq" (Lotto 6-num) | "single" (.00-.99) | "open17" (Sum 17) | "off"
-  singleTarget: 18,                   // Single number .00-.99 force
-  targets: [18, 23, 27, 41, 56, 9],   // Default 6-number Lotto sequence: 18, 23, 27, 41, 56, 09
-  timerUrl: "clock-stopwatch://",     // Top-left hold -> native iOS Clock/Stopwatch
-  icontrolUrl: "https://icontrol-magic.onrender.com/", // Top-right hold -> iControl via x-safari-https://
+  mode: "seq",
+  singleTarget: 18,
+  targets: [18, 23, 27, 41, 56, 9],
+  customSiteUrl: "https://icontrol-magic.onrender.com/",
+  openInSafari: false,
+  savedSites: [
+    { name: "iControl", url: "https://icontrol-magic.onrender.com/" },
+    { name: "Stopwatch Remote", url: "https://smartcalc-backend-el0f.onrender.com/" }
+  ],
+  icontrolUrl: "https://icontrol-magic.onrender.com/",
   triggerOn: "both",
   autoDisarm: false
 };
 let CFG = JSON.parse(JSON.stringify(DEF));
 
+function normalizeUrl(u){
+  if (!u) return "";
+  const s = u.trim();
+  if (!s) return "";
+  if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(s)) return s;
+  return "https://" + s;
+}
+
 function loadLocal(){
   try {
-    const s = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+    const s = JSON.parse(localStorage.getItem(STORE_KEY) || localStorage.getItem("acaat.minimal.v4") || "null");
     if (s && typeof s === "object"){
       if (["seq","single","open17","off"].includes(s.mode)) CFG.mode = s.mode;
       if (typeof s.singleTarget === "number" && !isNaN(s.singleTarget)){
@@ -418,7 +460,11 @@ function loadLocal(){
             : Math.max(0, Math.min(99, Math.floor(Number(v))));
         });
       }
-      if (typeof s.timerUrl === "string" && s.timerUrl.trim()) CFG.timerUrl = s.timerUrl.trim();
+      if (typeof s.customSiteUrl === "string" && s.customSiteUrl.trim()) CFG.customSiteUrl = s.customSiteUrl.trim();
+      if (typeof s.openInSafari === "boolean") CFG.openInSafari = s.openInSafari;
+      if (Array.isArray(s.savedSites) && s.savedSites.length){
+        CFG.savedSites = s.savedSites.filter(x => x && typeof x.url === "string" && x.url.trim());
+      }
       if (typeof s.icontrolUrl === "string" && s.icontrolUrl.trim()) CFG.icontrolUrl = s.icontrolUrl.trim();
       if (["both","stop","lap"].includes(s.triggerOn)) CFG.triggerOn = s.triggerOn;
       if (typeof s.autoDisarm === "boolean") CFG.autoDisarm = s.autoDisarm;
@@ -452,7 +498,6 @@ async function syncFromCloud(){
             : Math.max(0, Math.min(99, Math.floor(Number(v))));
         });
       }
-      if (typeof data.timerUrl === "string" && data.timerUrl.trim()) CFG.timerUrl = data.timerUrl.trim();
       if (typeof data.icontrolUrl === "string" && data.icontrolUrl.trim()) CFG.icontrolUrl = data.icontrolUrl.trim();
       if (["both","stop","lap"].includes(data.triggerOn)) CFG.triggerOn = data.triggerOn;
       if (typeof data.autoDisarm === "boolean") CFG.autoDisarm = data.autoDisarm;
@@ -479,33 +524,36 @@ async function pushPeekTelemetry(entry){
   } catch(e){}
 }
 
-/* Convert https:// to x-safari-https:// on iOS so App Clips open full Safari */
 function toSafariUrl(rawUrl){
-  if (!rawUrl) return "";
-  const u = rawUrl.trim();
+  const u = normalizeUrl(rawUrl);
+  if (!u) return "";
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  if (isIOS && /^https:\/\//i.test(u)){
-    return "x-safari-" + u;
-  }
+  if (isIOS && /^https:\/\//i.test(u)) return "x-safari-" + u;
   return u;
 }
 
-/* ---------- Runtime Stopwatch State ---------- */
+function launchCustomWebsite(rawUrl){
+  const u = normalizeUrl(rawUrl || CFG.customSiteUrl);
+  if (!u) return;
+  pulseLockDot(300);
+  window.location.href = CFG.openInSafari ? toSafariUrl(u) : u;
+}
+
 const S = {
   running: false,
   startPerf: 0,
   elapsedBefore: 0,
   lapStartElapsed: 0,
-  realLapStartPerf: 0, // Tracks actual real-world start time of current lap so forced hundredths never steal time from next lap
+  realLapStartPerf: 0,
   displayedMs: 0,
   laps: [],
   seqIndex: 0,
-  scrambledTargets: [], // Shuffled copy of Lotto numbers used when doing Start -> Stop -> Reset (instead of Laps)
+  scrambledTargets: [],
   scrambleIndex: 0,
   disarmed: false,
-  covertBuffer: [],   // Collects 2 covert digit taps on 00:00.00 -> sets Single Decimal Force
-  emergenceList: [],  // Stores up to 3 times confirmed by pressing Reset (Start -> Stop -> Reset x3)
+  covertBuffer: [],
+  emergenceList: [],
   peekLog: [],
   rafId: null
 };
@@ -534,13 +582,11 @@ function formatMs(ms){
   return `${p2(min)}:${p2(sec)}.${p2(cs)}`;
 }
 
-/* Convert a formatted time like "00:08.32" into its Emergence integer (832) */
 function timeToLargeInt(ms){
   const digitsOnly = formatMs(ms).replace(/[^0-9]/g, "");
   return parseInt(digitsOnly, 10) || 0;
 }
 
-/* Render 00:00.00 with 8 individual character tap targets (digits 1..8) when stopped at zero */
 function renderZeroReadout(){
   const chars = ["0","0",":","0","0",".","0","0"];
   elReadout.innerHTML = chars.map((ch, idx) =>
@@ -562,7 +608,6 @@ function activeTargets(){
   return CFG.targets.filter(v => v !== null && !isNaN(v));
 }
 
-/* Shuffle the active Lotto numbers for Start -> Stop -> Reset mode (guarantees a scrambled order) */
 function reshuffleLottoTargets(){
   const list = activeTargets().slice();
   if (list.length <= 1){
@@ -586,12 +631,8 @@ reshuffleLottoTargets();
 function syncVisualIndicators(){
   const isOff = S.disarmed || CFG.mode === "off";
   if (elLeftDot) elLeftDot.style.opacity = isOff ? "0.68" : "1";
-
-  // Right pagination dot brightens when Single Decimal Force is active
   const singleOn = !isOff && CFG.mode === "single";
   elRightDot.classList.toggle("dim", !singleOn);
-
-  // Orange dot at top-right when "Sum to 17" mode is active
   elOrangeDot.classList.toggle("on", !isOff && CFG.mode === "open17");
 }
 syncVisualIndicators();
@@ -609,16 +650,13 @@ function animatePress(el){
   setTimeout(() => el.classList.remove("pressed"), 150);
 }
 
-/* ---------- Covert Direct Screen Input (1–8 on 00:00.00, 9 on Center Dots, 0 on Lap) ---------- */
 let covertResetTimer = null;
 function pushCovertDigit(d, pressedEl){
   if (S.running || S.displayedMs > 0) return;
   if (kpOverlay.classList.contains("open")) return;
-
   animatePress(pressedEl);
   clearTimeout(covertResetTimer);
   S.covertBuffer.push(String(d));
-
   if (S.covertBuffer.length >= 2){
     const twoDigit = parseInt(S.covertBuffer.slice(0, 2).join(""), 10) || 0;
     S.covertBuffer = [];
@@ -629,13 +667,11 @@ function pushCovertDigit(d, pressedEl){
     syncVisualIndicators();
     pulseLockDot(900);
   } else {
-    // Brief confirmation flash on 1st digit too so you know it registered
     pulseLockDot(260);
     covertResetTimer = setTimeout(() => { S.covertBuffer = []; }, 4500);
   }
 }
 
-/* Tapping characters 1–8 of "00:00.00" (with nearest-character fallback so ":" and "." never miss) */
 elReadout.addEventListener("pointerdown", e => {
   if (S.running || S.displayedMs > 0) return;
   e.preventDefault();
@@ -654,13 +690,11 @@ elReadout.addEventListener("pointerdown", e => {
   pushCovertDigit(span.dataset.digit, span);
 });
 
-/* ---------- Force Calculation Engine ---------- */
 function forceDigitSum17Ms(realMs){
   const totalCs = Math.floor(realMs / 10);
   const baseSecTotal = Math.floor(totalCs / 100);
   let bestTotalCs = totalCs;
   let bestDiff = 999999;
-
   for (let deltaSec = 0; deltaSec <= 2; deltaSec++){
     for (const dir of [0, 1, -1]){
       const candSecTotal = Math.max(0, baseSecTotal + dir * deltaSec);
@@ -669,16 +703,12 @@ function forceDigitSum17Ms(realMs){
       const prefixSum = sumOfDigits(p2(min) + p2(sec));
       const neededCsSum = 17 - prefixSum;
       if (neededCsSum < 0 || neededCsSum > 18) continue;
-
       for (let cs = 0; cs < 100; cs++){
         const d1 = Math.floor(cs / 10), d2 = cs % 10;
         if (d1 + d2 === neededCsSum){
           const candTotalCs = candSecTotal * 100 + cs;
           const diff = Math.abs(candTotalCs - totalCs);
-          if (diff < bestDiff){
-            bestDiff = diff;
-            bestTotalCs = candTotalCs;
-          }
+          if (diff < bestDiff){ bestDiff = diff; bestTotalCs = candTotalCs; }
         }
       }
       if (bestDiff < 100) break;
@@ -690,49 +720,34 @@ function forceDigitSum17Ms(realMs){
 
 function computeForcedMs(realMs, isLap = false){
   if (S.disarmed || CFG.mode === "off") return realMs;
-
-  if (CFG.mode === "open17"){
-    return forceDigitSum17Ms(realMs);
-  }
-
+  if (CFG.mode === "open17") return forceDigitSum17Ms(realMs);
   const totalCs = Math.floor(Math.max(0, realMs) / 10);
   let realSec = Math.floor(totalCs / 100) % 60;
   const minPartCs = Math.floor(totalCs / 6000) * 6000;
-
   if (CFG.mode === "single"){
     const forcedCs = ((CFG.singleTarget % 100) + 100) % 100;
     if (CFG.autoDisarm) S.disarmed = true;
     syncVisualIndicators();
     return (minPartCs + realSec * 100 + forcedCs) * 10;
   }
-
   const list = activeTargets();
   if (!list.length) return realMs;
   let targetVal;
   if (isLap){
-    // Pressing Lap deals the 6 Lotto numbers in exact order (18, 23, 27, 41, 56, 09)
     targetVal = list[S.seqIndex % list.length];
     S.seqIndex++;
-    if (CFG.autoDisarm && S.seqIndex >= list.length){
-      S.disarmed = true;
-    }
+    if (CFG.autoDisarm && S.seqIndex >= list.length) S.disarmed = true;
   } else {
-    // Pressing Stop + Reset (without Laps) deals the 6 Lotto numbers in a scrambled order
     if (!S.scrambledTargets || S.scrambledTargets.length !== list.length || S.scrambleIndex >= S.scrambledTargets.length){
       reshuffleLottoTargets();
     }
     targetVal = S.scrambledTargets[S.scrambleIndex % S.scrambledTargets.length];
     S.scrambleIndex++;
-    if (CFG.autoDisarm && S.scrambleIndex >= S.scrambledTargets.length){
-      S.disarmed = true;
-    }
+    if (CFG.autoDisarm && S.scrambleIndex >= S.scrambledTargets.length) S.disarmed = true;
   }
   syncVisualIndicators();
   const forcedCs = ((targetVal % 100) + 100) % 100;
-  // Ensure Lotto forces always show at least 01 second (never "00:00.XX")
-  if (minPartCs === 0 && realSec === 0){
-    realSec = 1;
-  }
+  if (minPartCs === 0 && realSec === 0) realSec = 1;
   return (minPartCs + realSec * 100 + forcedCs) * 10;
 }
 
@@ -742,7 +757,7 @@ function recordPeek(type, shownMs){
   const fmt = formatMs(shownMs);
   const entry = {
     type,
-    realFormatted: fmt,  // Backward-compatible so older Render servers also display what spectator sees
+    realFormatted: fmt,
     shownFormatted: fmt,
     largeInt: timeToLargeInt(shownMs),
     realSec: sSec,
@@ -764,9 +779,7 @@ function tick(){
   S.displayedMs = totalMs;
   elReadout.textContent = formatMs(totalMs);
   const liveRow = elLapsWrap.querySelector(".lap-row.live .lap-time");
-  if (liveRow){
-    liveRow.textContent = formatMs(splitMs);
-  }
+  if (liveRow) liveRow.textContent = formatMs(splitMs);
   S.rafId = requestAnimationFrame(tick);
 }
 
@@ -801,7 +814,6 @@ function handleStartStop(){
     const now = performance.now();
     S.running = true;
     S.startPerf = now;
-    // Preserve any accumulated un-lapped split time if resuming from pause
     const priorUnlappedMs = Math.max(0, S.displayedMs - S.lapStartElapsed);
     S.realLapStartPerf = now - priorUnlappedMs;
     elStartBtn.textContent = "Stop";
@@ -817,16 +829,13 @@ function handleStartStop(){
     const unlappedSplitMs = Math.max(0, now - S.realLapStartPerf);
     const realTotalMs = S.lapStartElapsed + unlappedSplitMs;
     let shownTotalMs = realTotalMs;
-
     if (CFG.triggerOn === "both" || CFG.triggerOn === "stop"){
       if (S.laps.length > 0 && CFG.mode === "seq" && S.seqIndex >= activeTargets().length){
-        // All 6 Lotto numbers were already dealt via Lap 1..6; keep main readout cleanly synced to the sum of laps
         shownTotalMs = S.lapStartElapsed;
       } else {
         shownTotalMs = computeForcedMs(realTotalMs, false);
       }
     }
-
     S.elapsedBefore = shownTotalMs;
     S.displayedMs = shownTotalMs;
     elReadout.textContent = formatMs(shownTotalMs);
@@ -843,37 +852,23 @@ function handleLapReset(){
   if (kpOverlay.classList.contains("open")) return;
   if (S.running){
     const now = performance.now();
-    const realTotalMs = S.elapsedBefore + (now - S.startPerf);
-    // Measure true elapsed duration of THIS lap since the previous Lap press
     const realSplitMs = Math.max(0, now - S.realLapStartPerf);
     let shownSplitMs = realSplitMs;
-
     if (CFG.triggerOn === "both" || CFG.triggerOn === "lap"){
       shownSplitMs = computeForcedMs(realSplitMs, true);
     }
-
     const shownTotalMs = S.lapStartElapsed + shownSplitMs;
     S.elapsedBefore = shownTotalMs - (now - S.startPerf);
     S.lapStartElapsed = shownTotalMs;
     S.realLapStartPerf = now;
     S.displayedMs = shownTotalMs;
     elReadout.textContent = formatMs(shownTotalMs);
-
-    S.laps.push({
-      num: S.laps.length + 1,
-      splitMs: shownSplitMs,
-      totalMs: shownTotalMs
-    });
+    S.laps.push({ num: S.laps.length + 1, splitMs: shownSplitMs, totalMs: shownTotalMs });
     recordPeek(`LAP ${S.laps.length}`, shownSplitMs);
     renderLaps();
   } else if (S.displayedMs > 0){
-    // Emergence Peek: when someone presses Reset after stopping, lock their final stopped time into the 3-slot memory
     const stoppedMs = S.displayedMs;
-    const item = {
-      formatted: formatMs(stoppedMs),
-      largeInt: timeToLargeInt(stoppedMs),
-      ms: stoppedMs
-    };
+    const item = { formatted: formatMs(stoppedMs), largeInt: timeToLargeInt(stoppedMs), ms: stoppedMs };
     if (S.emergenceList.length >= 3) S.emergenceList = [];
     S.emergenceList.push(item);
     const totalSum = S.emergenceList.reduce((acc, it) => acc + it.largeInt, 0);
@@ -882,7 +877,7 @@ function handleLapReset(){
     const sCs = Math.floor(stoppedMs / 10) % 100;
     pushPeekTelemetry({
       type: `RESET #${S.emergenceList.length} (SUM: ${totalSum})`,
-      realFormatted: slotsStr,  // Backward-compatible with older Render backend parser
+      realFormatted: slotsStr,
       shownFormatted: `${item.formatted} (${item.largeInt})`,
       largeInt: item.largeInt,
       emergenceSum: totalSum,
@@ -893,7 +888,6 @@ function handleLapReset(){
       cs: sCs,
       at: new Date().toLocaleTimeString()
     });
-
     S.elapsedBefore = 0;
     S.lapStartElapsed = 0;
     S.realLapStartPerf = 0;
@@ -905,19 +899,99 @@ function handleLapReset(){
     elLapBtn.className = "sw-btn disabled";
     renderLaps();
   } else {
-    // While stopped at 00:00.00, tapping the disabled Lap button inputs "0" with press animation
     pushCovertDigit("0", elLapBtn);
   }
 }
 
-elStartBtn.addEventListener("pointerdown", e => {
-  e.preventDefault();
-  handleStartStop();
+elStartBtn.addEventListener("pointerdown", e => { e.preventDefault(); handleStartStop(); });
+elLapBtn.addEventListener("pointerdown", e => { e.preventDefault(); handleLapReset(); });
+
+/* ---------- Built-in 3D Die Roller (Hides App Clip) ---------- */
+const diceApp = document.getElementById("diceApp");
+const dieCube = document.getElementById("dieCube");
+const diePips = Array.from(dieCube.querySelectorAll(".pip"));
+const PIP_MAP = { 1:[4], 2:[2,6], 3:[2,4,6], 4:[0,2,6,8], 5:[0,2,4,6,8], 6:[0,2,3,5,6,8] };
+let rolling = false;
+
+function showDieFace(face){
+  const active = new Set(PIP_MAP[face] || PIP_MAP[5]);
+  diePips.forEach((p, idx) => p.classList.toggle("on", active.has(idx)));
+}
+
+function rollDie(){
+  if (rolling) return;
+  rolling = true;
+  dieCube.classList.remove("rolling");
+  void dieCube.offsetWidth;
+  dieCube.classList.add("rolling");
+  let ticks = 0;
+  const shuffle = setInterval(() => {
+    ticks++;
+    showDieFace(1 + Math.floor(Math.random() * 6));
+    if (ticks >= 6){
+      clearInterval(shuffle);
+      showDieFace(1 + Math.floor(Math.random() * 6));
+      rolling = false;
+    }
+  }, 75);
+}
+
+function openDiceApp(){
+  showDieFace(1 + Math.floor(Math.random() * 6));
+  diceApp.classList.add("open");
+  diceApp.setAttribute("aria-hidden", "false");
+}
+
+function closeDiceApp(){
+  diceApp.classList.remove("open");
+  diceApp.setAttribute("aria-hidden", "true");
+}
+
+document.getElementById("dieStage").addEventListener("click", rollDie);
+
+diceApp.querySelectorAll(".die-corner").forEach(corner => {
+  let holdT = null;
+  const start = e => {
+    e.stopPropagation();
+    clearTimeout(holdT);
+    holdT = setTimeout(() => { holdT = null; closeDiceApp(); }, 500);
+  };
+  const cancel = () => { clearTimeout(holdT); holdT = null; };
+  corner.addEventListener("pointerdown", start);
+  corner.addEventListener("pointerup", cancel);
+  corner.addEventListener("pointercancel", cancel);
+  corner.addEventListener("pointerleave", cancel);
 });
-elLapBtn.addEventListener("pointerdown", e => {
-  e.preventDefault();
-  handleLapReset();
-});
+
+/* ---------- Lower Black Area (Under Reset & Start):
+   - Double/Triple-Tap LEFT Side = Open Built-in Dice Roller
+   - Double/Triple-Tap RIGHT Side = Redirect to Active Saved Website ---------- */
+(() => {
+  const lowerArea = document.getElementById("lowerArea");
+  let leftTaps = 0, leftTimer = null;
+  let rightTaps = 0, rightTimer = null;
+
+  lowerArea.addEventListener("pointerdown", e => {
+    const isRightSide = e.clientX >= (window.innerWidth / 2);
+    if (!isRightSide){
+      rightTaps = 0;
+      leftTaps++;
+      clearTimeout(leftTimer);
+      leftTimer = setTimeout(() => {
+        if (leftTaps >= 2) openDiceApp();
+        leftTaps = 0;
+      }, 300);
+    } else {
+      leftTaps = 0;
+      rightTaps++;
+      clearTimeout(rightTimer);
+      rightTimer = setTimeout(() => {
+        if (rightTaps >= 2) launchCustomWebsite(CFG.customSiteUrl);
+        rightTaps = 0;
+      }, 300);
+    }
+  });
+})();
 
 /* ---------- Upper Zone Triple-Tap: Reset / Toggle Back to Default ---------- */
 (() => {
@@ -928,8 +1002,6 @@ elLapBtn.addEventListener("pointerdown", e => {
     clearTimeout(tapTimer);
     tapTimer = setTimeout(() => {
       if (taps >= 3){
-        // If any override (Single Number or 17 Force) is active, reset back to Default;
-        // if already in Default, toggle between Off (100% fair) and Default.
         if (CFG.mode !== "seq" || S.disarmed){
           CFG.mode = DEF.mode;
           CFG.singleTarget = DEF.singleTarget;
@@ -951,9 +1023,7 @@ elLapBtn.addEventListener("pointerdown", e => {
   });
 })();
 
-/* ---------- Center Dots between Lap & Start:
-   - Single-Tap at 00:00.00 = Covert Digit "9" (with press animation)
-   - Double-Tap = Opens Overt Number Keypad Overlay ---------- */
+/* ---------- Center Dots between Lap & Start ---------- */
 const kpOverlay = document.getElementById("kpOverlay");
 const kpDisplay = document.getElementById("kpDisplay");
 const kpGrid = document.getElementById("kpGrid");
@@ -1039,10 +1109,7 @@ kpGrid.addEventListener("pointerdown", e => {
   if (!btn) return;
   e.preventDefault();
   const val = btn.dataset.val;
-  if (val === "ENTER"){
-    closeKeypadAndCommit();
-    return;
-  }
+  if (val === "ENTER"){ closeKeypadAndCommit(); return; }
   if (kpType === "single"){
     if (kpBuffer.length >= 2) kpBuffer = [];
     kpBuffer.push(val);
@@ -1054,8 +1121,7 @@ kpGrid.addEventListener("pointerdown", e => {
 });
 
 (() => {
-  let tapCount = 0;
-  let tapTimer = null;
+  let tapCount = 0, tapTimer = null;
   elPagerDots.addEventListener("pointerdown", e => {
     e.preventDefault();
     tapCount++;
@@ -1063,34 +1129,24 @@ kpGrid.addEventListener("pointerdown", e => {
     if (tapCount >= 2){
       tapCount = 0;
       animatePress(elPagerDots);
-      if (kpOverlay.classList.contains("open")){
-        kpOverlay.classList.remove("open");
-      } else {
-        openKeypad();
-      }
+      if (kpOverlay.classList.contains("open")) kpOverlay.classList.remove("open");
+      else openKeypad();
     } else {
       tapTimer = setTimeout(() => {
-        if (tapCount === 1){
-          pushCovertDigit("9", elPagerDots);
-        }
+        if (tapCount === 1) pushCovertDigit("9", elPagerDots);
         tapCount = 0;
       }, 250);
     }
   });
 })();
 
-/* ---------- Bottom Tab Bar Controls:
-   - Tap "World Clock" -> 17 Force Mode (Digits sum to 17)
-   - Tap "Alarms" -> Single Number Force Mode (.00–.99)
-   - Tap "Timers" -> Lotto Mode (6-Number Sequence: 18, 23, 27, 41, 56, 09)
-   - Hold any tab (>220ms) -> Emergence 3-Person Peek (Sum + Individual Times) & clears on release ---------- */
+/* ---------- Bottom Tab Bar Controls ---------- */
 (() => {
   const tabBar = document.getElementById("tabBar");
   const worldTab = document.getElementById("worldTab");
   const alarmTab = document.getElementById("alarmTab");
   const timerTab = document.getElementById("timerTab");
-  let holdTimer = null;
-  let didHoldPeek = false;
+  let holdTimer = null, didHoldPeek = false;
 
   function showPeek(){
     didHoldPeek = true;
@@ -1124,10 +1180,7 @@ kpGrid.addEventListener("pointerdown", e => {
     clearTimeout(holdTimer);
     if (elPeekBox.classList.contains("on")){
       elPeekBox.classList.remove("on");
-      // Releasing your thumb after viewing the Emergence peek clears the 3-person memory for the next cycle
-      if (S.emergenceList.length > 0){
-        S.emergenceList = [];
-      }
+      if (S.emergenceList.length > 0) S.emergenceList = [];
     }
   }
 
@@ -1140,7 +1193,6 @@ kpGrid.addEventListener("pointerdown", e => {
   tabBar.addEventListener("pointercancel", hidePeek);
   tabBar.addEventListener("pointerleave", hidePeek);
 
-  /* Tap World Clock -> Toggle 17 Force */
   worldTab.addEventListener("pointerup", e => {
     if (didHoldPeek) return;
     e.preventDefault();
@@ -1153,7 +1205,6 @@ kpGrid.addEventListener("pointerdown", e => {
     pulseLockDot(450);
   });
 
-  /* Tap Alarms -> Switch to Single Number Force Mode (.00–.99) */
   alarmTab.addEventListener("pointerup", e => {
     if (didHoldPeek) return;
     e.preventDefault();
@@ -1166,7 +1217,6 @@ kpGrid.addEventListener("pointerdown", e => {
     pulseLockDot(450);
   });
 
-  /* Tap Timers -> Activate Lotto Mode (6-Number Sequence from #1 + fresh scrambled order for Stop+Reset) */
   timerTab.addEventListener("pointerup", e => {
     if (didHoldPeek) return;
     e.preventDefault();
@@ -1182,7 +1232,7 @@ kpGrid.addEventListener("pointerdown", e => {
   });
 })();
 
-/* ---------- Top Corner Hold Redirects (Top-Left = Real Timer App, Top-Right = iControl in Safari) ---------- */
+/* ---------- Top Corner Hold Redirects (Top-Left = Dice Roller, Top-Right = iControl in Safari) ---------- */
 (() => {
   const cornerTL = document.getElementById("cornerTL");
   const cornerTR = document.getElementById("cornerTR");
@@ -1190,11 +1240,7 @@ kpGrid.addEventListener("pointerdown", e => {
 
   cornerTL.addEventListener("pointerdown", () => {
     clearTimeout(tlTimer);
-    tlTimer = setTimeout(() => {
-      pulseLockDot(300);
-      const dest = (CFG.timerUrl || "clock-stopwatch://").trim();
-      if (dest) window.location.href = dest;
-    }, 450);
+    tlTimer = setTimeout(() => { openDiceApp(); }, 450);
   });
   const clearTL = () => clearTimeout(tlTimer);
   cornerTL.addEventListener("pointerup", clearTL);
@@ -1215,18 +1261,108 @@ kpGrid.addEventListener("pointerdown", e => {
   cornerTR.addEventListener("pointerleave", clearTR);
 })();
 
-/* ---------- Settings Sheet (Double-Tap "Stopwatch" Tab Icon) ---------- */
+/* ---------- Settings Sheet & Saved Websites Manager ---------- */
 const sheet = document.getElementById("sheet");
 const modeList = document.getElementById("modeList");
 const singleIn = document.getElementById("singleIn");
 const slotsGrid = document.getElementById("slotsGrid");
-const timerUrlIn = document.getElementById("timerUrlIn");
+const customSiteUrlIn = document.getElementById("customSiteUrlIn");
+const customSiteNameIn = document.getElementById("customSiteNameIn");
+const saveSiteBtn = document.getElementById("saveSiteBtn");
+const openInSafariIn = document.getElementById("openInSafariIn");
+const savedSitesList = document.getElementById("savedSitesList");
 const icontrolUrlIn = document.getElementById("icontrolUrlIn");
 const triggerIn = document.getElementById("triggerIn");
 const disarmIn = document.getElementById("disarmIn");
 const peekHistoryBox = document.getElementById("peekHistoryBox");
 
 let draft = null;
+
+function renderSavedSitesInSettings(){
+  if (!draft) return;
+  if (!Array.isArray(draft.savedSites) || !draft.savedSites.length){
+    savedSitesList.innerHTML = `<div class="row" style="color:var(--gray);font-size:14px;">No saved websites yet. Add one above!</div>`;
+    return;
+  }
+  const activeNorm = normalizeUrl(customSiteUrlIn.value || draft.customSiteUrl);
+  savedSitesList.innerHTML = draft.savedSites.map((site, idx) => {
+    const isSel = normalizeUrl(site.url) === activeNorm;
+    const safeName = (site.name || site.url).replace(/</g, "&lt;");
+    const safeUrl = site.url.replace(/</g, "&lt;");
+    return `<div class="site-item" data-idx="${idx}">
+      <div class="site-info">
+        <div class="site-name">${isSel ? "✓ " : ""}${safeName}</div>
+        <div class="site-url">${safeUrl}</div>
+      </div>
+      <div class="site-actions">
+        <button type="button" class="pill-btn sec site-go" data-idx="${idx}">Open</button>
+        <button type="button" class="site-del" data-idx="${idx}">×</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+saveSiteBtn.addEventListener("click", () => {
+  if (!draft) return;
+  const rawUrl = normalizeUrl(customSiteUrlIn.value);
+  if (!rawUrl) return;
+  let label = customSiteNameIn.value.trim();
+  if (!label){
+    try { label = new URL(rawUrl).hostname.replace(/^www\./, ""); } catch(e){ label = rawUrl; }
+  }
+  customSiteUrlIn.value = rawUrl;
+  draft.customSiteUrl = rawUrl;
+  const existingIdx = draft.savedSites.findIndex(s => normalizeUrl(s.url) === rawUrl);
+  if (existingIdx >= 0){
+    draft.savedSites[existingIdx].name = label;
+  } else {
+    draft.savedSites.unshift({ name: label, url: rawUrl });
+  }
+  customSiteNameIn.value = "";
+  CFG.customSiteUrl = draft.customSiteUrl;
+  CFG.savedSites = draft.savedSites.slice();
+  saveLocal();
+  renderSavedSitesInSettings();
+});
+
+savedSitesList.addEventListener("click", e => {
+  if (!draft) return;
+  const delBtn = e.target.closest(".site-del");
+  if (delBtn){
+    e.stopPropagation();
+    const idx = Number(delBtn.dataset.idx);
+    draft.savedSites.splice(idx, 1);
+    CFG.savedSites = draft.savedSites.slice();
+    saveLocal();
+    renderSavedSitesInSettings();
+    return;
+  }
+  const goBtn = e.target.closest(".site-go");
+  if (goBtn){
+    e.stopPropagation();
+    const idx = Number(goBtn.dataset.idx);
+    const site = draft.savedSites[idx];
+    if (site){
+      CFG.openInSafari = openInSafariIn.checked;
+      CFG.customSiteUrl = normalizeUrl(site.url);
+      saveLocal();
+      launchCustomWebsite(site.url);
+    }
+    return;
+  }
+  const row = e.target.closest(".site-item");
+  if (row){
+    const idx = Number(row.dataset.idx);
+    const site = draft.savedSites[idx];
+    if (site){
+      draft.customSiteUrl = normalizeUrl(site.url);
+      customSiteUrlIn.value = draft.customSiteUrl;
+      CFG.customSiteUrl = draft.customSiteUrl;
+      saveLocal();
+      renderSavedSitesInSettings();
+    }
+  }
+});
 
 function openSettings(){
   draft = JSON.parse(JSON.stringify(CFG));
@@ -1237,10 +1373,13 @@ function openSettings(){
     const idx = Number(inp.dataset.slot);
     inp.value = draft.targets[idx] !== null ? p2(draft.targets[idx]) : "";
   });
-  timerUrlIn.value = draft.timerUrl || "clock-stopwatch://";
+  customSiteUrlIn.value = draft.customSiteUrl || "";
+  customSiteNameIn.value = "";
+  openInSafariIn.checked = !!draft.openInSafari;
   icontrolUrlIn.value = draft.icontrolUrl || "https://icontrol-magic.onrender.com/";
   triggerIn.value = draft.triggerOn;
   disarmIn.checked = draft.autoDisarm;
+  renderSavedSitesInSettings();
 
   if (S.peekLog.length){
     peekHistoryBox.textContent = S.peekLog.map(
@@ -1264,7 +1403,8 @@ function closeSettings(save){
       const raw = inp.value.trim();
       draft.targets[idx] = raw === "" ? null : Math.max(0, Math.min(99, parseInt(raw, 10) || 0));
     });
-    if (timerUrlIn.value.trim()) draft.timerUrl = timerUrlIn.value.trim();
+    if (customSiteUrlIn.value.trim()) draft.customSiteUrl = normalizeUrl(customSiteUrlIn.value);
+    draft.openInSafari = openInSafariIn.checked;
     if (icontrolUrlIn.value.trim()) draft.icontrolUrl = icontrolUrlIn.value.trim();
     draft.triggerOn = triggerIn.value;
     draft.autoDisarm = disarmIn.checked;
