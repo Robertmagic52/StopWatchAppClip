@@ -430,4 +430,880 @@ function saveLocal(){
 }
 loadLocal();
 
-let lastRemoteTs =
+let lastRemoteTs = 0;
+async function syncFromCloud(){
+  try {
+    const res = await fetch(BACKEND_URL + "/api/acaat", { cache: "no-store" });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data || typeof data !== "object") return;
+    const ts = Number(data.updatedAt) || 1;
+    if (ts > lastRemoteTs){
+      lastRemoteTs = ts;
+      if (["seq","single","open17","off"].includes(data.mode)) CFG.mode = data.mode;
+      if (typeof data.singleTarget === "number" && !isNaN(data.singleTarget)){
+        CFG.singleTarget = Math.max(0, Math.min(99, Math.floor(data.singleTarget)));
+      }
+      if (Array.isArray(data.targets)){
+        CFG.targets = [0,1,2,3,4,5].map(i => {
+          const v = data.targets[i];
+          return (v === null || v === "" || v === undefined || isNaN(Number(v)))
+            ? null
+            : Math.max(0, Math.min(99, Math.floor(Number(v))));
+        });
+      }
+      if (typeof data.timerUrl === "string" && data.timerUrl.trim()) CFG.timerUrl = data.timerUrl.trim();
+      if (typeof data.icontrolUrl === "string" && data.icontrolUrl.trim()) CFG.icontrolUrl = data.icontrolUrl.trim();
+      if (["both","stop","lap"].includes(data.triggerOn)) CFG.triggerOn = data.triggerOn;
+      if (typeof data.autoDisarm === "boolean") CFG.autoDisarm = data.autoDisarm;
+      S.seqIndex = 0;
+      reshuffleLottoTargets();
+      S.disarmed = (CFG.mode === "off");
+      saveLocal();
+      syncVisualIndicators();
+    }
+  } catch(e){}
+}
+syncFromCloud();
+setInterval(() => {
+  if (!S.running) syncFromCloud();
+}, 3500);
+
+async function pushPeekTelemetry(entry){
+  try {
+    await fetch(BACKEND_URL + "/api/acaat/peek", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(entry)
+    });
+  } catch(e){}
+}
+
+/* Convert https:// to x-safari-https:// on iOS so App Clips open full Safari */
+function toSafariUrl(rawUrl){
+  if (!rawUrl) return "";
+  const u = rawUrl.trim();
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (isIOS && /^https:\/\//i.test(u)){
+    return "x-safari-" + u;
+  }
+  return u;
+}
+
+/* ---------- Runtime Stopwatch State ---------- */
+const S = {
+  running: false,
+  startPerf: 0,
+  elapsedBefore: 0,
+  lapStartElapsed: 0,
+  realLapStartPerf: 0, // Tracks actual real-world start time of current lap so forced hundredths never steal time from next lap
+  displayedMs: 0,
+  laps: [],
+  seqIndex: 0,
+  scrambledTargets: [], // Shuffled copy of Lotto numbers used when doing Start -> Stop -> Reset (instead of Laps)
+  scrambleIndex: 0,
+  disarmed: false,
+  covertBuffer: [],   // Collects 2 covert digit taps on 00:00.00 -> sets Single Decimal Force
+  emergenceList: [],  // Stores up to 3 times confirmed by pressing Reset (Start -> Stop -> Reset x3)
+  peekLog: [],
+  rafId: null
+};
+
+const elReadout = document.getElementById("timeReadout");
+const elLapBtn = document.getElementById("lapBtn");
+const elStartBtn = document.getElementById("startBtn");
+const elPagerDots = document.getElementById("pagerDots");
+const elLapsWrap = document.getElementById("lapsWrap");
+const elRightDot = document.getElementById("rightDot");
+const elLeftDot = document.getElementById("leftDot");
+const elLockDot = document.getElementById("lockDot");
+const elOrangeDot = document.getElementById("orangeDot");
+const elPeekBox = document.getElementById("peekBox");
+const elPkMain = document.getElementById("pkMain");
+const elPkSub = document.getElementById("pkSub");
+
+function p2(n){ return String(Math.floor(Math.max(0, n))).padStart(2, "0"); }
+
+function formatMs(ms){
+  const totalCs = Math.floor(Math.max(0, ms) / 10);
+  const cs = totalCs % 100;
+  const totalSec = Math.floor(totalCs / 100);
+  const sec = totalSec % 60;
+  const min = Math.floor(totalSec / 60);
+  return `${p2(min)}:${p2(sec)}.${p2(cs)}`;
+}
+
+/* Convert a formatted time like "00:08.32" into its Emergence integer (832) */
+function timeToLargeInt(ms){
+  const digitsOnly = formatMs(ms).replace(/[^0-9]/g, "");
+  return parseInt(digitsOnly, 10) || 0;
+}
+
+/* Render 00:00.00 with 8 individual character tap targets (digits 1..8) when stopped at zero */
+function renderZeroReadout(){
+  const chars = ["0","0",":","0","0",".","0","0"];
+  elReadout.innerHTML = chars.map((ch, idx) =>
+    `<span class="ch" data-digit="${idx + 1}">${ch}</span>`
+  ).join("");
+}
+renderZeroReadout();
+
+function sumOfDigits(str){
+  let sum = 0;
+  for (let i = 0; i < str.length; i++){
+    const c = str.charCodeAt(i);
+    if (c >= 48 && c <= 57) sum += (c - 48);
+  }
+  return sum;
+}
+
+function activeTargets(){
+  return CFG.targets.filter(v => v !== null && !isNaN(v));
+}
+
+/* Shuffle the active Lotto numbers for Start -> Stop -> Reset mode (guarantees a scrambled order) */
+function reshuffleLottoTargets(){
+  const list = activeTargets().slice();
+  if (list.length <= 1){
+    S.scrambledTargets = list;
+    S.scrambleIndex = 0;
+    return;
+  }
+  const origKey = list.join(",");
+  for (let attempt = 0; attempt < 6; attempt++){
+    for (let i = list.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = list[i]; list[i] = list[j]; list[j] = tmp;
+    }
+    if (list.join(",") !== origKey) break;
+  }
+  S.scrambledTargets = list;
+  S.scrambleIndex = 0;
+}
+reshuffleLottoTargets();
+
+function syncVisualIndicators(){
+  const isOff = S.disarmed || CFG.mode === "off";
+  if (elLeftDot) elLeftDot.style.opacity = isOff ? "0.68" : "1";
+
+  // Right pagination dot brightens when Single Decimal Force is active
+  const singleOn = !isOff && CFG.mode === "single";
+  elRightDot.classList.toggle("dim", !singleOn);
+
+  // Orange dot at top-right when "Sum to 17" mode is active
+  elOrangeDot.classList.toggle("on", !isOff && CFG.mode === "open17");
+}
+syncVisualIndicators();
+
+let lockDotTimer = null;
+function pulseLockDot(durationMs = 550){
+  clearTimeout(lockDotTimer);
+  elLockDot.classList.add("on");
+  lockDotTimer = setTimeout(() => elLockDot.classList.remove("on"), durationMs);
+}
+
+function animatePress(el){
+  if (!el) return;
+  el.classList.add("pressed");
+  setTimeout(() => el.classList.remove("pressed"), 150);
+}
+
+/* ---------- Covert Direct Screen Input (1–8 on 00:00.00, 9 on Center Dots, 0 on Lap) ---------- */
+let covertResetTimer = null;
+function pushCovertDigit(d, pressedEl){
+  if (S.running || S.displayedMs > 0) return;
+  if (kpOverlay.classList.contains("open")) return;
+
+  animatePress(pressedEl);
+  clearTimeout(covertResetTimer);
+  S.covertBuffer.push(String(d));
+
+  if (S.covertBuffer.length >= 2){
+    const twoDigit = parseInt(S.covertBuffer.slice(0, 2).join(""), 10) || 0;
+    S.covertBuffer = [];
+    CFG.singleTarget = Math.max(0, Math.min(99, twoDigit));
+    CFG.mode = "single";
+    S.disarmed = false;
+    saveLocal();
+    syncVisualIndicators();
+    pulseLockDot(900);
+  } else {
+    // Brief confirmation flash on 1st digit too so you know it registered
+    pulseLockDot(260);
+    covertResetTimer = setTimeout(() => { S.covertBuffer = []; }, 4500);
+  }
+}
+
+/* Tapping characters 1–8 of "00:00.00" (with nearest-character fallback so ":" and "." never miss) */
+elReadout.addEventListener("pointerdown", e => {
+  if (S.running || S.displayedMs > 0) return;
+  e.preventDefault();
+  let span = e.target.closest(".ch");
+  if (!span){
+    const spans = Array.from(elReadout.querySelectorAll(".ch"));
+    let bestDist = Infinity;
+    for (const s of spans){
+      const r = s.getBoundingClientRect();
+      const cx = (r.left + r.right) / 2;
+      const dist = Math.abs(e.clientX - cx);
+      if (dist < bestDist){ bestDist = dist; span = s; }
+    }
+  }
+  if (!span) return;
+  pushCovertDigit(span.dataset.digit, span);
+});
+
+/* ---------- Force Calculation Engine ---------- */
+function forceDigitSum17Ms(realMs){
+  const totalCs = Math.floor(realMs / 10);
+  const baseSecTotal = Math.floor(totalCs / 100);
+  let bestTotalCs = totalCs;
+  let bestDiff = 999999;
+
+  for (let deltaSec = 0; deltaSec <= 2; deltaSec++){
+    for (const dir of [0, 1, -1]){
+      const candSecTotal = Math.max(0, baseSecTotal + dir * deltaSec);
+      const min = Math.floor(candSecTotal / 60);
+      const sec = candSecTotal % 60;
+      const prefixSum = sumOfDigits(p2(min) + p2(sec));
+      const neededCsSum = 17 - prefixSum;
+      if (neededCsSum < 0 || neededCsSum > 18) continue;
+
+      for (let cs = 0; cs < 100; cs++){
+        const d1 = Math.floor(cs / 10), d2 = cs % 10;
+        if (d1 + d2 === neededCsSum){
+          const candTotalCs = candSecTotal * 100 + cs;
+          const diff = Math.abs(candTotalCs - totalCs);
+          if (diff < bestDiff){
+            bestDiff = diff;
+            bestTotalCs = candTotalCs;
+          }
+        }
+      }
+      if (bestDiff < 100) break;
+    }
+    if (bestDiff < 100) break;
+  }
+  return bestTotalCs * 10;
+}
+
+function computeForcedMs(realMs, isLap = false){
+  if (S.disarmed || CFG.mode === "off") return realMs;
+
+  if (CFG.mode === "open17"){
+    return forceDigitSum17Ms(realMs);
+  }
+
+  const totalCs = Math.floor(Math.max(0, realMs) / 10);
+  let realSec = Math.floor(totalCs / 100) % 60;
+  const minPartCs = Math.floor(totalCs / 6000) * 6000;
+
+  if (CFG.mode === "single"){
+    const forcedCs = ((CFG.singleTarget % 100) + 100) % 100;
+    if (CFG.autoDisarm) S.disarmed = true;
+    syncVisualIndicators();
+    return (minPartCs + realSec * 100 + forcedCs) * 10;
+  }
+
+  const list = activeTargets();
+  if (!list.length) return realMs;
+  let targetVal;
+  if (isLap){
+    // Pressing Lap deals the 6 Lotto numbers in exact order (18, 23, 27, 41, 56, 09)
+    targetVal = list[S.seqIndex % list.length];
+    S.seqIndex++;
+    if (CFG.autoDisarm && S.seqIndex >= list.length){
+      S.disarmed = true;
+    }
+  } else {
+    // Pressing Stop + Reset (without Laps) deals the 6 Lotto numbers in a scrambled order
+    if (!S.scrambledTargets || S.scrambledTargets.length !== list.length || S.scrambleIndex >= S.scrambledTargets.length){
+      reshuffleLottoTargets();
+    }
+    targetVal = S.scrambledTargets[S.scrambleIndex % S.scrambledTargets.length];
+    S.scrambleIndex++;
+    if (CFG.autoDisarm && S.scrambleIndex >= S.scrambledTargets.length){
+      S.disarmed = true;
+    }
+  }
+  syncVisualIndicators();
+  const forcedCs = ((targetVal % 100) + 100) % 100;
+  // Ensure Lotto forces always show at least 01 second (never "00:00.XX")
+  if (minPartCs === 0 && realSec === 0){
+    realSec = 1;
+  }
+  return (minPartCs + realSec * 100 + forcedCs) * 10;
+}
+
+function recordPeek(type, shownMs){
+  const sCs = Math.floor(shownMs / 10) % 100;
+  const sSec = Math.floor(shownMs / 1000) % 60;
+  const fmt = formatMs(shownMs);
+  const entry = {
+    type,
+    realFormatted: fmt,  // Backward-compatible so older Render servers also display what spectator sees
+    shownFormatted: fmt,
+    largeInt: timeToLargeInt(shownMs),
+    realSec: sSec,
+    realCs: sCs,
+    sec: sSec,
+    cs: sCs,
+    at: new Date().toLocaleTimeString()
+  };
+  S.peekLog.unshift(entry);
+  if (S.peekLog.length > 15) S.peekLog.pop();
+  pushPeekTelemetry(entry);
+}
+
+function tick(){
+  if (!S.running) return;
+  const now = performance.now();
+  const splitMs = Math.max(0, now - S.realLapStartPerf);
+  const totalMs = S.lapStartElapsed + splitMs;
+  S.displayedMs = totalMs;
+  elReadout.textContent = formatMs(totalMs);
+  const liveRow = elLapsWrap.querySelector(".lap-row.live .lap-time");
+  if (liveRow){
+    liveRow.textContent = formatMs(splitMs);
+  }
+  S.rafId = requestAnimationFrame(tick);
+}
+
+function renderLaps(){
+  const currentSplit = Math.max(0, S.displayedMs - S.lapStartElapsed);
+  let html = "";
+  const showLiveRow = S.running || (S.displayedMs > 0 && S.laps.length === 0);
+  if (showLiveRow){
+    const liveNum = S.laps.length + 1;
+    html += `<div class="lap-row live"><span>Lap ${liveNum}</span><span class="lap-time">${formatMs(currentSplit)}</span></div>`;
+  }
+  let minIdx = -1, maxIdx = -1;
+  if (S.laps.length >= 2){
+    let minV = Infinity, maxV = -Infinity;
+    S.laps.forEach((l, idx) => {
+      if (l.splitMs < minV){ minV = l.splitMs; minIdx = idx; }
+      if (l.splitMs > maxV){ maxV = l.splitMs; maxIdx = idx; }
+    });
+  }
+  for (let i = S.laps.length - 1; i >= 0; i--){
+    const l = S.laps[i];
+    const cls = (i === minIdx) ? " best" : (i === maxIdx) ? " worst" : "";
+    html += `<div class="lap-row${cls}"><span>Lap ${l.num}</span><span>${formatMs(l.splitMs)}</span></div>`;
+  }
+  elLapsWrap.innerHTML = html;
+}
+
+function handleStartStop(){
+  if (kpOverlay.classList.contains("open")) return;
+  S.covertBuffer = [];
+  if (!S.running){
+    const now = performance.now();
+    S.running = true;
+    S.startPerf = now;
+    // Preserve any accumulated un-lapped split time if resuming from pause
+    const priorUnlappedMs = Math.max(0, S.displayedMs - S.lapStartElapsed);
+    S.realLapStartPerf = now - priorUnlappedMs;
+    elStartBtn.textContent = "Stop";
+    elStartBtn.className = "sw-btn stop";
+    elLapBtn.textContent = "Lap";
+    elLapBtn.className = "sw-btn";
+    renderLaps();
+    S.rafId = requestAnimationFrame(tick);
+  } else {
+    cancelAnimationFrame(S.rafId);
+    S.running = false;
+    const now = performance.now();
+    const unlappedSplitMs = Math.max(0, now - S.realLapStartPerf);
+    const realTotalMs = S.lapStartElapsed + unlappedSplitMs;
+    let shownTotalMs = realTotalMs;
+
+    if (CFG.triggerOn === "both" || CFG.triggerOn === "stop"){
+      if (S.laps.length > 0 && CFG.mode === "seq" && S.seqIndex >= activeTargets().length){
+        // All 6 Lotto numbers were already dealt via Lap 1..6; keep main readout cleanly synced to the sum of laps
+        shownTotalMs = S.lapStartElapsed;
+      } else {
+        shownTotalMs = computeForcedMs(realTotalMs, false);
+      }
+    }
+
+    S.elapsedBefore = shownTotalMs;
+    S.displayedMs = shownTotalMs;
+    elReadout.textContent = formatMs(shownTotalMs);
+    elStartBtn.textContent = "Start";
+    elStartBtn.className = "sw-btn start";
+    elLapBtn.textContent = "Reset";
+    elLapBtn.className = "sw-btn";
+    recordPeek("STOP", shownTotalMs);
+    renderLaps();
+  }
+}
+
+function handleLapReset(){
+  if (kpOverlay.classList.contains("open")) return;
+  if (S.running){
+    const now = performance.now();
+    const realTotalMs = S.elapsedBefore + (now - S.startPerf);
+    // Measure true elapsed duration of THIS lap since the previous Lap press
+    const realSplitMs = Math.max(0, now - S.realLapStartPerf);
+    let shownSplitMs = realSplitMs;
+
+    if (CFG.triggerOn === "both" || CFG.triggerOn === "lap"){
+      shownSplitMs = computeForcedMs(realSplitMs, true);
+    }
+
+    const shownTotalMs = S.lapStartElapsed + shownSplitMs;
+    S.elapsedBefore = shownTotalMs - (now - S.startPerf);
+    S.lapStartElapsed = shownTotalMs;
+    S.realLapStartPerf = now;
+    S.displayedMs = shownTotalMs;
+    elReadout.textContent = formatMs(shownTotalMs);
+
+    S.laps.push({
+      num: S.laps.length + 1,
+      splitMs: shownSplitMs,
+      totalMs: shownTotalMs
+    });
+    recordPeek(`LAP ${S.laps.length}`, shownSplitMs);
+    renderLaps();
+  } else if (S.displayedMs > 0){
+    // Emergence Peek: when someone presses Reset after stopping, lock their final stopped time into the 3-slot memory
+    const stoppedMs = S.displayedMs;
+    const item = {
+      formatted: formatMs(stoppedMs),
+      largeInt: timeToLargeInt(stoppedMs),
+      ms: stoppedMs
+    };
+    if (S.emergenceList.length >= 3) S.emergenceList = [];
+    S.emergenceList.push(item);
+    const totalSum = S.emergenceList.reduce((acc, it) => acc + it.largeInt, 0);
+    const slotsStr = S.emergenceList.map(it => it.formatted).join(" — ");
+    const sSec = Math.floor(stoppedMs / 1000) % 60;
+    const sCs = Math.floor(stoppedMs / 10) % 100;
+    pushPeekTelemetry({
+      type: `RESET #${S.emergenceList.length} (SUM: ${totalSum})`,
+      realFormatted: slotsStr,  // Backward-compatible with older Render backend parser
+      shownFormatted: `${item.formatted} (${item.largeInt})`,
+      largeInt: item.largeInt,
+      emergenceSum: totalSum,
+      emergenceSlots: slotsStr,
+      realSec: sSec,
+      realCs: sCs,
+      sec: sSec,
+      cs: sCs,
+      at: new Date().toLocaleTimeString()
+    });
+
+    S.elapsedBefore = 0;
+    S.lapStartElapsed = 0;
+    S.realLapStartPerf = 0;
+    S.displayedMs = 0;
+    S.laps = [];
+    S.covertBuffer = [];
+    renderZeroReadout();
+    elLapBtn.textContent = "Lap";
+    elLapBtn.className = "sw-btn disabled";
+    renderLaps();
+  } else {
+    // While stopped at 00:00.00, tapping the disabled Lap button inputs "0" with press animation
+    pushCovertDigit("0", elLapBtn);
+  }
+}
+
+elStartBtn.addEventListener("pointerdown", e => {
+  e.preventDefault();
+  handleStartStop();
+});
+elLapBtn.addEventListener("pointerdown", e => {
+  e.preventDefault();
+  handleLapReset();
+});
+
+/* ---------- Upper Zone Triple-Tap: Reset / Toggle Back to Default ---------- */
+(() => {
+  const upperZone = document.getElementById("upperZone");
+  let taps = 0, tapTimer = null;
+  upperZone.addEventListener("pointerdown", () => {
+    taps++;
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(() => {
+      if (taps >= 3){
+        // If any override (Single Number or 17 Force) is active, reset back to Default;
+        // if already in Default, toggle between Off (100% fair) and Default.
+        if (CFG.mode !== "seq" || S.disarmed){
+          CFG.mode = DEF.mode;
+          CFG.singleTarget = DEF.singleTarget;
+          CFG.targets = DEF.targets.slice();
+          S.seqIndex = 0;
+          reshuffleLottoTargets();
+          S.disarmed = false;
+        } else {
+          CFG.mode = "off";
+          S.disarmed = true;
+        }
+        S.covertBuffer = [];
+        saveLocal();
+        syncVisualIndicators();
+        pulseLockDot(550);
+      }
+      taps = 0;
+    }, 280);
+  });
+})();
+
+/* ---------- Center Dots between Lap & Start:
+   - Single-Tap at 00:00.00 = Covert Digit "9" (with press animation)
+   - Double-Tap = Opens Overt Number Keypad Overlay ---------- */
+const kpOverlay = document.getElementById("kpOverlay");
+const kpDisplay = document.getElementById("kpDisplay");
+const kpGrid = document.getElementById("kpGrid");
+const kpModeBtn = document.getElementById("kpModeBtn");
+const kpClearBtn = document.getElementById("kpClearBtn");
+
+let kpType = "single";
+let kpBuffer = [];
+
+function updateKpDisplay(){
+  if (kpType === "single"){
+    kpModeBtn.textContent = "1 NUM (.XX)";
+    const a = kpBuffer[0] !== undefined ? kpBuffer[0] : "-";
+    const b = kpBuffer[1] !== undefined ? kpBuffer[1] : "-";
+    kpDisplay.textContent = `${a} ${b}`;
+  } else {
+    kpModeBtn.textContent = "LOTTO ×6";
+    if (!kpBuffer.length){
+      kpDisplay.textContent = activeTargets().map(n => p2(n)).join("·");
+    } else {
+      const pairs = [];
+      for (let i = 0; i < kpBuffer.length; i += 2){
+        const a = kpBuffer[i];
+        const b = kpBuffer[i + 1] !== undefined ? kpBuffer[i + 1] : "_";
+        pairs.push(a + b);
+      }
+      kpDisplay.textContent = pairs.join("·");
+    }
+  }
+}
+
+function openKeypad(){
+  kpType = "single";
+  kpBuffer = [];
+  updateKpDisplay();
+  kpOverlay.classList.add("open");
+}
+
+function closeKeypadAndCommit(){
+  if (kpType === "single"){
+    if (kpBuffer.length > 0){
+      CFG.singleTarget = Math.max(0, Math.min(99, parseInt(kpBuffer.join(""), 10) || 0));
+    }
+    CFG.mode = "single";
+    S.disarmed = false;
+    saveLocal();
+  } else {
+    if (kpBuffer.length > 0){
+      const newTargets = [null, null, null, null, null, null];
+      let idx = 0;
+      for (let i = 0; i < kpBuffer.length && idx < 6; i += 2){
+        const pairStr = kpBuffer[i] + (kpBuffer[i + 1] || "0");
+        newTargets[idx++] = Math.max(0, Math.min(99, parseInt(pairStr, 10) || 0));
+      }
+      CFG.targets = newTargets;
+    }
+    CFG.mode = "seq";
+    S.seqIndex = 0;
+    reshuffleLottoTargets();
+    S.disarmed = false;
+    saveLocal();
+  }
+  kpOverlay.classList.remove("open");
+  syncVisualIndicators();
+  pulseLockDot(900);
+}
+
+kpModeBtn.addEventListener("pointerdown", e => {
+  e.preventDefault();
+  kpType = (kpType === "single") ? "seq" : "single";
+  kpBuffer = [];
+  updateKpDisplay();
+});
+
+kpClearBtn.addEventListener("pointerdown", e => {
+  e.preventDefault();
+  kpBuffer = [];
+  updateKpDisplay();
+});
+
+kpGrid.addEventListener("pointerdown", e => {
+  const btn = e.target.closest(".kp-btn");
+  if (!btn) return;
+  e.preventDefault();
+  const val = btn.dataset.val;
+  if (val === "ENTER"){
+    closeKeypadAndCommit();
+    return;
+  }
+  if (kpType === "single"){
+    if (kpBuffer.length >= 2) kpBuffer = [];
+    kpBuffer.push(val);
+  } else {
+    if (kpBuffer.length >= 12) kpBuffer = [];
+    kpBuffer.push(val);
+  }
+  updateKpDisplay();
+});
+
+(() => {
+  let tapCount = 0;
+  let tapTimer = null;
+  elPagerDots.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    tapCount++;
+    clearTimeout(tapTimer);
+    if (tapCount >= 2){
+      tapCount = 0;
+      animatePress(elPagerDots);
+      if (kpOverlay.classList.contains("open")){
+        kpOverlay.classList.remove("open");
+      } else {
+        openKeypad();
+      }
+    } else {
+      tapTimer = setTimeout(() => {
+        if (tapCount === 1){
+          pushCovertDigit("9", elPagerDots);
+        }
+        tapCount = 0;
+      }, 250);
+    }
+  });
+})();
+
+/* ---------- Bottom Tab Bar Controls:
+   - Tap "World Clock" -> 17 Force Mode (Digits sum to 17)
+   - Tap "Alarms" -> Single Number Force Mode (.00–.99)
+   - Tap "Timers" -> Lotto Mode (6-Number Sequence: 18, 23, 27, 41, 56, 09)
+   - Hold any tab (>220ms) -> Emergence 3-Person Peek (Sum + Individual Times) & clears on release ---------- */
+(() => {
+  const tabBar = document.getElementById("tabBar");
+  const worldTab = document.getElementById("worldTab");
+  const alarmTab = document.getElementById("alarmTab");
+  const timerTab = document.getElementById("timerTab");
+  let holdTimer = null;
+  let didHoldPeek = false;
+
+  function showPeek(){
+    didHoldPeek = true;
+    if (S.emergenceList.length > 0){
+      if (S.emergenceList.length === 1){
+        elPkMain.textContent = String(S.emergenceList[0].largeInt);
+        elPkSub.textContent = S.emergenceList[0].formatted;
+      } else {
+        const totalSum = S.emergenceList.reduce((acc, it) => acc + it.largeInt, 0);
+        elPkMain.textContent = String(totalSum);
+        elPkSub.textContent = S.emergenceList.map(it => it.formatted).join(" — ");
+      }
+    } else if (S.displayedMs > 0 && !S.running){
+      elPkMain.textContent = String(timeToLargeInt(S.displayedMs));
+      elPkSub.textContent = formatMs(S.displayedMs);
+    } else {
+      const modeDesc = CFG.mode === "single"
+        ? `1-NUM: .${p2(CFG.singleTarget)}`
+        : CFG.mode === "seq"
+        ? `LOTTO: ${activeTargets().map(n => p2(n)).join(",")}`
+        : CFG.mode === "open17"
+        ? "SUM TO 17"
+        : "FAIR (OFF)";
+      elPkMain.textContent = "0";
+      elPkSub.textContent = modeDesc;
+    }
+    elPeekBox.classList.add("on");
+  }
+
+  function hidePeek(){
+    clearTimeout(holdTimer);
+    if (elPeekBox.classList.contains("on")){
+      elPeekBox.classList.remove("on");
+      // Releasing your thumb after viewing the Emergence peek clears the 3-person memory for the next cycle
+      if (S.emergenceList.length > 0){
+        S.emergenceList = [];
+      }
+    }
+  }
+
+  tabBar.addEventListener("pointerdown", () => {
+    didHoldPeek = false;
+    clearTimeout(holdTimer);
+    holdTimer = setTimeout(showPeek, 220);
+  });
+  tabBar.addEventListener("pointerup", hidePeek);
+  tabBar.addEventListener("pointercancel", hidePeek);
+  tabBar.addEventListener("pointerleave", hidePeek);
+
+  /* Tap World Clock -> Toggle 17 Force */
+  worldTab.addEventListener("pointerup", e => {
+    if (didHoldPeek) return;
+    e.preventDefault();
+    animatePress(worldTab);
+    CFG.mode = (CFG.mode === "open17") ? "seq" : "open17";
+    S.disarmed = false;
+    S.covertBuffer = [];
+    saveLocal();
+    syncVisualIndicators();
+    pulseLockDot(450);
+  });
+
+  /* Tap Alarms -> Switch to Single Number Force Mode (.00–.99) */
+  alarmTab.addEventListener("pointerup", e => {
+    if (didHoldPeek) return;
+    e.preventDefault();
+    animatePress(alarmTab);
+    CFG.mode = "single";
+    S.disarmed = false;
+    S.covertBuffer = [];
+    saveLocal();
+    syncVisualIndicators();
+    pulseLockDot(450);
+  });
+
+  /* Tap Timers -> Activate Lotto Mode (6-Number Sequence from #1 + fresh scrambled order for Stop+Reset) */
+  timerTab.addEventListener("pointerup", e => {
+    if (didHoldPeek) return;
+    e.preventDefault();
+    animatePress(timerTab);
+    CFG.mode = "seq";
+    S.seqIndex = 0;
+    reshuffleLottoTargets();
+    S.disarmed = false;
+    S.covertBuffer = [];
+    saveLocal();
+    syncVisualIndicators();
+    pulseLockDot(450);
+  });
+})();
+
+/* ---------- Top Corner Hold Redirects (Top-Left = Real Timer App, Top-Right = iControl in Safari) ---------- */
+(() => {
+  const cornerTL = document.getElementById("cornerTL");
+  const cornerTR = document.getElementById("cornerTR");
+  let tlTimer = null, trTimer = null;
+
+  cornerTL.addEventListener("pointerdown", () => {
+    clearTimeout(tlTimer);
+    tlTimer = setTimeout(() => {
+      pulseLockDot(300);
+      const dest = (CFG.timerUrl || "clock-stopwatch://").trim();
+      if (dest) window.location.href = dest;
+    }, 450);
+  });
+  const clearTL = () => clearTimeout(tlTimer);
+  cornerTL.addEventListener("pointerup", clearTL);
+  cornerTL.addEventListener("pointercancel", clearTL);
+  cornerTL.addEventListener("pointerleave", clearTL);
+
+  cornerTR.addEventListener("pointerdown", () => {
+    clearTimeout(trTimer);
+    trTimer = setTimeout(() => {
+      pulseLockDot(300);
+      const dest = toSafariUrl(CFG.icontrolUrl || "https://icontrol-magic.onrender.com/");
+      if (dest) window.location.href = dest;
+    }, 450);
+  });
+  const clearTR = () => clearTimeout(trTimer);
+  cornerTR.addEventListener("pointerup", clearTR);
+  cornerTR.addEventListener("pointercancel", clearTR);
+  cornerTR.addEventListener("pointerleave", clearTR);
+})();
+
+/* ---------- Settings Sheet (Double-Tap "Stopwatch" Tab Icon) ---------- */
+const sheet = document.getElementById("sheet");
+const modeList = document.getElementById("modeList");
+const singleIn = document.getElementById("singleIn");
+const slotsGrid = document.getElementById("slotsGrid");
+const timerUrlIn = document.getElementById("timerUrlIn");
+const icontrolUrlIn = document.getElementById("icontrolUrlIn");
+const triggerIn = document.getElementById("triggerIn");
+const disarmIn = document.getElementById("disarmIn");
+const peekHistoryBox = document.getElementById("peekHistoryBox");
+
+let draft = null;
+
+function openSettings(){
+  draft = JSON.parse(JSON.stringify(CFG));
+  modeList.querySelectorAll(".opt").forEach(r =>
+    r.classList.toggle("sel", r.dataset.mode === draft.mode));
+  singleIn.value = p2(draft.singleTarget);
+  slotsGrid.querySelectorAll(".slot-in").forEach(inp => {
+    const idx = Number(inp.dataset.slot);
+    inp.value = draft.targets[idx] !== null ? p2(draft.targets[idx]) : "";
+  });
+  timerUrlIn.value = draft.timerUrl || "clock-stopwatch://";
+  icontrolUrlIn.value = draft.icontrolUrl || "https://icontrol-magic.onrender.com/";
+  triggerIn.value = draft.triggerOn;
+  disarmIn.checked = draft.autoDisarm;
+
+  if (S.peekLog.length){
+    peekHistoryBox.textContent = S.peekLog.map(
+      e => `[${e.at}] ${e.type}: ${e.shownFormatted} (${e.largeInt})`
+    ).join("\n");
+  } else {
+    peekHistoryBox.textContent = "No stops recorded yet.";
+  }
+
+  sheet.classList.add("open");
+  sheet.setAttribute("aria-hidden", "false");
+}
+
+function closeSettings(save){
+  if (save && draft){
+    if (singleIn.value.trim() !== ""){
+      draft.singleTarget = Math.max(0, Math.min(99, parseInt(singleIn.value, 10) || 0));
+    }
+    slotsGrid.querySelectorAll(".slot-in").forEach(inp => {
+      const idx = Number(inp.dataset.slot);
+      const raw = inp.value.trim();
+      draft.targets[idx] = raw === "" ? null : Math.max(0, Math.min(99, parseInt(raw, 10) || 0));
+    });
+    if (timerUrlIn.value.trim()) draft.timerUrl = timerUrlIn.value.trim();
+    if (icontrolUrlIn.value.trim()) draft.icontrolUrl = icontrolUrlIn.value.trim();
+    draft.triggerOn = triggerIn.value;
+    draft.autoDisarm = disarmIn.checked;
+    CFG = draft;
+    S.seqIndex = 0;
+    reshuffleLottoTargets();
+    S.disarmed = false;
+    saveLocal();
+    syncVisualIndicators();
+  }
+  sheet.classList.remove("open");
+  sheet.setAttribute("aria-hidden", "true");
+}
+
+modeList.addEventListener("click", e => {
+  const r = e.target.closest(".opt");
+  if (!r) return;
+  draft.mode = r.dataset.mode;
+  modeList.querySelectorAll(".opt").forEach(row =>
+    row.classList.toggle("sel", row.dataset.mode === draft.mode));
+});
+
+document.getElementById("shCancel").addEventListener("click", () => closeSettings(false));
+document.getElementById("shDone").addEventListener("click", () => closeSettings(true));
+
+(() => {
+  const swTab = document.getElementById("swTab");
+  let last = 0;
+  swTab.addEventListener("pointerdown", e => {
+    const now = performance.now();
+    if (now - last < 320){
+      e.preventDefault();
+      openSettings();
+      last = 0;
+    } else {
+      last = now;
+    }
+  });
+})();
+</script>
+</body>
+</html>
