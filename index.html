@@ -11,496 +11,586 @@
 <meta name="theme-color" content="#000000">
 <style>
 :root{--st: env(safe-area-inset-top, 0px);--orange:#ff952b;--green:#30d158;--sh-bg:#1c1c1e;--sh-cell:#2c2c2e;--sh-fill:#3a3a3c;--gray:#8e8e93;--sep:#38383a;}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{margin:0;padding:0;height:100%;background:#000;color:#fff;overscroll-behavior:none;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation;-webkit-font-smoothing:antialiased;}
-.app{position:fixed;inset:0;}
-.corner-zone{position:fixed;top:0;width:88px;height:calc(var(--st) + 76px);z-index:55;cursor:pointer;}
-.corner-zone.tl{left:0;}
-.corner-zone.tr{right:0;}
-.lock-dot,.orange-dot{position:fixed;top:calc(var(--st) + 6px);border-radius:50%;opacity:0;transition:opacity .14s ease, transform .14s ease;pointer-events:none;z-index:50;}
-.lock-dot{right:26%;width:5px;height:5px;background:#fff;}
-.lock-dot.on{opacity:.9;transform:scale(1.15);}
-.orange-dot{right:22%;width:6px;height:6px;background:var(--orange);}
-.orange-dot.on{opacity:1;}
-.upper-zone{position:absolute;left:0;right:0;top:0;height:calc(var(--st) + 95px);display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;z-index:18;}
-.peek-box{text-align:center;opacity:0;pointer-events:none;transition:opacity .08s ease;}
-.peek-box.on{opacity:1;}
-.pk-main{font-size:16.5px;font-weight:600;color:#fff;font-variant-numeric:tabular-nums;margin-bottom:3px;letter-spacing:.02em;}
-.pk-sub{font-size:11.5px;color:#8e8e93;font-variant-numeric:tabular-nums;letter-spacing:.01em;}
-.time-readout{position:absolute;left:0;right:0;top:calc(var(--st) + 99px);height:96px;display:flex;justify-content:center;align-items:center;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;font-size:var(--rd-size, 85.6px);font-weight:200;line-height:1;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;white-space:nowrap;color:#fff;z-index:20;}
-.time-readout .ch{display:inline-flex;align-items:center;justify-content:center;height:96px;cursor:pointer;transition:transform .11s cubic-bezier(.2,.8,.2,1), opacity .11s ease;will-change:transform, opacity;}
-.time-readout .ch.pressed{transform:scale(0.89);opacity:0.55;}
-.sw-btn{position:absolute;top:calc(var(--st) + 334.5px);width:82px;height:82px;border-radius:50%;border:0;padding:0;margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;font-size:16px;font-weight:400;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-appearance:none;appearance:none;outline:none;transition:transform .11s cubic-bezier(.2,.8,.2,1), filter .11s ease;z-index:15;}
-#lapBtn{left:16px;background:#1c1c1e;color:#fff;}
-#lapBtn.disabled{color:#8a8a8e;}
-#lapBtn.pressed{transform:scale(0.92);filter:brightness(1.35);}
-#startBtn{right:15px;}
-.sw-btn.start{background:#092a11;color:var(--green);}
-.sw-btn.stop{background:#340e0b;color:#ff4245;}
-.sw-btn:active{filter:brightness(1.3);}
-.pager{position:absolute;left:50%;top:calc(var(--st) + 375.5px);transform:translate(-50%,-50%);display:flex;align-items:center;gap:9.7px;padding:26px 32px;cursor:pointer;z-index:18;transition:transform .11s ease, opacity .11s ease;}
-.pager.pressed{transform:translate(-50%,-50%) scale(0.84);opacity:0.6;}
-.dot{width:7px;height:7px;border-radius:50%;background:#fff;transition:background .15s ease;}
-.dot.dim{background:#727272;}
-.lower-area{position:absolute;left:0;right:0;top:calc(var(--st) + 432.7px);bottom:0;}
-.lower-area::before{content:"";position:absolute;left:13.5px;right:13.5px;top:0;height:1px;background:var(--sep);transform:scaleY(.34);transform-origin:top;}
-.laps-wrap{position:absolute;left:0;right:0;top:0;bottom:calc(82px + env(safe-area-inset-bottom,0px));overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 13.5px;}
-.lap-row{display:flex;align-items:center;justify-content:space-between;height:44px;position:relative;padding:0 2px;font-size:17px;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;}
-.lap-row::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--sep);transform:scaleY(.34);transform-origin:bottom;}
-.lap-row.best{color:var(--green);}
-.lap-row.worst{color:#ff4245;}
-.kp-overlay{position:absolute;left:0;right:0;top:calc(var(--st) + 432.7px);bottom:calc(86px + env(safe-area-inset-bottom,0px));background:#000;z-index:25;display:none;flex-direction:column;align-items:center;padding:10px 18px 8px;}
-.kp-overlay.open{display:flex;}
-.kp-top-row{width:100%;max-width:340px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;min-height:28px;}
-.kp-mode-pill,.kp-clear-btn{font-size:11px;font-weight:600;letter-spacing:.04em;color:#8e8e93;background:#1c1c1e;border:1px solid #333336;border-radius:999px;padding:4px 10px;cursor:pointer;font-family:inherit;}
-.kp-display{font-size:21px;font-weight:600;letter-spacing:.22em;font-variant-numeric:tabular-nums;text-align:center;flex:1;}
-.kp-grid{width:100%;max-width:340px;flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(5,1fr);gap:7px;}
-.kp-btn{background:#0c0c0c;border:1.5px solid #48484a;border-radius:10px;color:#fff;font-family:inherit;font-size:20px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;}
-.kp-btn:active{background:#2c2c2e;}
-.kp-btn.zero{grid-column:2/3;}
-.kp-btn.enter{grid-column:1/-1;font-size:17px;letter-spacing:.06em;}
-.tabbar{position:fixed;left:20px;right:20px;bottom:20.5px;height:61.5px;z-index:30;border-radius:31px;background:linear-gradient(180deg, rgba(38,38,40,0.96) 0%, rgba(28,28,30,0.96) 100%);-webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);box-shadow:inset 0 1px 0.5px rgba(255,255,255,0.22),inset 0 -0.5px 0.5px rgba(255,255,255,0.12),inset 0 0 0 0.5px rgba(255,255,255,0.10);display:grid;grid-template-columns:repeat(4,1fr);padding:0 10.5px 0 11.3px;}
-.tab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:10.4px;color:#fff;cursor:pointer;z-index:0;transition:transform .11s cubic-bezier(.2,.8,.2,1), opacity .11s ease;}
-.tab.pressed{transform:scale(0.91);opacity:0.72;}
-.tab.active{color:var(--orange);}
-.tab.active::before{content:"";position:absolute;top:4px;bottom:4px;left:50%;width:96px;transform:translateX(-50%);border-radius:27px;background:#0a0a0a;z-index:-1;}
-.tab svg{width:25.5px;height:25.5px;display:block;}
-.tab span{margin-top:2.2px;font-size:10px;font-weight:600;line-height:12px;white-space:nowrap;}
-.dice-app{position:fixed;inset:0;z-index:80;background:radial-gradient(circle at 50% 42%, #1d1d22 0%, #0a0a0c 74%);display:none;flex-direction:column;align-items:center;justify-content:center;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
-.dice-app.open{display:flex;}
-.die-stage{perspective:900px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;padding:32px;}
-.die{width:min(46vw, 196px);height:min(46vw, 196px);background:linear-gradient(145deg, #ffffff 0%, #ececf1 58%, #d7d7df 100%);border-radius:22%;padding:14%;display:grid;grid-template-columns:repeat(3, 1fr);grid-template-rows:repeat(3, 1fr);place-items:center;box-shadow:0 26px 54px rgba(0,0,0,.68),0 6px 16px rgba(0,0,0,.42),inset 0 2px 3px rgba(255,255,255,.95),inset 0 -5px 10px rgba(0,0,0,.15);will-change:transform;transition:transform .14s ease;}
-.die:active{transform:scale(.95);}
-.die.rolling{animation:dieRoll .52s cubic-bezier(.22,.82,.32,1);}
-@keyframes dieRoll{0%{transform:scale(.90) rotate3d(1,1,0,0deg);}30%{transform:scale(1.08) translateY(-18px) rotate3d(1,-.8,.4,170deg);}65%{transform:scale(1.03) translateY(-6px) rotate3d(-.6,1,-.3,310deg);}100%{transform:scale(1) translateY(0) rotate3d(0,0,1,360deg);}}
-.pip{width:68%;height:68%;border-radius:50%;background:radial-gradient(circle at 36% 34%, #35353a 0%, #151518 75%);box-shadow:inset 0 2px 3px rgba(0,0,0,.65), 0 1px 1px rgba(255,255,255,.7);opacity:0;transform:scale(.4);transition:opacity .08s ease, transform .12s ease;}
-.pip.on{opacity:1;transform:scale(1);}
-.die-sub{margin-top:34px;color:rgba(255,255,255,.32);font-size:15px;font-weight:500;letter-spacing:.04em;pointer-events:none;}
-.die-corner{position:fixed;width:88px;height:88px;z-index:85;}
-.die-corner.tl{top:0;left:0;}
-.die-corner.tr{top:0;right:0;}
-.die-corner.bl{bottom:0;left:0;}
-.die-corner.br{bottom:0;right:0;}
-.sheet{position:fixed;inset:0;z-index:60;background:var(--sh-bg);color:#fff;display:flex;flex-direction:column;transform:translateY(100%);visibility:hidden;transition:transform .36s cubic-bezier(.32,.72,0,1), visibility 0s linear .36s;}
-.sheet.open{transform:none;visibility:visible;transition:transform .36s cubic-bezier(.32,.72,0,1), visibility 0s;}
-.sh-head{flex:0 0 auto;padding-top:env(safe-area-inset-top);border-bottom:.5px solid #38383a;}
-.sh-bar{height:54px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 18px;}
-.sh-btn{color:var(--orange);font-family:inherit;font-size:17px;background:none;border:0;padding:10px 0;cursor:pointer;}
-.sh-btn.l{justify-self:start;} .sh-btn.r{justify-self:end;font-weight:600;}
-.sh-title{font-size:17px;font-weight:600;}
-.sh-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px calc(40px + env(safe-area-inset-bottom,0px));}
-.sec-h{font-size:12px;color:var(--gray);letter-spacing:.05em;text-transform:uppercase;margin:20px 4px 8px;}
-.sec-f{font-size:13px;line-height:1.35;color:var(--gray);margin:6px 4px 0;}
-.card{background:var(--sh-cell);border-radius:12px;overflow:hidden;}
-.row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:46px;padding:0 14px;font-size:16px;}
-.row + .row{border-top:.5px solid #38383a;}
-.opt{cursor:pointer;}
-.opt .chk{color:var(--orange);font-weight:700;opacity:0;}
-.opt.sel .chk{opacity:1;}
-.slots-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;padding:12px;}
-.slot-box{display:flex;flex-direction:column;align-items:center;gap:4px;}
-.slot-box span{font-size:11px;color:var(--gray);}
-.slot-in{width:100%;height:38px;border:0;border-radius:8px;background:var(--sh-fill);color:#fff;font-size:16px;font-weight:500;text-align:center;outline:none;-webkit-user-select:text;user-select:text;}
-.url-in{flex:1;min-width:0;height:36px;border:0;border-radius:8px;background:var(--sh-fill);color:#fff;font-size:14px;padding:0 10px;outline:none;-webkit-user-select:text;user-select:text;}
-.pill-btn{background:var(--orange);color:#000;border:0;border-radius:8px;padding:8px 12px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;}
-.pill-btn.sec{background:var(--sh-fill);color:#fff;font-weight:500;}
-.site-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;border-top:.5px solid #38383a;cursor:pointer;}
-.site-item:first-child{border-top:0;}
-.site-info{flex:1;min-width:0;overflow:hidden;}
-.site-name{font-size:15px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.site-url{font-size:12px;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
-.site-actions{display:flex;align-items:center;gap:6px;flex:0 0 auto;}
-.site-del{background:rgba(255,69,58,0.18);color:#ff453a;border:0;border-radius:6px;width:28px;height:28px;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.history-box{padding:12px 14px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:#d1d1d6;white-space:pre-wrap;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;background:#000;color:#fff;overscroll-behavior:none;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation;-webkit-font-smoothing:antialiased;}
+  .app{position:fixed;inset:0;}
+
+    .corner-zone{position:fixed;top:0;width:88px;height:calc(var(--st) + 76px);z-index:55;cursor:pointer;}
+  .corner-zone.tl{left:0;}
+  .corner-zone.tr{right:0;}
+
+    .lock-dot,.orange-dot{position:fixed;top:calc(var(--st) + 6px);border-radius:50%;opacity:0;transition:opacity .14s ease, transform .14s ease;pointer-events:none;z-index:50;}
+  .lock-dot{right:26%;width:5px;height:5px;background:#fff;}
+  .lock-dot.on{opacity:.9;transform:scale(1.15);}
+  .orange-dot{right:22%;width:6px;height:6px;background:var(--orange);}
+  .orange-dot.on{opacity:1;}
+
+    .upper-zone{position:absolute;left:0;right:0;top:0;height:calc(var(--st) + 95px);display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;z-index:18;}
+  .peek-box{text-align:center;opacity:0;pointer-events:none;transition:opacity .08s ease;}
+  .peek-box.on{opacity:1;}
+  .pk-main{font-size:16.5px;font-weight:600;color:#fff;font-variant-numeric:tabular-nums;margin-bottom:3px;letter-spacing:.02em;}
+  .pk-sub{font-size:11.5px;color:#8e8e93;font-variant-numeric:tabular-nums;letter-spacing:.01em;}
+
+    .time-readout{position:absolute;left:0;right:0;top:calc(var(--st) + 100.5px);height:96px;display:flex;justify-content:center;align-items:center;font-family:-apple-system-ultralight,"SFProDisplay-Ultralight","SF Pro Display",-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;font-size:var(--rd-size, 88px);font-weight:100;line-height:1;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;white-space:nowrap;color:#fff;z-index:20;}
+  .time-readout .ch{display:inline-flex;align-items:center;justify-content:center;height:96px;font-weight:100;cursor:pointer;transition:transform .11s cubic-bezier(.2,.8,.2,1), opacity .11s ease;will-change:transform, opacity;}
+  .time-readout .ch.pressed{transform:scale(0.89);opacity:0.55;}
+
+    .sw-btn{position:absolute;top:calc(var(--st) + 339.5px);width:83.5px;height:83.5px;border-radius:50%;border:0;padding:0;margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;font-size:16px;font-weight:400;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-appearance:none;appearance:none;outline:none;transition:transform .11s cubic-bezier(.2,.8,.2,1), filter .11s ease;z-index:15;}
+  #lapBtn{left:16px;background:#1c1c1e;color:#fff;}
+  #lapBtn.disabled{color:#8a8a8e;}
+  #lapBtn.pressed{transform:scale(0.92);filter:brightness(1.35);}
+  #startBtn{right:15px;}
+  .sw-btn.start{background:#092a11;color:var(--green);}
+  .sw-btn.stop{background:#340e0b;color:#ff4245;}
+  .sw-btn:active{filter:brightness(1.3);}
+
+    .pager{position:absolute;left:50%;top:calc(var(--st) + 381px);transform:translate(-50%,-50%);display:flex;align-items:center;gap:9.7px;padding:26px 32px;cursor:pointer;z-index:18;transition:transform .11s ease, opacity .11s ease;}
+  .pager.pressed{transform:translate(-50%,-50%) scale(0.84);opacity:0.6;}
+  .dot{width:7px;height:7px;border-radius:50%;background:#fff;transition:background .15s ease;}
+  .dot.dim{background:#727272;}
+
+    .lower-area{position:absolute;left:0;right:0;top:calc(var(--st) + 440px);bottom:0;}
+  .lower-area::before{content:"";position:absolute;left:15px;right:15px;top:0;height:1px;background:var(--sep);transform:scaleY(.5);transform-origin:top;}
+  .laps-wrap{position:absolute;left:0;right:0;top:0;bottom:calc(82px + env(safe-area-inset-bottom,0px));overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 13.5px;}
+  .lap-row{display:flex;align-items:center;justify-content:space-between;height:44px;position:relative;padding:0 2px;font-size:17px;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;}
+  .lap-row::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--sep);transform:scaleY(.34);transform-origin:bottom;}
+  .lap-row.best{color:var(--green);}
+  .lap-row.worst{color:#ff4245;}
+
+    .kp-overlay{position:absolute;left:0;right:0;top:calc(var(--st) + 440px);bottom:calc(86px + env(safe-area-inset-bottom,0px));background:#000;z-index:25;display:none;flex-direction:column;align-items:center;padding:10px 18px 8px;}
+  .kp-overlay.open{display:flex;}
+  .kp-top-row{width:100%;max-width:340px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;min-height:28px;}
+  .kp-mode-pill,.kp-clear-btn{font-size:11px;font-weight:600;letter-spacing:.04em;color:#8e8e93;background:#1c1c1e;border:1px solid #333336;border-radius:999px;padding:4px 10px;cursor:pointer;font-family:inherit;}
+  .kp-display{font-size:21px;font-weight:600;letter-spacing:.22em;font-variant-numeric:tabular-nums;text-align:center;flex:1;}
+  .kp-grid{width:100%;max-width:340px;flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(5,1fr);gap:7px;}
+  .kp-btn{background:#0c0c0c;border:1.5px solid #48484a;border-radius:10px;color:#fff;font-family:inherit;font-size:20px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;}
+  .kp-btn:active{background:#2c2c2e;}
+  .kp-btn.zero{grid-column:2/3;}
+  .kp-btn.enter{grid-column:1/-1;font-size:17px;letter-spacing:.06em;}
+
+    .tabbar{position:fixed;left:20px;right:20px;bottom:20.5px;height:61.5px;z-index:30;border-radius:31px;background:linear-gradient(180deg, rgba(38,38,40,0.96) 0%, rgba(28,28,30,0.96) 100%);-webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);box-shadow:
+      inset 0 1px 0.5px rgba(255,255,255,0.22),
+      inset 0 -0.5px 0.5px rgba(255,255,255,0.12),
+      inset 0 0 0 0.5px rgba(255,255,255,0.10);display:grid;grid-template-columns:repeat(4,1fr);padding:0 10.5px 0 11.3px;}
+  .tab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:10.4px;color:#fff;cursor:pointer;z-index:0;transition:transform .11s cubic-bezier(.2,.8,.2,1), opacity .11s ease;}
+  .tab.pressed{transform:scale(0.91);opacity:0.72;}
+  .tab.active{color:var(--orange);}
+  .tab.active::before{content:"";position:absolute;top:4px;bottom:4px;left:50%;width:96px;transform:translateX(-50%);border-radius:27px;background:#0a0a0a;z-index:-1;}
+  .tab svg{width:25.5px;height:25.5px;display:block;}
+  .tab span{margin-top:2.2px;font-size:10px;font-weight:600;line-height:12px;white-space:nowrap;}
+
+    .dice-app{position:fixed;inset:0;z-index:80;background:radial-gradient(circle at 50% 42%, #1d1d22 0%, #0a0a0c 74%);display:none;flex-direction:column;align-items:center;justify-content:center;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
+  .dice-app.open{display:flex;}
+  .die-stage{perspective:900px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;padding:32px;}
+  .die{width:min(46vw, 196px);height:min(46vw, 196px);background:linear-gradient(145deg, #ffffff 0%, #ececf1 58%, #d7d7df 100%);border-radius:22%;padding:14%;display:grid;grid-template-columns:repeat(3, 1fr);grid-template-rows:repeat(3, 1fr);place-items:center;box-shadow:
+      0 26px 54px rgba(0,0,0,.68),
+      0 6px 16px rgba(0,0,0,.42),
+      inset 0 2px 3px rgba(255,255,255,.95),
+      inset 0 -5px 10px rgba(0,0,0,.15);will-change:transform;transition:transform .14s ease;}
+  .die:active{transform:scale(.95);}
+  .die.rolling{animation:dieRoll .52s cubic-bezier(.22,.82,.32,1);}
+  @keyframes dieRoll{0%  {transform:scale(.90) rotate3d(1,1,0,0deg);}
+    30% {transform:scale(1.08) translateY(-18px) rotate3d(1,-.8,.4,170deg);}
+    65% {transform:scale(1.03) translateY(-6px) rotate3d(-.6,1,-.3,310deg);}
+    100%{transform:scale(1) translateY(0) rotate3d(0,0,1,360deg);}}
+  .pip{width:68%;height:68%;border-radius:50%;background:radial-gradient(circle at 36% 34%, #35353a 0%, #151518 75%);box-shadow:inset 0 2px 3px rgba(0,0,0,.65), 0 1px 1px rgba(255,255,255,.7);opacity:0;transform:scale(.4);transition:opacity .08s ease, transform .12s ease;}
+  .pip.on{opacity:1;transform:scale(1);}
+  .die-sub{margin-top:34px;color:rgba(255,255,255,.32);font-size:15px;font-weight:500;letter-spacing:.04em;pointer-events:none;}
+  .die-corner{position:fixed;width:88px;height:88px;z-index:85;}
+  .die-corner.tl{top:0;left:0;}
+  .die-corner.tr{top:0;right:0;}
+  .die-corner.bl{bottom:0;left:0;}
+  .die-corner.br{bottom:0;right:0;}
+
+    .sheet{position:fixed;inset:0;z-index:60;background:var(--sh-bg);color:#fff;display:flex;flex-direction:column;transform:translateY(100%);visibility:hidden;transition:transform .36s cubic-bezier(.32,.72,0,1), visibility 0s linear .36s;}
+  .sheet.open{transform:none;visibility:visible;transition:transform .36s cubic-bezier(.32,.72,0,1), visibility 0s;}
+  .sh-head{flex:0 0 auto;padding-top:env(safe-area-inset-top);border-bottom:.5px solid #38383a;}
+  .sh-bar{height:54px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 18px;}
+  .sh-btn{color:var(--orange);font-family:inherit;font-size:17px;background:none;border:0;padding:10px 0;cursor:pointer;}
+  .sh-btn.l{justify-self:start;} .sh-btn.r{justify-self:end;font-weight:600;}
+  .sh-title{font-size:17px;font-weight:600;}
+  .sh-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px calc(40px + env(safe-area-inset-bottom,0px));}
+  .sec-h{font-size:12px;color:var(--gray);letter-spacing:.05em;text-transform:uppercase;margin:20px 4px 8px;}
+  .sec-f{font-size:13px;line-height:1.35;color:var(--gray);margin:6px 4px 0;}
+  .card{background:var(--sh-cell);border-radius:12px;overflow:hidden;}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:46px;padding:0 14px;font-size:16px;}
+  .row + .row{border-top:.5px solid #38383a;}
+  .opt{cursor:pointer;}
+  .opt .chk{color:var(--orange);font-weight:700;opacity:0;}
+  .opt.sel .chk{opacity:1;}
+  .slots-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;padding:12px;}
+  .slot-box{display:flex;flex-direction:column;align-items:center;gap:4px;}
+  .slot-box span{font-size:11px;color:var(--gray);}
+  .slot-in{width:100%;height:38px;border:0;border-radius:8px;background:var(--sh-fill);color:#fff;font-size:16px;font-weight:500;text-align:center;outline:none;-webkit-user-select:text;user-select:text;}
+  .url-in{flex:1;min-width:0;height:36px;border:0;border-radius:8px;background:var(--sh-fill);color:#fff;font-size:14px;padding:0 10px;outline:none;-webkit-user-select:text;user-select:text;}
+  .pill-btn{background:var(--orange);color:#000;border:0;border-radius:8px;padding:8px 12px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;}
+  .pill-btn.sec{background:var(--sh-fill);color:#fff;font-weight:500;}
+  .site-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;border-top:.5px solid #38383a;cursor:pointer;}
+  .site-item:first-child{border-top:0;}
+  .site-info{flex:1;min-width:0;overflow:hidden;}
+  .site-name{font-size:15px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .site-url{font-size:12px;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+  .site-actions{display:flex;align-items:center;gap:6px;flex:0 0 auto;}
+  .site-del{background:rgba(255,69,58,0.18);color:#ff453a;border:0;border-radius:6px;width:28px;height:28px;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .history-box{padding:12px 14px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:#d1d1d6;white-space:pre-wrap;}
 </style>
 </head>
 <body>
+<!-- Top Corner Zones: Top-Left = Left Redirect (Default: Dice Roller), Top-Right = iControl Redirect (Opens New Safari Tab) -->
 <a class="corner-zone tl" id="cornerTL" href="#dice"></a>
 <a class="corner-zone tr" id="cornerTR" href="https://icontrol-magic.onrender.com/" target="_blank" rel="noopener noreferrer"></a>
+
 <div class="lock-dot" id="lockDot"></div>
 <div class="orange-dot" id="orangeDot"></div>
+
 <div class="app">
-<div class="upper-zone" id="upperZone">
-<div class="peek-box" id="peekBox">
-<div class="pk-main" id="pkMain">00:00.00</div>
-<div class="pk-sub" id="pkSub"></div>
+  <div class="upper-zone" id="upperZone">
+    <div class="peek-box" id="peekBox">
+      <div class="pk-main" id="pkMain">00:00.00</div>
+      <div class="pk-sub" id="pkSub"></div>
+    </div>
+  </div>
+
+  <div class="time-readout" id="timeReadout"><span class="ch" data-digit="1">0</span><span class="ch" data-digit="2">0</span><span class="ch" data-digit="3">:</span><span class="ch" data-digit="4">0</span><span class="ch" data-digit="5">0</span><span class="ch" data-digit="6">.</span><span class="ch" data-digit="7">0</span><span class="ch" data-digit="8">0</span></div>
+
+  <button class="sw-btn disabled" id="lapBtn" type="button">Lap</button>
+  <div class="pager" id="pagerDots">
+    <span class="dot" id="leftDot"></span>
+    <span class="dot dim" id="rightDot"></span>
+  </div>
+  <button class="sw-btn start" id="startBtn" type="button">Start</button>
+
+  <!-- Black Area Underneath Reset & Start:
+       - Double/Triple-Tap LEFT side = Open Built-in Dice Roller (hides App Clip)
+       - Double/Triple-Tap RIGHT side = Switch to Saved Website (Calculator or any saved URL) -->
+  <div class="lower-area" id="lowerArea">
+    <div class="laps-wrap" id="lapsWrap"></div>
+  </div>
+
+  <div class="kp-overlay" id="kpOverlay">
+    <div class="kp-top-row">
+      <button type="button" class="kp-mode-pill" id="kpModeBtn">1 NUM (.XX)</button>
+      <div class="kp-display" id="kpDisplay">- -</div>
+      <button type="button" class="kp-clear-btn" id="kpClearBtn">CLR</button>
+    </div>
+    <div class="kp-grid" id="kpGrid">
+      <button type="button" class="kp-btn" data-val="1">1</button>
+      <button type="button" class="kp-btn" data-val="2">2</button>
+      <button type="button" class="kp-btn" data-val="3">3</button>
+      <button type="button" class="kp-btn" data-val="4">4</button>
+      <button type="button" class="kp-btn" data-val="5">5</button>
+      <button type="button" class="kp-btn" data-val="6">6</button>
+      <button type="button" class="kp-btn" data-val="7">7</button>
+      <button type="button" class="kp-btn" data-val="8">8</button>
+      <button type="button" class="kp-btn" data-val="9">9</button>
+      <button type="button" class="kp-btn zero" data-val="0">0</button>
+      <button type="button" class="kp-btn enter" data-val="ENTER">ENTER</button>
+    </div>
+  </div>
 </div>
-</div>
-<div class="time-readout" id="timeReadout"><span class="ch" data-digit="1">0</span><span class="ch" data-digit="2">0</span><span class="ch" data-digit="3">:</span><span class="ch" data-digit="4">0</span><span class="ch" data-digit="5">0</span><span class="ch" data-digit="6">.</span><span class="ch" data-digit="7">0</span><span class="ch" data-digit="8">0</span></div>
-<button class="sw-btn disabled" id="lapBtn" type="button">Lap</button>
-<div class="pager" id="pagerDots">
-<span class="dot" id="leftDot"></span>
-<span class="dot dim" id="rightDot"></span>
-</div>
-<button class="sw-btn start" id="startBtn" type="button">Start</button>
-<div class="lower-area" id="lowerArea">
-<div class="laps-wrap" id="lapsWrap"></div>
-</div>
-<div class="kp-overlay" id="kpOverlay">
-<div class="kp-top-row">
-<button type="button" class="kp-mode-pill" id="kpModeBtn">1 NUM (.XX)</button>
-<div class="kp-display" id="kpDisplay">- -</div>
-<button type="button" class="kp-clear-btn" id="kpClearBtn">CLR</button>
-</div>
-<div class="kp-grid" id="kpGrid">
-<button type="button" class="kp-btn" data-val="1">1</button>
-<button type="button" class="kp-btn" data-val="2">2</button>
-<button type="button" class="kp-btn" data-val="3">3</button>
-<button type="button" class="kp-btn" data-val="4">4</button>
-<button type="button" class="kp-btn" data-val="5">5</button>
-<button type="button" class="kp-btn" data-val="6">6</button>
-<button type="button" class="kp-btn" data-val="7">7</button>
-<button type="button" class="kp-btn" data-val="8">8</button>
-<button type="button" class="kp-btn" data-val="9">9</button>
-<button type="button" class="kp-btn zero" data-val="0">0</button>
-<button type="button" class="kp-btn enter" data-val="ENTER">ENTER</button>
-</div>
-</div>
-</div>
+
+<!-- iOS 26 Floating Tab Bar (Pixel-matched SVGs) -->
 <div class="tabbar" id="tabBar">
-<div class="tab" id="worldTab">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65">
-<circle cx="12" cy="12" r="9.6"/>
-<ellipse cx="12" cy="12" rx="5.1" ry="9.6"/>
-<line x1="12" y1="2.4" x2="12" y2="21.6"/>
-<line x1="2.4" y1="12" x2="21.6" y2="12"/>
-<path d="M4.1 7.4h15.8M4.1 16.6h15.8"/>
-</svg>
-<span>World Clock</span>
+  <div class="tab" id="worldTab">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65">
+      <circle cx="12" cy="12" r="9.6"/>
+      <ellipse cx="12" cy="12" rx="5.1" ry="9.6"/>
+      <line x1="12" y1="2.4" x2="12" y2="21.6"/>
+      <line x1="2.4" y1="12" x2="21.6" y2="12"/>
+      <path d="M4.1 7.4h15.8M4.1 16.6h15.8"/>
+    </svg>
+    <span>World Clock</span>
+  </div>
+  <div class="tab" id="alarmTab">
+    <svg viewBox="0 0 24 24">
+      <path fill="currentColor" d="M5.3 2.5a3.2 3.2 0 0 0-2.9 4.7l4.5-3.9A3.2 3.2 0 0 0 5.3 2.5zM18.7 2.5a3.2 3.2 0 0 0-1.6.8l4.5 3.9a3.2 3.2 0 0 0-2.9-4.7z"/>
+      <circle cx="12" cy="13.2" r="8.8" fill="currentColor"/>
+      <path d="M12 8.2v5H8.5" fill="none" stroke="#222224" stroke-width="1.95" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M6.3 20.1l-1.5 1.7M17.7 20.1l1.5 1.7" stroke="currentColor" stroke-width="1.85" stroke-linecap="round"/>
+    </svg>
+    <span>Alarms</span>
+  </div>
+  <div class="tab active" id="swTab">
+    <svg viewBox="0 0 24 24">
+      <rect x="10.9" y="1.4" width="2.2" height="2.8" rx="1.0" fill="currentColor"/>
+      <path d="M17.8 5.0l1.4-1.4a1.05 1.05 0 0 1 1.5 1.5l-1.4 1.4z" fill="currentColor"/>
+      <circle cx="12" cy="13.5" r="9.3" fill="currentColor"/>
+      <path d="M12 13.5V7.6" stroke="#0a0a0a" stroke-width="1.95" stroke-linecap="round"/>
+      <circle cx="12" cy="13.5" r="1.4" fill="#0a0a0a"/>
+    </svg>
+    <span>Stopwatch</span>
+  </div>
+  <div class="tab" id="timerTab">
+    <svg viewBox="0 0 24 24" fill="none">
+      <path d="M12 3.0a9.5 9.5 0 1 1-6.9 3.0" stroke="currentColor" stroke-width="1.95" stroke-linecap="round"/>
+      <path d="M12 3.0v3.3" stroke="currentColor" stroke-width="1.95" stroke-linecap="round"/>
+      <path d="M12 12.5L7.6 8.1" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/>
+      <circle cx="12" cy="12.5" r="1.65" fill="currentColor"/>
+    </svg>
+    <span>Timers</span>
+  </div>
 </div>
-<div class="tab" id="alarmTab">
-<svg viewBox="0 0 24 24">
-<path fill="currentColor" d="M5.3 2.5a3.2 3.2 0 0 0-2.9 4.7l4.5-3.9A3.2 3.2 0 0 0 5.3 2.5zM18.7 2.5a3.2 3.2 0 0 0-1.6.8l4.5 3.9a3.2 3.2 0 0 0-2.9-4.7z"/>
-<circle cx="12" cy="13.2" r="8.8" fill="currentColor"/>
-<path d="M12 8.2v5H8.5" fill="none" stroke="#222224" stroke-width="1.95" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M6.3 20.1l-1.5 1.7M17.7 20.1l1.5 1.7" stroke="currentColor" stroke-width="1.85" stroke-linecap="round"/>
-</svg>
-<span>Alarms</span>
-</div>
-<div class="tab active" id="swTab">
-<svg viewBox="0 0 24 24">
-<rect x="10.9" y="1.4" width="2.2" height="2.8" rx="1.0" fill="currentColor"/>
-<path d="M17.8 5.0l1.4-1.4a1.05 1.05 0 0 1 1.5 1.5l-1.4 1.4z" fill="currentColor"/>
-<circle cx="12" cy="13.5" r="9.3" fill="currentColor"/>
-<path d="M12 13.5V7.6" stroke="#0a0a0a" stroke-width="1.95" stroke-linecap="round"/>
-<circle cx="12" cy="13.5" r="1.4" fill="#0a0a0a"/>
-</svg>
-<span>Stopwatch</span>
-</div>
-<div class="tab" id="timerTab">
-<svg viewBox="0 0 24 24" fill="none">
-<path d="M12 3.0a9.5 9.5 0 1 1-6.9 3.0" stroke="currentColor" stroke-width="1.95" stroke-linecap="round"/>
-<path d="M12 3.0v3.3" stroke="currentColor" stroke-width="1.95" stroke-linecap="round"/>
-<path d="M12 12.5L7.6 8.1" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/>
-<circle cx="12" cy="12.5" r="1.65" fill="currentColor"/>
-</svg>
-<span>Timers</span>
-</div>
-</div>
+
+<!-- Built-in Die Roller (Double/Triple-Tap Left Area under Reset or Hold Top-Left Corner; Hold any corner to return) -->
 <div class="dice-app" id="diceApp" aria-hidden="true">
-<div class="die-corner tl" data-corner="1"></div>
-<div class="die-corner tr" data-corner="2"></div>
-<div class="die-corner bl" data-corner="3"></div>
-<div class="die-corner br" data-corner="4"></div>
-<div class="die-stage" id="dieStage">
-<div class="die" id="dieCube">
-<span class="pip" data-p="0"></span>
-<span class="pip" data-p="1"></span>
-<span class="pip" data-p="2"></span>
-<span class="pip" data-p="3"></span>
-<span class="pip" data-p="4"></span>
-<span class="pip" data-p="5"></span>
-<span class="pip" data-p="6"></span>
-<span class="pip" data-p="7"></span>
-<span class="pip" data-p="8"></span>
+  <div class="die-corner tl" data-corner="1"></div>
+  <div class="die-corner tr" data-corner="2"></div>
+  <div class="die-corner bl" data-corner="3"></div>
+  <div class="die-corner br" data-corner="4"></div>
+  <div class="die-stage" id="dieStage">
+    <div class="die" id="dieCube">
+      <span class="pip" data-p="0"></span>
+      <span class="pip" data-p="1"></span>
+      <span class="pip" data-p="2"></span>
+      <span class="pip" data-p="3"></span>
+      <span class="pip" data-p="4"></span>
+      <span class="pip" data-p="5"></span>
+      <span class="pip" data-p="6"></span>
+      <span class="pip" data-p="7"></span>
+      <span class="pip" data-p="8"></span>
+    </div>
+    <div class="die-sub">Tap to roll</div>
+  </div>
 </div>
-<div class="die-sub">Tap to roll</div>
-</div>
-</div>
+
+<!-- Settings Sheet (Double-Tap orange "Stopwatch" tab icon) -->
 <div class="sheet" id="sheet" aria-hidden="true">
-<div class="sh-head">
-<div class="sh-bar">
-<button class="sh-btn l" id="shCancel" type="button">Cancel</button>
-<div class="sh-title">Stopwatch Settings</div>
-<button class="sh-btn r" id="shDone" type="button">Done</button>
+  <div class="sh-head">
+    <div class="sh-bar">
+      <button class="sh-btn l" id="shCancel" type="button">Cancel</button>
+      <div class="sh-title">Stopwatch Settings</div>
+      <button class="sh-btn r" id="shDone" type="button">Done</button>
+    </div>
+  </div>
+  <div class="sh-body">
+    <div class="sec-h">Force Mode</div>
+    <div class="card" id="modeList">
+      <div class="row opt" data-mode="seq"><span>Lotto / 6-Number Sequence (Tap Timers)</span><span class="chk">✓</span></div>
+      <div class="row opt" data-mode="single"><span>Single Decimal Number (Tap Alarms)</span><span class="chk">✓</span></div>
+      <div class="row opt" data-mode="open17"><span>Digits Add Up to 17 (Tap World Clock)</span><span class="chk">✓</span></div>
+      <div class="row opt" data-mode="off"><span>Off (100% Fair Stopwatch)</span><span class="chk">✓</span></div>
+    </div>
+
+    <div class="sec-h">Single Decimal Force (.00–.99)</div>
+    <div class="card">
+      <div class="row">
+        <span>Forced Decimal Number</span>
+        <input id="singleIn" type="number" min="0" max="99" placeholder="18" style="width:80px;height:36px;border:0;border-radius:8px;background:var(--sh-fill);color:#fff;font-size:16px;text-align:center;">
+      </div>
+    </div>
+    <div class="sec-f">Secret screen input: Tap any 2 digits on 00:00.00 (1–8 on the characters, 9 on the center dots, 0 on Lap).</div>
+
+    <div class="sec-h">Lotto / 6-Stop Sequence (00–99)</div>
+    <div class="card">
+      <div class="slots-grid" id="slotsGrid">
+        <div class="slot-box"><span>#1</span><input class="slot-in" type="number" min="0" max="99" data-slot="0"></div>
+        <div class="slot-box"><span>#2</span><input class="slot-in" type="number" min="0" max="99" data-slot="1"></div>
+        <div class="slot-box"><span>#3</span><input class="slot-in" type="number" min="0" max="99" data-slot="2"></div>
+        <div class="slot-box"><span>#4</span><input class="slot-in" type="number" min="0" max="99" data-slot="3"></div>
+        <div class="slot-box"><span>#5</span><input class="slot-in" type="number" min="0" max="99" data-slot="4"></div>
+        <div class="slot-box"><span>#6</span><input class="slot-in" type="number" min="0" max="99" data-slot="5"></div>
+      </div>
+      <div class="row">
+        <span>Scramble Lotto Order Automatically</span>
+        <input type="checkbox" id="scrambleLottoIn" style="width:20px;height:20px;accent-color:var(--orange)">
+      </div>
+      <div class="row">
+        <span>Shuffle the 6 Boxes Above</span>
+        <button type="button" class="pill-btn sec" id="shuffleSlotsBtn">🔀 Scramble Boxes</button>
+      </div>
+    </div>
+
+    <div class="sec-h">Left Redirect (2x/3x Tap Left Under Reset & Top-Left)</div>
+    <div class="card">
+      <div class="row">
+        <span style="white-space:nowrap;">Left Target</span>
+        <input id="leftUrlIn" class="url-in" type="text" placeholder="dice or https://...">
+        <button type="button" class="pill-btn sec" id="leftDiceBtn">🎲 Dice</button>
+      </div>
+      <div class="row">
+        <span>Open in New Safari Tab (off = App Clip)</span>
+        <input type="checkbox" id="leftSafariIn" style="width:20px;height:20px;accent-color:var(--orange)">
+      </div>
+    </div>
+
+    <div class="sec-h">Right Redirect (2x/3x Tap Right Under Start)</div>
+    <div class="card">
+      <div class="row">
+        <span style="white-space:nowrap;">Right Target</span>
+        <input id="customSiteUrlIn" class="url-in" type="text" placeholder="https://your-calculator-site.com or dice">
+        <button type="button" class="pill-btn sec" id="rightDiceBtn">🎲 Dice</button>
+      </div>
+      <div class="row">
+        <span>Open in New Safari Tab (off = App Clip)</span>
+        <input type="checkbox" id="openInSafariIn" style="width:20px;height:20px;accent-color:var(--orange)">
+      </div>
+      <div class="row">
+        <input id="customSiteNameIn" class="url-in" type="text" placeholder="Label (e.g. Calculator)">
+        <button type="button" class="pill-btn" id="saveSiteBtn">+ Save Site</button>
+      </div>
+    </div>
+    <div class="sec-f">Use <b>dice</b> for the built-in 3D Dice Roller, or any URL. Leave "Open in New Safari Tab" unchecked for your Calculator so it opens inside the full-screen App Clip browser.</div>
+
+    <div class="sec-h">Saved Websites Library</div>
+    <div class="card" id="savedSitesList"></div>
+
+    <div class="sec-h">Top-Right Corner Redirect (iControl)</div>
+    <div class="card">
+      <div class="row">
+        <span style="white-space:nowrap;">Top-Right URL</span>
+        <input id="icontrolUrlIn" class="url-in" type="text" placeholder="https://icontrol-magic.onrender.com/">
+      </div>
+      <div class="row">
+        <span>Open in New Safari Tab</span>
+        <input type="checkbox" id="icontrolSafariIn" style="width:20px;height:20px;accent-color:var(--orange)">
+      </div>
+    </div>
+    <div class="sec-f">Tap or hold the Top-Right corner to open iControl in a new Safari tab.</div>
+
+    <div class="sec-h">Trigger Controls</div>
+    <div class="card">
+      <div class="row">
+        <span>Apply Force On</span>
+        <select id="triggerIn" style="background:var(--sh-fill);color:#fff;border:0;border-radius:8px;padding:6px 10px;font-size:15px;">
+          <option value="both">Stop & Lap Presses</option>
+          <option value="stop">Stop Presses Only</option>
+          <option value="lap">Lap Presses Only</option>
+        </select>
+      </div>
+      <div class="row">
+        <span>Auto-Disarm After Force</span>
+        <input type="checkbox" id="disarmIn" style="width:20px;height:20px;accent-color:var(--orange)">
+      </div>
+    </div>
+
+    <div class="sec-h">Peek History (Spectator Times)</div>
+    <div class="card">
+      <div class="history-box" id="peekHistoryBox">No stops recorded yet.</div>
+    </div>
+  </div>
 </div>
-</div>
-<div class="sh-body">
-<div class="sec-h">Force Mode</div>
-<div class="card" id="modeList">
-<div class="row opt" data-mode="seq"><span>Lotto / 6-Number Sequence (Tap Timers)</span><span class="chk">✓</span></div>
-<div class="row opt" data-mode="single"><span>Single Decimal Number (Tap Alarms)</span><span class="chk">✓</span></div>
-<div class="row opt" data-mode="open17"><span>Digits Add Up to 17 (Tap World Clock)</span><span class="chk">✓</span></div>
-<div class="row opt" data-mode="off"><span>Off (100% Fair Stopwatch)</span><span class="chk">✓</span></div>
-</div>
-<div class="sec-h">Single Decimal Force (.00–.99)</div>
-<div class="card">
-<div class="row">
-<span>Forced Decimal Number</span>
-<input id="singleIn" type="number" min="0" max="99" placeholder="18" style="width:80px;height:36px;border:0;border-radius:8px;background:var(--sh-fill);color:#fff;font-size:16px;text-align:center;">
-</div>
-</div>
-<div class="sec-f">Secret screen input: Tap any 2 digits on 00:00.00 (1–8 on the characters, 9 on the center dots, 0 on Lap).</div>
-<div class="sec-h">Lotto / 6-Stop Sequence (00–99)</div>
-<div class="card">
-<div class="slots-grid" id="slotsGrid">
-<div class="slot-box"><span>#1</span><input class="slot-in" type="number" min="0" max="99" data-slot="0"></div>
-<div class="slot-box"><span>#2</span><input class="slot-in" type="number" min="0" max="99" data-slot="1"></div>
-<div class="slot-box"><span>#3</span><input class="slot-in" type="number" min="0" max="99" data-slot="2"></div>
-<div class="slot-box"><span>#4</span><input class="slot-in" type="number" min="0" max="99" data-slot="3"></div>
-<div class="slot-box"><span>#5</span><input class="slot-in" type="number" min="0" max="99" data-slot="4"></div>
-<div class="slot-box"><span>#6</span><input class="slot-in" type="number" min="0" max="99" data-slot="5"></div>
-</div>
-</div>
-<div class="sec-h">Left Redirect (2x/3x Tap Left Under Reset & Top-Left)</div>
-<div class="card">
-<div class="row">
-<span style="white-space:nowrap;">Left Target</span>
-<input id="leftUrlIn" class="url-in" type="text" placeholder="dice or https://...">
-<button type="button" class="pill-btn sec" id="leftDiceBtn">🎲 Dice</button>
-</div>
-<div class="row">
-<span>Open in New Safari Tab (off = App Clip)</span>
-<input type="checkbox" id="leftSafariIn" style="width:20px;height:20px;accent-color:var(--orange)">
-</div>
-</div>
-<div class="sec-h">Right Redirect (2x/3x Tap Right Under Start)</div>
-<div class="card">
-<div class="row">
-<span style="white-space:nowrap;">Right Target</span>
-<input id="customSiteUrlIn" class="url-in" type="text" placeholder="https://your-calculator-site.com or dice">
-<button type="button" class="pill-btn sec" id="rightDiceBtn">🎲 Dice</button>
-</div>
-<div class="row">
-<span>Open in New Safari Tab (off = App Clip)</span>
-<input type="checkbox" id="openInSafariIn" style="width:20px;height:20px;accent-color:var(--orange)">
-</div>
-<div class="row">
-<input id="customSiteNameIn" class="url-in" type="text" placeholder="Label (e.g. Calculator)">
-<button type="button" class="pill-btn" id="saveSiteBtn">+ Save Site</button>
-</div>
-</div>
-<div class="sec-f">Use <b>dice</b> for the built-in 3D Dice Roller, or any URL. Leave "Open in New Safari Tab" unchecked for your Calculator so it opens inside the full-screen App Clip browser.</div>
-<div class="sec-h">Saved Websites Library</div>
-<div class="card" id="savedSitesList"></div>
-<div class="sec-h">Top-Right Corner Redirect (iControl)</div>
-<div class="card">
-<div class="row">
-<span style="white-space:nowrap;">Top-Right URL</span>
-<input id="icontrolUrlIn" class="url-in" type="text" placeholder="https://icontrol-magic.onrender.com/">
-</div>
-<div class="row">
-<span>Open in New Safari Tab</span>
-<input type="checkbox" id="icontrolSafariIn" style="width:20px;height:20px;accent-color:var(--orange)">
-</div>
-</div>
-<div class="sec-f">Tap or hold the Top-Right corner to open iControl in a new Safari tab.</div>
-<div class="sec-h">Trigger Controls</div>
-<div class="card">
-<div class="row">
-<span>Apply Force On</span>
-<select id="triggerIn" style="background:var(--sh-fill);color:#fff;border:0;border-radius:8px;padding:6px 10px;font-size:15px;">
-<option value="both">Stop & Lap Presses</option>
-<option value="stop">Stop Presses Only</option>
-<option value="lap">Lap Presses Only</option>
-</select>
-</div>
-<div class="row">
-<span>Auto-Disarm After Force</span>
-<input type="checkbox" id="disarmIn" style="width:20px;height:20px;accent-color:var(--orange)">
-</div>
-</div>
-<div class="sec-h">Peek History (Spectator Times)</div>
-<div class="card">
-<div class="history-box" id="peekHistoryBox">No stops recorded yet.</div>
-</div>
-</div>
-</div>
+
 <script>
 "use strict";
 const BACKEND_URL = "https://smartcalc-backend-el0f.onrender.com";
 const STORE_KEY = "acaat.minimal.v6";
 const DEF = {
-mode: "seq",
-singleTarget: 18,
-targets: [18, 23, 27, 41, 56, 9],
-leftRedirectUrl: "dice",
-leftOpenSafari: false,
-customSiteUrl: "https://icontrol-magic.onrender.com/",
-openInSafari: false,
-savedSites: [
-{ name: "Built-in 3D Dice Roller", url: "dice", openInSafari: false },
-{ name: "iControl", url: "https://icontrol-magic.onrender.com/", openInSafari: true },
-{ name: "Stopwatch Remote", url: "https://smartcalc-backend-el0f.onrender.com/", openInSafari: true }
-],
-icontrolUrl: "https://icontrol-magic.onrender.com/",
-icontrolOpenSafari: true,
-triggerOn: "both",
-autoDisarm: false
+  mode: "seq",                        // "seq" (Lotto 6-num) | "single" (.00-.99) | "open17" (Sum 17) | "off"
+  singleTarget: 18,                   // Single number .00-.99 force
+  targets: [18, 23, 27, 41, 56, 9],   // Default 6-number Lotto sequence: 18, 23, 27, 41, 56, 09
+  scrambleLotto: false,               // false = exact #1..#6 order; true = deal in random scrambled order
+  leftRedirectUrl: "dice",            // Left black area under Reset (2x/3x tap) & Top-Left corner
+  leftOpenSafari: false,              // false = App Clip browser; true = new Safari tab
+  customSiteUrl: "https://icontrol-magic.onrender.com/", // Right black area under Start (2x/3x tap)
+  openInSafari: false,                // false = stays inside full-screen App Clip; true = new Safari tab
+  savedSites: [
+    { name: "Built-in 3D Dice Roller", url: "dice", openInSafari: false },
+    { name: "iControl", url: "https://icontrol-magic.onrender.com/", openInSafari: true },
+    { name: "Stopwatch Remote", url: "https://smartcalc-backend-el0f.onrender.com/", openInSafari: true }
+  ],
+  icontrolUrl: "https://icontrol-magic.onrender.com/",
+  icontrolOpenSafari: true,           // true = opens iControl in a new Safari tab
+  triggerOn: "both",
+  autoDisarm: false
 };
 let CFG = JSON.parse(JSON.stringify(DEF));
 function normalizeUrl(u){
-if (!u) return "";
-const s = u.trim();
-if (!s) return "";
-if (s.toLowerCase() === "dice") return "dice";
-if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(s)) return s;
-return "https://" + s;
+  if (!u) return "";
+  const s = u.trim();
+  if (!s) return "";
+  if (s.toLowerCase() === "dice") return "dice";
+  if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(s)) return s;
+  return "https://" + s;
 }
 function loadLocal(){
-try {
-const s = JSON.parse(localStorage.getItem(STORE_KEY) || localStorage.getItem("acaat.minimal.v5") || localStorage.getItem("acaat.minimal.v4") || "null");
-if (s && typeof s === "object"){
-if (["seq","single","open17","off"].includes(s.mode)) CFG.mode = s.mode;
-if (typeof s.singleTarget === "number" && !isNaN(s.singleTarget)){
-CFG.singleTarget = Math.max(0, Math.min(99, Math.floor(s.singleTarget)));
-}
-if (Array.isArray(s.targets)){
-CFG.targets = [0,1,2,3,4,5].map(i => {
-const v = s.targets[i];
-return (v === null || v === "" || v === undefined || isNaN(Number(v)))
-? null
-: Math.max(0, Math.min(99, Math.floor(Number(v))));
-});
-}
-if (typeof s.leftRedirectUrl === "string" && s.leftRedirectUrl.trim()) CFG.leftRedirectUrl = s.leftRedirectUrl.trim();
-if (typeof s.leftOpenSafari === "boolean") CFG.leftOpenSafari = s.leftOpenSafari;
-if (typeof s.customSiteUrl === "string" && s.customSiteUrl.trim()) CFG.customSiteUrl = s.customSiteUrl.trim();
-if (typeof s.rightRedirectUrl === "string" && s.rightRedirectUrl.trim()) CFG.customSiteUrl = s.rightRedirectUrl.trim();
-if (typeof s.openInSafari === "boolean") CFG.openInSafari = s.openInSafari;
-if (typeof s.rightOpenSafari === "boolean") CFG.openInSafari = s.rightOpenSafari;
-if (Array.isArray(s.savedSites) && s.savedSites.length){
-CFG.savedSites = s.savedSites.filter(x => x && typeof x.url === "string" && x.url.trim());
-}
-if (typeof s.icontrolUrl === "string" && s.icontrolUrl.trim()) CFG.icontrolUrl = s.icontrolUrl.trim();
-if (typeof s.icontrolOpenSafari === "boolean") CFG.icontrolOpenSafari = s.icontrolOpenSafari;
-if (["both","stop","lap"].includes(s.triggerOn)) CFG.triggerOn = s.triggerOn;
-if (typeof s.autoDisarm === "boolean") CFG.autoDisarm = s.autoDisarm;
-}
-} catch(e){}
+  try {
+    const s = JSON.parse(localStorage.getItem(STORE_KEY) || localStorage.getItem("acaat.minimal.v5") || localStorage.getItem("acaat.minimal.v4") || "null");
+    if (s && typeof s === "object"){
+      if (["seq","single","open17","off"].includes(s.mode)) CFG.mode = s.mode;
+      if (typeof s.singleTarget === "number" && !isNaN(s.singleTarget)){
+        CFG.singleTarget = Math.max(0, Math.min(99, Math.floor(s.singleTarget)));
+      }
+      if (Array.isArray(s.targets)){
+        CFG.targets = [0,1,2,3,4,5].map(i => {
+          const v = s.targets[i];
+          return (v === null || v === "" || v === undefined || isNaN(Number(v)))
+            ? null
+            : Math.max(0, Math.min(99, Math.floor(Number(v))));
+        });
+      }
+      if (typeof s.leftRedirectUrl === "string" && s.leftRedirectUrl.trim()) CFG.leftRedirectUrl = s.leftRedirectUrl.trim();
+      if (typeof s.leftOpenSafari === "boolean") CFG.leftOpenSafari = s.leftOpenSafari;
+      if (typeof s.customSiteUrl === "string" && s.customSiteUrl.trim()) CFG.customSiteUrl = s.customSiteUrl.trim();
+      if (typeof s.rightRedirectUrl === "string" && s.rightRedirectUrl.trim()) CFG.customSiteUrl = s.rightRedirectUrl.trim();
+      if (typeof s.openInSafari === "boolean") CFG.openInSafari = s.openInSafari;
+      if (typeof s.rightOpenSafari === "boolean") CFG.openInSafari = s.rightOpenSafari;
+      if (Array.isArray(s.savedSites) && s.savedSites.length){
+        CFG.savedSites = s.savedSites.filter(x => x && typeof x.url === "string" && x.url.trim());
+      }
+      if (typeof s.icontrolUrl === "string" && s.icontrolUrl.trim()) CFG.icontrolUrl = s.icontrolUrl.trim();
+      if (typeof s.icontrolOpenSafari === "boolean") CFG.icontrolOpenSafari = s.icontrolOpenSafari;
+      if (["both","stop","lap"].includes(s.triggerOn)) CFG.triggerOn = s.triggerOn;
+      if (typeof s.autoDisarm === "boolean") CFG.autoDisarm = s.autoDisarm;
+      if (typeof s.scrambleLotto === "boolean") CFG.scrambleLotto = s.scrambleLotto;
+    }
+  } catch(e){}
 }
 function saveLocal(){
-try { localStorage.setItem(STORE_KEY, JSON.stringify(CFG)); } catch(e){}
-syncCornerLinks();
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(CFG)); } catch(e){}
+  syncCornerLinks();
+}
+function toSafariUrl(u){
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (isIOS){
+    if (/^https:\/\//i.test(u)) return u.replace(/^https:\/\//i, "x-safari-https://");
+    if (/^http:\/\//i.test(u)) return u.replace(/^http:\/\//i, "x-safari-http://");
+  }
+  return u;
+}
+function getRightRedirectTarget(){
+  const direct = normalizeUrl(CFG.customSiteUrl);
+  if (direct) return { url: direct, openInSafari: !!CFG.openInSafari };
+  if (Array.isArray(CFG.savedSites)){
+    const match = CFG.savedSites.find(s => {
+      const u = normalizeUrl(s && s.url);
+      return u && u !== "dice" && !u.includes("icontrol-magic.onrender.com") && !u.includes("smartcalc-backend-el0f.onrender.com");
+    });
+    if (match) return { url: normalizeUrl(match.url), openInSafari: !!(CFG.openInSafari || match.openInSafari) };
+  }
+  return { url: normalizeUrl(DEF.customSiteUrl), openInSafari: !!CFG.openInSafari };
 }
 function syncCornerLinks(){
-const tl = document.getElementById("cornerTL");
-const tr = document.getElementById("cornerTR");
-if (tl){
-const lUrl = normalizeUrl(CFG.leftRedirectUrl || "dice");
-if (lUrl === "dice"){
-tl.href = "#dice";
-tl.removeAttribute("target");
-} else {
-tl.href = lUrl;
-if (CFG.leftOpenSafari){ tl.target = "_blank"; tl.rel = "noopener noreferrer"; }
-else tl.removeAttribute("target");
-}
-}
-if (tr){
-const icUrl = normalizeUrl(CFG.icontrolUrl || "https://icontrol-magic.onrender.com/");
-if (icUrl === "dice"){
-tr.href = "#dice";
-tr.removeAttribute("target");
-} else {
-tr.href = icUrl;
-if (CFG.icontrolOpenSafari !== false){ tr.target = "_blank"; tr.rel = "noopener noreferrer"; }
-else tr.removeAttribute("target");
-}
-}
+  const tl = document.getElementById("cornerTL");
+  const tr = document.getElementById("cornerTR");
+  if (tl){
+    const lUrl = normalizeUrl(CFG.leftRedirectUrl || "dice");
+    if (lUrl === "dice"){
+      tl.href = "#dice";
+      tl.removeAttribute("target");
+    } else if (CFG.leftOpenSafari){
+      tl.href = toSafariUrl(lUrl);
+      tl.target = "_blank";
+      tl.rel = "noopener noreferrer";
+    } else {
+      tl.href = lUrl;
+      tl.removeAttribute("target");
+    }
+  }
+  if (tr){
+    const icUrl = normalizeUrl(CFG.icontrolUrl || "https://icontrol-magic.onrender.com/");
+    if (icUrl === "dice"){
+      tr.href = "#dice";
+      tr.removeAttribute("target");
+    } else if (CFG.icontrolOpenSafari !== false){
+      tr.href = toSafariUrl(icUrl);
+      tr.target = "_blank";
+      tr.rel = "noopener noreferrer";
+    } else {
+      tr.href = icUrl;
+      tr.removeAttribute("target");
+    }
+  }
 }
 loadLocal();
 syncCornerLinks();
 let lastRemoteTs = 0;
 async function syncFromCloud(){
-try {
-const res = await fetch(BACKEND_URL + "/api/acaat", { cache: "no-store" });
-if (!res.ok) return;
-const data = await res.json();
-if (!data || typeof data !== "object") return;
-const ts = Number(data.updatedAt) || 1;
-if (ts > lastRemoteTs){
-lastRemoteTs = ts;
-if (["seq","single","open17","off"].includes(data.mode)) CFG.mode = data.mode;
-if (typeof data.singleTarget === "number" && !isNaN(data.singleTarget)){
-CFG.singleTarget = Math.max(0, Math.min(99, Math.floor(data.singleTarget)));
-}
-if (Array.isArray(data.targets)){
-CFG.targets = [0,1,2,3,4,5].map(i => {
-const v = data.targets[i];
-return (v === null || v === "" || v === undefined || isNaN(Number(v)))
-? null
-: Math.max(0, Math.min(99, Math.floor(Number(v))));
-});
-}
-if (typeof data.leftRedirectUrl === "string" && data.leftRedirectUrl.trim()) CFG.leftRedirectUrl = data.leftRedirectUrl.trim();
-if (typeof data.leftOpenSafari === "boolean") CFG.leftOpenSafari = data.leftOpenSafari;
-const rUrl = data.rightRedirectUrl || data.customSiteUrl;
-if (typeof rUrl === "string" && rUrl.trim()) CFG.customSiteUrl = rUrl.trim();
-if (typeof data.rightOpenSafari === "boolean") CFG.openInSafari = data.rightOpenSafari;
-else if (typeof data.openInSafari === "boolean") CFG.openInSafari = data.openInSafari;
-if (typeof data.icontrolUrl === "string" && data.icontrolUrl.trim()) CFG.icontrolUrl = data.icontrolUrl.trim();
-if (typeof data.icontrolOpenSafari === "boolean") CFG.icontrolOpenSafari = data.icontrolOpenSafari;
-if (Array.isArray(data.savedSites) && data.savedSites.length) CFG.savedSites = data.savedSites;
-if (["both","stop","lap"].includes(data.triggerOn)) CFG.triggerOn = data.triggerOn;
-if (typeof data.autoDisarm === "boolean") CFG.autoDisarm = data.autoDisarm;
-S.seqIndex = 0;
-reshuffleLottoTargets();
-S.disarmed = (CFG.mode === "off");
-saveLocal();
-syncVisualIndicators();
-}
-} catch(e){}
+  try {
+    const res = await fetch(BACKEND_URL + "/api/acaat", { cache: "no-store" });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data || typeof data !== "object") return;
+    const ts = Number(data.updatedAt) || 1;
+    if (ts > lastRemoteTs){
+      lastRemoteTs = ts;
+      if (["seq","single","open17","off"].includes(data.mode)) CFG.mode = data.mode;
+      if (typeof data.singleTarget === "number" && !isNaN(data.singleTarget)){
+        CFG.singleTarget = Math.max(0, Math.min(99, Math.floor(data.singleTarget)));
+      }
+      if (Array.isArray(data.targets)){
+        CFG.targets = [0,1,2,3,4,5].map(i => {
+          const v = data.targets[i];
+          return (v === null || v === "" || v === undefined || isNaN(Number(v)))
+            ? null
+            : Math.max(0, Math.min(99, Math.floor(Number(v))));
+        });
+      }
+      if (typeof data.leftRedirectUrl === "string" && data.leftRedirectUrl.trim()) CFG.leftRedirectUrl = data.leftRedirectUrl.trim();
+      if (typeof data.leftOpenSafari === "boolean") CFG.leftOpenSafari = data.leftOpenSafari;
+      const rUrl = data.rightRedirectUrl || data.customSiteUrl;
+      if (typeof rUrl === "string" && rUrl.trim()) CFG.customSiteUrl = rUrl.trim();
+      if (typeof data.rightOpenSafari === "boolean") CFG.openInSafari = data.rightOpenSafari;
+      else if (typeof data.openInSafari === "boolean") CFG.openInSafari = data.openInSafari;
+      if (typeof data.icontrolUrl === "string" && data.icontrolUrl.trim()) CFG.icontrolUrl = data.icontrolUrl.trim();
+      if (typeof data.icontrolOpenSafari === "boolean") CFG.icontrolOpenSafari = data.icontrolOpenSafari;
+      if (Array.isArray(data.savedSites) && data.savedSites.length) CFG.savedSites = data.savedSites;
+      if (["both","stop","lap"].includes(data.triggerOn)) CFG.triggerOn = data.triggerOn;
+      if (typeof data.autoDisarm === "boolean") CFG.autoDisarm = data.autoDisarm;
+      if (typeof data.scrambleLotto === "boolean") CFG.scrambleLotto = data.scrambleLotto;
+      S.seqIndex = 0;
+      reshuffleLottoTargets();
+      S.disarmed = (CFG.mode === "off");
+      saveLocal();
+      syncVisualIndicators();
+    }
+  } catch(e){}
 }
 syncFromCloud();
 setInterval(() => {
-if (!S.running) syncFromCloud();
+  if (!S.running) syncFromCloud();
 }, 3500);
 async function pushPeekTelemetry(entry){
-try {
-await fetch(BACKEND_URL + "/api/acaat/peek", {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify(entry)
-});
-} catch(e){}
+  try {
+    await fetch(BACKEND_URL + "/api/acaat/peek", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(entry)
+    });
+  } catch(e){}
 }
+/* Execute any redirect ("dice" or URL) either in a new Safari tab or inside the App Clip browser */
 function executeRedirect(rawTarget, openInSafari){
-const u = normalizeUrl(rawTarget);
-if (!u) return;
-if (u === "dice"){
-openDiceApp();
-return;
+  const u = normalizeUrl(rawTarget);
+  if (!u) return;
+  if (u === "dice"){
+    openDiceApp();
+    return;
+  }
+  pulseLockDot(300);
+  if (openInSafari){
+    const safUrl = toSafariUrl(u);
+    if (safUrl !== u){
+      window.location.href = safUrl;
+    } else {
+      const a = document.createElement("a");
+      a.href = u;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+  } else {
+    window.location.href = u;
+  }
 }
-pulseLockDot(300);
-if (openInSafari){
-const a = document.createElement("a");
-a.href = u;
-a.target = "_blank";
-a.rel = "noopener noreferrer";
-document.body.appendChild(a);
-a.click();
-a.remove();
-} else {
-window.location.href = u;
-}
-}
+/* ---------- Runtime Stopwatch State ---------- */
 const S = {
-running: false,
-startPerf: 0,
-elapsedBefore: 0,
-lapStartElapsed: 0,
-realLapStartPerf: 0,
-displayedMs: 0,
-laps: [],
-seqIndex: 0,
-scrambledTargets: [],
-scrambleIndex: 0,
-disarmed: false,
-covertBuffer: [],
-emergenceList: [],
-peekLog: [],
-rafId: null
+  running: false,
+  startPerf: 0,
+  elapsedBefore: 0,
+  lapStartElapsed: 0,
+  realLapStartPerf: 0,
+  displayedMs: 0,
+  laps: [],
+  seqIndex: 0,
+  scrambledTargets: [],
+  scrambleIndex: 0,
+  disarmed: false,
+  covertBuffer: [],
+  emergenceList: [],
+  peekLog: [],
+  rafId: null
 };
 const elReadout = document.getElementById("timeReadout");
 const elLapBtn = document.getElementById("lapBtn");
@@ -516,440 +606,452 @@ const elPkMain = document.getElementById("pkMain");
 const elPkSub = document.getElementById("pkSub");
 function p2(n){ return String(Math.floor(Math.max(0, n))).padStart(2, "0"); }
 function formatMs(ms){
-const totalCs = Math.floor(Math.max(0, ms) / 10);
-const cs = totalCs % 100;
-const totalSec = Math.floor(totalCs / 100);
-const sec = totalSec % 60;
-const min = Math.floor(totalSec / 60);
-return `${p2(min)}:${p2(sec)}.${p2(cs)}`;
+  const totalCs = Math.floor(Math.max(0, ms) / 10);
+  const cs = totalCs % 100;
+  const totalSec = Math.floor(totalCs / 100);
+  const sec = totalSec % 60;
+  const min = Math.floor(totalSec / 60);
+  return `${p2(min)}:${p2(sec)}.${p2(cs)}`;
 }
 function timeToLargeInt(ms){
-const digitsOnly = formatMs(ms).replace(/[^0-9]/g, "");
-return parseInt(digitsOnly, 10) || 0;
+  const digitsOnly = formatMs(ms).replace(/[^0-9]/g, "");
+  return parseInt(digitsOnly, 10) || 0;
 }
 function renderZeroReadout(){
-const chars = ["0","0",":","0","0",".","0","0"];
-elReadout.innerHTML = chars.map((ch, idx) =>
-`<span class="ch" data-digit="${idx + 1}">${ch}</span>`
-).join("");
+  const chars = ["0","0",":","0","0",".","0","0"];
+  elReadout.innerHTML = chars.map((ch, idx) =>
+    `<span class="ch" data-digit="${idx + 1}">${ch}</span>`
+  ).join("");
 }
 renderZeroReadout();
 function sumOfDigits(str){
-let sum = 0;
-for (let i = 0; i < str.length; i++){
-const c = str.charCodeAt(i);
-if (c >= 48 && c <= 57) sum += (c - 48);
-}
-return sum;
+  let sum = 0;
+  for (let i = 0; i < str.length; i++){
+    const c = str.charCodeAt(i);
+    if (c >= 48 && c <= 57) sum += (c - 48);
+  }
+  return sum;
 }
 function activeTargets(){
-return CFG.targets.filter(v => v !== null && !isNaN(v));
+  return CFG.targets.filter(v => v !== null && !isNaN(v));
 }
 function reshuffleLottoTargets(){
-const list = activeTargets().slice();
-if (list.length <= 1){
-S.scrambledTargets = list;
-S.scrambleIndex = 0;
-return;
-}
-const origKey = list.join(",");
-for (let attempt = 0; attempt < 6; attempt++){
-for (let i = list.length - 1; i > 0; i--){
-const j = Math.floor(Math.random() * (i + 1));
-const tmp = list[i]; list[i] = list[j]; list[j] = tmp;
-}
-if (list.join(",") !== origKey) break;
-}
-S.scrambledTargets = list;
-S.scrambleIndex = 0;
+  const list = activeTargets().slice();
+  if (list.length <= 1){
+    S.scrambledTargets = list;
+    S.scrambleIndex = 0;
+    return;
+  }
+  const origKey = list.join(",");
+  for (let attempt = 0; attempt < 6; attempt++){
+    for (let i = list.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = list[i]; list[i] = list[j]; list[j] = tmp;
+    }
+    if (list.join(",") !== origKey) break;
+  }
+  S.scrambledTargets = list;
+  S.scrambleIndex = 0;
 }
 reshuffleLottoTargets();
 function syncVisualIndicators(){
-const isOff = S.disarmed || CFG.mode === "off";
-if (elLeftDot) elLeftDot.style.opacity = isOff ? "0.68" : "1";
-const singleOn = !isOff && CFG.mode === "single";
-elRightDot.classList.toggle("dim", !singleOn);
-elOrangeDot.classList.toggle("on", !isOff && CFG.mode === "open17");
+  const isOff = S.disarmed || CFG.mode === "off";
+  if (elLeftDot) elLeftDot.style.opacity = isOff ? "0.68" : "1";
+  const singleOn = !isOff && CFG.mode === "single";
+  elRightDot.classList.toggle("dim", !singleOn);
+  elOrangeDot.classList.toggle("on", !isOff && CFG.mode === "open17");
 }
 syncVisualIndicators();
 let lockDotTimer = null;
 function pulseLockDot(durationMs = 550){
-clearTimeout(lockDotTimer);
-elLockDot.classList.add("on");
-lockDotTimer = setTimeout(() => elLockDot.classList.remove("on"), durationMs);
+  clearTimeout(lockDotTimer);
+  elLockDot.classList.add("on");
+  lockDotTimer = setTimeout(() => elLockDot.classList.remove("on"), durationMs);
 }
 function animatePress(el){
-if (!el) return;
-el.classList.add("pressed");
-setTimeout(() => el.classList.remove("pressed"), 150);
+  if (!el) return;
+  el.classList.add("pressed");
+  setTimeout(() => el.classList.remove("pressed"), 150);
 }
+/* ---------- Covert Direct Screen Input (1–8 on 00:00.00, 9 on Center Dots, 0 on Lap) ---------- */
 let covertResetTimer = null;
 function pushCovertDigit(d, pressedEl){
-if (S.running || S.displayedMs > 0) return;
-if (kpOverlay.classList.contains("open")) return;
-animatePress(pressedEl);
-clearTimeout(covertResetTimer);
-S.covertBuffer.push(String(d));
-if (S.covertBuffer.length >= 2){
-const twoDigit = parseInt(S.covertBuffer.slice(0, 2).join(""), 10) || 0;
-S.covertBuffer = [];
-CFG.singleTarget = Math.max(0, Math.min(99, twoDigit));
-CFG.mode = "single";
-S.disarmed = false;
-saveLocal();
-syncVisualIndicators();
-pulseLockDot(900);
-} else {
-pulseLockDot(260);
-covertResetTimer = setTimeout(() => { S.covertBuffer = []; }, 4500);
-}
+  if (S.running || S.displayedMs > 0) return;
+  if (kpOverlay.classList.contains("open")) return;
+  animatePress(pressedEl);
+  clearTimeout(covertResetTimer);
+  S.covertBuffer.push(String(d));
+  if (S.covertBuffer.length >= 2){
+    const twoDigit = parseInt(S.covertBuffer.slice(0, 2).join(""), 10) || 0;
+    S.covertBuffer = [];
+    CFG.singleTarget = Math.max(0, Math.min(99, twoDigit));
+    CFG.mode = "single";
+    S.disarmed = false;
+    saveLocal();
+    syncVisualIndicators();
+    pulseLockDot(900);
+  } else {
+    pulseLockDot(260);
+    covertResetTimer = setTimeout(() => { S.covertBuffer = []; }, 4500);
+  }
 }
 elReadout.addEventListener("pointerdown", e => {
-if (S.running || S.displayedMs > 0) return;
-e.preventDefault();
-let span = e.target.closest(".ch");
-if (!span){
-const spans = Array.from(elReadout.querySelectorAll(".ch"));
-let bestDist = Infinity;
-for (const s of spans){
-const r = s.getBoundingClientRect();
-const cx = (r.left + r.right) / 2;
-const dist = Math.abs(e.clientX - cx);
-if (dist < bestDist){ bestDist = dist; span = s; }
-}
-}
-if (!span) return;
-pushCovertDigit(span.dataset.digit, span);
+  if (S.running || S.displayedMs > 0) return;
+  e.preventDefault();
+  let span = e.target.closest(".ch");
+  if (!span){
+    const spans = Array.from(elReadout.querySelectorAll(".ch"));
+    let bestDist = Infinity;
+    for (const s of spans){
+      const r = s.getBoundingClientRect();
+      const cx = (r.left + r.right) / 2;
+      const dist = Math.abs(e.clientX - cx);
+      if (dist < bestDist){ bestDist = dist; span = s; }
+    }
+  }
+  if (!span) return;
+  pushCovertDigit(span.dataset.digit, span);
 });
+/* ---------- Force Calculation Engine ---------- */
 function forceDigitSum17Ms(realMs){
-const totalCs = Math.floor(realMs / 10);
-const baseSecTotal = Math.floor(totalCs / 100);
-let bestTotalCs = totalCs;
-let bestDiff = 999999;
-for (let deltaSec = 0; deltaSec <= 2; deltaSec++){
-for (const dir of [0, 1, -1]){
-const candSecTotal = Math.max(0, baseSecTotal + dir * deltaSec);
-const min = Math.floor(candSecTotal / 60);
-const sec = candSecTotal % 60;
-const prefixSum = sumOfDigits(p2(min) + p2(sec));
-const neededCsSum = 17 - prefixSum;
-if (neededCsSum < 0 || neededCsSum > 18) continue;
-for (let cs = 0; cs < 100; cs++){
-const d1 = Math.floor(cs / 10), d2 = cs % 10;
-if (d1 + d2 === neededCsSum){
-const candTotalCs = candSecTotal * 100 + cs;
-const diff = Math.abs(candTotalCs - totalCs);
-if (diff < bestDiff){
-bestDiff = diff;
-bestTotalCs = candTotalCs;
-}
-}
-}
-if (bestDiff < 100) break;
-}
-if (bestDiff < 100) break;
-}
-return bestTotalCs * 10;
+  const totalCs = Math.floor(realMs / 10);
+  const baseSecTotal = Math.floor(totalCs / 100);
+  let bestTotalCs = totalCs;
+  let bestDiff = 999999;
+  for (let deltaSec = 0; deltaSec <= 2; deltaSec++){
+    for (const dir of [0, 1, -1]){
+      const candSecTotal = Math.max(0, baseSecTotal + dir * deltaSec);
+      const min = Math.floor(candSecTotal / 60);
+      const sec = candSecTotal % 60;
+      const prefixSum = sumOfDigits(p2(min) + p2(sec));
+      const neededCsSum = 17 - prefixSum;
+      if (neededCsSum < 0 || neededCsSum > 18) continue;
+      for (let cs = 0; cs < 100; cs++){
+        const d1 = Math.floor(cs / 10), d2 = cs % 10;
+        if (d1 + d2 === neededCsSum){
+          const candTotalCs = candSecTotal * 100 + cs;
+          const diff = Math.abs(candTotalCs - totalCs);
+          if (diff < bestDiff){
+            bestDiff = diff;
+            bestTotalCs = candTotalCs;
+          }
+        }
+      }
+      if (bestDiff < 100) break;
+    }
+    if (bestDiff < 100) break;
+  }
+  return bestTotalCs * 10;
 }
 function computeForcedMs(realMs, isLap = false){
-if (S.disarmed || CFG.mode === "off") return realMs;
-if (CFG.mode === "open17") return forceDigitSum17Ms(realMs);
-const totalCs = Math.floor(Math.max(0, realMs) / 10);
-let realSec = Math.floor(totalCs / 100) % 60;
-const minPartCs = Math.floor(totalCs / 6000) * 6000;
-if (CFG.mode === "single"){
-const forcedCs = ((CFG.singleTarget % 100) + 100) % 100;
-if (CFG.autoDisarm) S.disarmed = true;
-syncVisualIndicators();
-return (minPartCs + realSec * 100 + forcedCs) * 10;
-}
-const list = activeTargets();
-if (!list.length) return realMs;
-let targetVal;
-if (isLap){
-targetVal = list[S.seqIndex % list.length];
-S.seqIndex++;
-if (CFG.autoDisarm && S.seqIndex >= list.length) S.disarmed = true;
-} else {
-if (!S.scrambledTargets || S.scrambledTargets.length !== list.length || S.scrambleIndex >= S.scrambledTargets.length){
-reshuffleLottoTargets();
-}
-targetVal = S.scrambledTargets[S.scrambleIndex % S.scrambledTargets.length];
-S.scrambleIndex++;
-if (CFG.autoDisarm && S.scrambleIndex >= S.scrambledTargets.length) S.disarmed = true;
-}
-syncVisualIndicators();
-const forcedCs = ((targetVal % 100) + 100) % 100;
-if (minPartCs === 0 && realSec === 0) realSec = 1;
-return (minPartCs + realSec * 100 + forcedCs) * 10;
+  if (S.disarmed || CFG.mode === "off") return realMs;
+  if (CFG.mode === "open17") return forceDigitSum17Ms(realMs);
+  const totalCs = Math.floor(Math.max(0, realMs) / 10);
+  let realSec = Math.floor(totalCs / 100) % 60;
+  const minPartCs = Math.floor(totalCs / 6000) * 6000;
+  if (CFG.mode === "single"){
+    const forcedCs = ((CFG.singleTarget % 100) + 100) % 100;
+    if (CFG.autoDisarm) S.disarmed = true;
+    syncVisualIndicators();
+    return (minPartCs + realSec * 100 + forcedCs) * 10;
+  }
+  const list = activeTargets();
+  if (!list.length) return realMs;
+  let targetVal;
+  if (!CFG.scrambleLotto){
+    targetVal = list[S.seqIndex % list.length];
+    S.seqIndex++;
+    if (CFG.autoDisarm && S.seqIndex >= list.length) S.disarmed = true;
+  } else {
+    if (!S.scrambledTargets || S.scrambledTargets.length !== list.length || S.scrambleIndex >= S.scrambledTargets.length){
+      reshuffleLottoTargets();
+    }
+    targetVal = S.scrambledTargets[S.scrambleIndex % S.scrambledTargets.length];
+    S.scrambleIndex++;
+    if (CFG.autoDisarm && S.scrambleIndex >= S.scrambledTargets.length) S.disarmed = true;
+  }
+  syncVisualIndicators();
+  const forcedCs = ((targetVal % 100) + 100) % 100;
+  if (minPartCs === 0 && realSec === 0) realSec = 1;
+  return (minPartCs + realSec * 100 + forcedCs) * 10;
 }
 function recordPeek(type, shownMs){
-const sCs = Math.floor(shownMs / 10) % 100;
-const sSec = Math.floor(shownMs / 1000) % 60;
-const fmt = formatMs(shownMs);
-const entry = {
-type,
-realFormatted: fmt,
-shownFormatted: fmt,
-largeInt: timeToLargeInt(shownMs),
-realSec: sSec,
-realCs: sCs,
-sec: sSec,
-cs: sCs,
-at: new Date().toLocaleTimeString()
-};
-S.peekLog.unshift(entry);
-if (S.peekLog.length > 15) S.peekLog.pop();
-pushPeekTelemetry(entry);
+  const sCs = Math.floor(shownMs / 10) % 100;
+  const sSec = Math.floor(shownMs / 1000) % 60;
+  const fmt = formatMs(shownMs);
+  const entry = {
+    type,
+    realFormatted: fmt,
+    shownFormatted: fmt,
+    largeInt: timeToLargeInt(shownMs),
+    realSec: sSec,
+    realCs: sCs,
+    sec: sSec,
+    cs: sCs,
+    at: new Date().toLocaleTimeString()
+  };
+  S.peekLog.unshift(entry);
+  if (S.peekLog.length > 15) S.peekLog.pop();
+  pushPeekTelemetry(entry);
 }
 function tick(){
-if (!S.running) return;
-const now = performance.now();
-const splitMs = Math.max(0, now - S.realLapStartPerf);
-const totalMs = S.lapStartElapsed + splitMs;
-S.displayedMs = totalMs;
-elReadout.textContent = formatMs(totalMs);
-const liveRow = elLapsWrap.querySelector(".lap-row.live .lap-time");
-if (liveRow) liveRow.textContent = formatMs(splitMs);
-S.rafId = requestAnimationFrame(tick);
+  if (!S.running) return;
+  const now = performance.now();
+  const splitMs = Math.max(0, now - S.realLapStartPerf);
+  const totalMs = S.lapStartElapsed + splitMs;
+  S.displayedMs = totalMs;
+  elReadout.textContent = formatMs(totalMs);
+  const liveRow = elLapsWrap.querySelector(".lap-row.live .lap-time");
+  if (liveRow) liveRow.textContent = formatMs(splitMs);
+  S.rafId = requestAnimationFrame(tick);
 }
 function renderLaps(){
-const currentSplit = Math.max(0, S.displayedMs - S.lapStartElapsed);
-let html = "";
-const showLiveRow = S.running || (S.displayedMs > 0 && S.laps.length === 0);
-if (showLiveRow){
-const liveNum = S.laps.length + 1;
-html += `<div class="lap-row live"><span>Lap ${liveNum}</span><span class="lap-time">${formatMs(currentSplit)}</span></div>`;
-}
-let minIdx = -1, maxIdx = -1;
-if (S.laps.length >= 2){
-let minV = Infinity, maxV = -Infinity;
-S.laps.forEach((l, idx) => {
-if (l.splitMs < minV){ minV = l.splitMs; minIdx = idx; }
-if (l.splitMs > maxV){ maxV = l.splitMs; maxIdx = idx; }
-});
-}
-for (let i = S.laps.length - 1; i >= 0; i--){
-const l = S.laps[i];
-const cls = (i === minIdx) ? " best" : (i === maxIdx) ? " worst" : "";
-html += `<div class="lap-row${cls}"><span>Lap ${l.num}</span><span>${formatMs(l.splitMs)}</span></div>`;
-}
-elLapsWrap.innerHTML = html;
+  const currentSplit = Math.max(0, S.displayedMs - S.lapStartElapsed);
+  let html = "";
+  const showLiveRow = S.running || (S.displayedMs > 0 && S.laps.length === 0);
+  if (showLiveRow){
+    const liveNum = S.laps.length + 1;
+    html += `<div class="lap-row live"><span>Lap ${liveNum}</span><span class="lap-time">${formatMs(currentSplit)}</span></div>`;
+  }
+  let minIdx = -1, maxIdx = -1;
+  if (S.laps.length >= 2){
+    let minV = Infinity, maxV = -Infinity;
+    S.laps.forEach((l, idx) => {
+      if (l.splitMs < minV){ minV = l.splitMs; minIdx = idx; }
+      if (l.splitMs > maxV){ maxV = l.splitMs; maxIdx = idx; }
+    });
+  }
+  for (let i = S.laps.length - 1; i >= 0; i--){
+    const l = S.laps[i];
+    const cls = (i === minIdx) ? " best" : (i === maxIdx) ? " worst" : "";
+    html += `<div class="lap-row${cls}"><span>Lap ${l.num}</span><span>${formatMs(l.splitMs)}</span></div>`;
+  }
+  elLapsWrap.innerHTML = html;
 }
 function handleStartStop(){
-if (kpOverlay.classList.contains("open")) return;
-S.covertBuffer = [];
-if (!S.running){
-const now = performance.now();
-S.running = true;
-S.startPerf = now;
-const priorUnlappedMs = Math.max(0, S.displayedMs - S.lapStartElapsed);
-S.realLapStartPerf = now - priorUnlappedMs;
-elStartBtn.textContent = "Stop";
-elStartBtn.className = "sw-btn stop";
-elLapBtn.textContent = "Lap";
-elLapBtn.className = "sw-btn";
-renderLaps();
-S.rafId = requestAnimationFrame(tick);
-} else {
-cancelAnimationFrame(S.rafId);
-S.running = false;
-const now = performance.now();
-const unlappedSplitMs = Math.max(0, now - S.realLapStartPerf);
-const realTotalMs = S.lapStartElapsed + unlappedSplitMs;
-let shownTotalMs = realTotalMs;
-if (CFG.triggerOn === "both" || CFG.triggerOn === "stop"){
-if (S.laps.length > 0 && CFG.mode === "seq" && S.seqIndex >= activeTargets().length){
-shownTotalMs = S.lapStartElapsed;
-} else {
-shownTotalMs = computeForcedMs(realTotalMs, false);
-}
-}
-S.elapsedBefore = shownTotalMs;
-S.displayedMs = shownTotalMs;
-elReadout.textContent = formatMs(shownTotalMs);
-elStartBtn.textContent = "Start";
-elStartBtn.className = "sw-btn start";
-elLapBtn.textContent = "Reset";
-elLapBtn.className = "sw-btn";
-recordPeek("STOP", shownTotalMs);
-renderLaps();
-}
+  if (kpOverlay.classList.contains("open")) return;
+  S.covertBuffer = [];
+  if (!S.running){
+    const now = performance.now();
+    S.running = true;
+    S.startPerf = now;
+    const priorUnlappedMs = Math.max(0, S.displayedMs - S.lapStartElapsed);
+    S.realLapStartPerf = now - priorUnlappedMs;
+    elStartBtn.textContent = "Stop";
+    elStartBtn.className = "sw-btn stop";
+    elLapBtn.textContent = "Lap";
+    elLapBtn.className = "sw-btn";
+    renderLaps();
+    S.rafId = requestAnimationFrame(tick);
+  } else {
+    cancelAnimationFrame(S.rafId);
+    S.running = false;
+    const now = performance.now();
+    const unlappedSplitMs = Math.max(0, now - S.realLapStartPerf);
+    const realTotalMs = S.lapStartElapsed + unlappedSplitMs;
+    let shownTotalMs = realTotalMs;
+    if (CFG.triggerOn === "both" || CFG.triggerOn === "stop"){
+      if (S.laps.length > 0 && CFG.mode === "seq" && S.seqIndex >= activeTargets().length){
+        shownTotalMs = S.lapStartElapsed;
+      } else {
+        shownTotalMs = computeForcedMs(realTotalMs, false);
+      }
+    }
+    S.elapsedBefore = shownTotalMs;
+    S.displayedMs = shownTotalMs;
+    elReadout.textContent = formatMs(shownTotalMs);
+    elStartBtn.textContent = "Start";
+    elStartBtn.className = "sw-btn start";
+    elLapBtn.textContent = "Reset";
+    elLapBtn.className = "sw-btn";
+    recordPeek("STOP", shownTotalMs);
+    renderLaps();
+  }
 }
 function handleLapReset(){
-if (kpOverlay.classList.contains("open")) return;
-if (S.running){
-const now = performance.now();
-const realSplitMs = Math.max(0, now - S.realLapStartPerf);
-let shownSplitMs = realSplitMs;
-if (CFG.triggerOn === "both" || CFG.triggerOn === "lap"){
-shownSplitMs = computeForcedMs(realSplitMs, true);
-}
-const shownTotalMs = S.lapStartElapsed + shownSplitMs;
-S.elapsedBefore = shownTotalMs - (now - S.startPerf);
-S.lapStartElapsed = shownTotalMs;
-S.realLapStartPerf = now;
-S.displayedMs = shownTotalMs;
-elReadout.textContent = formatMs(shownTotalMs);
-S.laps.push({
-num: S.laps.length + 1,
-splitMs: shownSplitMs,
-totalMs: shownTotalMs
-});
-recordPeek(`LAP ${S.laps.length}`, shownSplitMs);
-renderLaps();
-} else if (S.displayedMs > 0){
-const stoppedMs = S.displayedMs;
-const item = {
-formatted: formatMs(stoppedMs),
-largeInt: timeToLargeInt(stoppedMs),
-ms: stoppedMs
-};
-if (S.emergenceList.length >= 3) S.emergenceList = [];
-S.emergenceList.push(item);
-const totalSum = S.emergenceList.reduce((acc, it) => acc + it.largeInt, 0);
-const slotsStr = S.emergenceList.map(it => it.formatted).join(" — ");
-const sSec = Math.floor(stoppedMs / 1000) % 60;
-const sCs = Math.floor(stoppedMs / 10) % 100;
-pushPeekTelemetry({
-type: `RESET #${S.emergenceList.length} (SUM: ${totalSum})`,
-realFormatted: slotsStr,
-shownFormatted: `${item.formatted} (${item.largeInt})`,
-largeInt: item.largeInt,
-emergenceSum: totalSum,
-emergenceSlots: slotsStr,
-realSec: sSec,
-realCs: sCs,
-sec: sSec,
-cs: sCs,
-at: new Date().toLocaleTimeString()
-});
-S.elapsedBefore = 0;
-S.lapStartElapsed = 0;
-S.realLapStartPerf = 0;
-S.displayedMs = 0;
-S.laps = [];
-S.covertBuffer = [];
-renderZeroReadout();
-elLapBtn.textContent = "Lap";
-elLapBtn.className = "sw-btn disabled";
-renderLaps();
-} else {
-pushCovertDigit("0", elLapBtn);
-}
+  if (kpOverlay.classList.contains("open")) return;
+  if (S.running){
+    const now = performance.now();
+    const realSplitMs = Math.max(0, now - S.realLapStartPerf);
+    let shownSplitMs = realSplitMs;
+    if (CFG.triggerOn === "both" || CFG.triggerOn === "lap"){
+      shownSplitMs = computeForcedMs(realSplitMs, true);
+    }
+    const shownTotalMs = S.lapStartElapsed + shownSplitMs;
+    S.elapsedBefore = shownTotalMs - (now - S.startPerf);
+    S.lapStartElapsed = shownTotalMs;
+    S.realLapStartPerf = now;
+    S.displayedMs = shownTotalMs;
+    elReadout.textContent = formatMs(shownTotalMs);
+    S.laps.push({
+      num: S.laps.length + 1,
+      splitMs: shownSplitMs,
+      totalMs: shownTotalMs
+    });
+    recordPeek(`LAP ${S.laps.length}`, shownSplitMs);
+    renderLaps();
+  } else if (S.displayedMs > 0){
+    const stoppedMs = S.displayedMs;
+    const item = {
+      formatted: formatMs(stoppedMs),
+      largeInt: timeToLargeInt(stoppedMs),
+      ms: stoppedMs
+    };
+    if (S.emergenceList.length >= 3) S.emergenceList = [];
+    S.emergenceList.push(item);
+    const totalSum = S.emergenceList.reduce((acc, it) => acc + it.largeInt, 0);
+    const slotsStr = S.emergenceList.map(it => it.formatted).join(" — ");
+    const sSec = Math.floor(stoppedMs / 1000) % 60;
+    const sCs = Math.floor(stoppedMs / 10) % 100;
+    pushPeekTelemetry({
+      type: `RESET #${S.emergenceList.length} (SUM: ${totalSum})`,
+      realFormatted: slotsStr,
+      shownFormatted: `${item.formatted} (${item.largeInt})`,
+      largeInt: item.largeInt,
+      emergenceSum: totalSum,
+      emergenceSlots: slotsStr,
+      realSec: sSec,
+      realCs: sCs,
+      sec: sSec,
+      cs: sCs,
+      at: new Date().toLocaleTimeString()
+    });
+    S.elapsedBefore = 0;
+    S.lapStartElapsed = 0;
+    S.realLapStartPerf = 0;
+    S.displayedMs = 0;
+    S.laps = [];
+    S.covertBuffer = [];
+    renderZeroReadout();
+    elLapBtn.textContent = "Lap";
+    elLapBtn.className = "sw-btn disabled";
+    renderLaps();
+  } else {
+    pushCovertDigit("0", elLapBtn);
+  }
 }
 elStartBtn.addEventListener("pointerdown", e => { e.preventDefault(); handleStartStop(); });
 elLapBtn.addEventListener("pointerdown", e => { e.preventDefault(); handleLapReset(); });
+/* ---------- Built-in 3D Die Roller (Hides App Clip) ---------- */
 const diceApp = document.getElementById("diceApp");
 const dieCube = document.getElementById("dieCube");
 const diePips = Array.from(dieCube.querySelectorAll(".pip"));
 const PIP_MAP = {
-1: [4],
-2: [2, 6],
-3: [2, 4, 6],
-4: [0, 2, 6, 8],
-5: [0, 2, 4, 6, 8],
-6: [0, 2, 3, 5, 6, 8]
+  1: [4],
+  2: [2, 6],
+  3: [2, 4, 6],
+  4: [0, 2, 6, 8],
+  5: [0, 2, 4, 6, 8],
+  6: [0, 2, 3, 5, 6, 8]
 };
 let rolling = false;
 function showDieFace(face){
-const active = new Set(PIP_MAP[face] || PIP_MAP[5]);
-diePips.forEach((p, idx) => p.classList.toggle("on", active.has(idx)));
+  const active = new Set(PIP_MAP[face] || PIP_MAP[5]);
+  diePips.forEach((p, idx) => p.classList.toggle("on", active.has(idx)));
 }
 function rollDie(){
-if (rolling) return;
-rolling = true;
-dieCube.classList.remove("rolling");
-void dieCube.offsetWidth;
-dieCube.classList.add("rolling");
-let ticks = 0;
-const shuffle = setInterval(() => {
-ticks++;
-showDieFace(1 + Math.floor(Math.random() * 6));
-if (ticks >= 6){
-clearInterval(shuffle);
-showDieFace(1 + Math.floor(Math.random() * 6));
-rolling = false;
-}
-}, 75);
+  if (rolling) return;
+  rolling = true;
+  dieCube.classList.remove("rolling");
+  void dieCube.offsetWidth;
+  dieCube.classList.add("rolling");
+  let ticks = 0;
+  const shuffle = setInterval(() => {
+    ticks++;
+    showDieFace(1 + Math.floor(Math.random() * 6));
+    if (ticks >= 6){
+      clearInterval(shuffle);
+      showDieFace(1 + Math.floor(Math.random() * 6));
+      rolling = false;
+    }
+  }, 75);
 }
 function openDiceApp(){
-showDieFace(1 + Math.floor(Math.random() * 6));
-diceApp.classList.add("open");
-diceApp.setAttribute("aria-hidden", "false");
+  showDieFace(1 + Math.floor(Math.random() * 6));
+  diceApp.classList.add("open");
+  diceApp.setAttribute("aria-hidden", "false");
 }
 function closeDiceApp(){
-diceApp.classList.remove("open");
-diceApp.setAttribute("aria-hidden", "true");
+  diceApp.classList.remove("open");
+  diceApp.setAttribute("aria-hidden", "true");
 }
 document.getElementById("dieStage").addEventListener("click", rollDie);
+/* Hold any of the 4 corners for 500ms to return from the Dice Roller to the Stopwatch */
 diceApp.querySelectorAll(".die-corner").forEach(corner => {
-let holdT = null;
-const start = e => {
-e.stopPropagation();
-clearTimeout(holdT);
-holdT = setTimeout(() => { holdT = null; closeDiceApp(); }, 500);
-};
-const cancel = () => { clearTimeout(holdT); holdT = null; };
-corner.addEventListener("pointerdown", start);
-corner.addEventListener("pointerup", cancel);
-corner.addEventListener("pointercancel", cancel);
-corner.addEventListener("pointerleave", cancel);
+  let holdT = null;
+  const start = e => {
+    e.stopPropagation();
+    clearTimeout(holdT);
+    holdT = setTimeout(() => { holdT = null; closeDiceApp(); }, 500);
+  };
+  const cancel = () => { clearTimeout(holdT); holdT = null; };
+  corner.addEventListener("pointerdown", start);
+  corner.addEventListener("pointerup", cancel);
+  corner.addEventListener("pointercancel", cancel);
+  corner.addEventListener("pointerleave", cancel);
 });
+/* ---------- Lower Black Area (Under Reset & Start):
+   - Double/Triple-Tap LEFT Side = Execute Left Redirect (Default: Dice Roller)
+   - Double/Triple-Tap RIGHT Side = Execute Right Redirect (Default: Calculator / Saved Website) ---------- */
 (() => {
-const lowerArea = document.getElementById("lowerArea");
-let lastLeftTap = 0;
-let lastRightTap = 0;
-lowerArea.addEventListener("click", e => {
-const now = Date.now();
-const isRightSide = e.clientX >= (window.innerWidth / 2);
-if (!isRightSide){
-lastRightTap = 0;
-if (now - lastLeftTap < 360){
-lastLeftTap = 0;
-executeRedirect(CFG.leftRedirectUrl || "dice", !!CFG.leftOpenSafari);
-} else {
-lastLeftTap = now;
-}
-} else {
-lastLeftTap = 0;
-if (now - lastRightTap < 360){
-lastRightTap = 0;
-executeRedirect(CFG.customSiteUrl, !!CFG.openInSafari);
-} else {
-lastRightTap = now;
-}
-}
-});
+  const lowerArea = document.getElementById("lowerArea");
+  let lastLeftTap = 0;
+  let lastRightTap = 0;
+  lowerArea.addEventListener("click", e => {
+    const now = Date.now();
+    const isRightSide = e.clientX >= (window.innerWidth / 2);
+    if (!isRightSide){
+      lastRightTap = 0;
+      if (now - lastLeftTap < 360){
+        lastLeftTap = 0;
+        executeRedirect(CFG.leftRedirectUrl || "dice", !!CFG.leftOpenSafari);
+      } else {
+        lastLeftTap = now;
+      }
+    } else {
+      lastLeftTap = 0;
+      if (now - lastRightTap < 360){
+        lastRightTap = 0;
+        const target = getRightRedirectTarget();
+        executeRedirect(target.url, target.openInSafari);
+      } else {
+        lastRightTap = now;
+      }
+    }
+  });
 })();
+/* ---------- Upper Zone Triple-Tap: Reset / Toggle Back to Default ---------- */
 (() => {
-const upperZone = document.getElementById("upperZone");
-let taps = 0, tapTimer = null;
-upperZone.addEventListener("pointerdown", () => {
-taps++;
-clearTimeout(tapTimer);
-tapTimer = setTimeout(() => {
-if (taps >= 3){
-if (CFG.mode !== "seq" || S.disarmed){
-CFG.mode = DEF.mode;
-CFG.singleTarget = DEF.singleTarget;
-CFG.targets = DEF.targets.slice();
-S.seqIndex = 0;
-reshuffleLottoTargets();
-S.disarmed = false;
-} else {
-CFG.mode = "off";
-S.disarmed = true;
-}
-S.covertBuffer = [];
-saveLocal();
-syncVisualIndicators();
-pulseLockDot(550);
-}
-taps = 0;
-}, 280);
-});
+  const upperZone = document.getElementById("upperZone");
+  let taps = 0, tapTimer = null;
+  upperZone.addEventListener("pointerdown", () => {
+    taps++;
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(() => {
+      if (taps >= 3){
+        if (CFG.mode !== "seq" || S.disarmed){
+          CFG.mode = DEF.mode;
+          CFG.singleTarget = DEF.singleTarget;
+          CFG.targets = DEF.targets.slice();
+          S.seqIndex = 0;
+          reshuffleLottoTargets();
+          S.disarmed = false;
+        } else {
+          CFG.mode = "off";
+          S.disarmed = true;
+        }
+        S.covertBuffer = [];
+        saveLocal();
+        syncVisualIndicators();
+        pulseLockDot(550);
+      }
+      taps = 0;
+    }, 280);
+  });
 })();
+/* ---------- Center Dots between Lap & Start:
+   - Single-Tap at 00:00.00 = Covert Digit "9"
+   - Double-Tap = Opens Overt Number Keypad Overlay ---------- */
 const kpOverlay = document.getElementById("kpOverlay");
 const kpDisplay = document.getElementById("kpDisplay");
 const kpGrid = document.getElementById("kpGrid");
@@ -958,225 +1060,224 @@ const kpClearBtn = document.getElementById("kpClearBtn");
 let kpType = "single";
 let kpBuffer = [];
 function updateKpDisplay(){
-if (kpType === "single"){
-kpModeBtn.textContent = "1 NUM (.XX)";
-const a = kpBuffer[0] !== undefined ? kpBuffer[0] : "-";
-const b = kpBuffer[1] !== undefined ? kpBuffer[1] : "-";
-kpDisplay.textContent = `${a} ${b}`;
-} else {
-kpModeBtn.textContent = "LOTTO ×6";
-if (!kpBuffer.length){
-kpDisplay.textContent = activeTargets().map(n => p2(n)).join("·");
-} else {
-const pairs = [];
-for (let i = 0; i < kpBuffer.length; i += 2){
-const a = kpBuffer[i];
-const b = kpBuffer[i + 1] !== undefined ? kpBuffer[i + 1] : "_";
-pairs.push(a + b);
-}
-kpDisplay.textContent = pairs.join("·");
-}
-}
+  if (kpType === "single"){
+    kpModeBtn.textContent = "1 NUM (.XX)";
+    const a = kpBuffer[0] !== undefined ? kpBuffer[0] : "-";
+    const b = kpBuffer[1] !== undefined ? kpBuffer[1] : "-";
+    kpDisplay.textContent = `${a} ${b}`;
+  } else {
+    kpModeBtn.textContent = "LOTTO ×6";
+    if (!kpBuffer.length){
+      kpDisplay.textContent = activeTargets().map(n => p2(n)).join("·");
+    } else {
+      const pairs = [];
+      for (let i = 0; i < kpBuffer.length; i += 2){
+        const a = kpBuffer[i];
+        const b = kpBuffer[i + 1] !== undefined ? kpBuffer[i + 1] : "_";
+        pairs.push(a + b);
+      }
+      kpDisplay.textContent = pairs.join("·");
+    }
+  }
 }
 function openKeypad(){
-kpType = "single";
-kpBuffer = [];
-updateKpDisplay();
-kpOverlay.classList.add("open");
+  kpType = "single";
+  kpBuffer = [];
+  updateKpDisplay();
+  kpOverlay.classList.add("open");
 }
 function closeKeypadAndCommit(){
-if (kpType === "single"){
-if (kpBuffer.length > 0){
-CFG.singleTarget = Math.max(0, Math.min(99, parseInt(kpBuffer.join(""), 10) || 0));
-}
-CFG.mode = "single";
-S.disarmed = false;
-saveLocal();
-} else {
-if (kpBuffer.length > 0){
-const newTargets = [null, null, null, null, null, null];
-let idx = 0;
-for (let i = 0; i < kpBuffer.length && idx < 6; i += 2){
-const pairStr = kpBuffer[i] + (kpBuffer[i + 1] || "0");
-newTargets[idx++] = Math.max(0, Math.min(99, parseInt(pairStr, 10) || 0));
-}
-CFG.targets = newTargets;
-}
-CFG.mode = "seq";
-S.seqIndex = 0;
-reshuffleLottoTargets();
-S.disarmed = false;
-saveLocal();
-}
-kpOverlay.classList.remove("open");
-syncVisualIndicators();
-pulseLockDot(900);
+  if (kpType === "single"){
+    if (kpBuffer.length > 0){
+      CFG.singleTarget = Math.max(0, Math.min(99, parseInt(kpBuffer.join(""), 10) || 0));
+    }
+    CFG.mode = "single";
+    S.disarmed = false;
+    saveLocal();
+  } else {
+    if (kpBuffer.length > 0){
+      const newTargets = [null, null, null, null, null, null];
+      let idx = 0;
+      for (let i = 0; i < kpBuffer.length && idx < 6; i += 2){
+        const pairStr = kpBuffer[i] + (kpBuffer[i + 1] || "0");
+        newTargets[idx++] = Math.max(0, Math.min(99, parseInt(pairStr, 10) || 0));
+      }
+      CFG.targets = newTargets;
+    }
+    CFG.mode = "seq";
+    S.seqIndex = 0;
+    reshuffleLottoTargets();
+    S.disarmed = false;
+    saveLocal();
+  }
+  kpOverlay.classList.remove("open");
+  syncVisualIndicators();
+  pulseLockDot(900);
 }
 kpModeBtn.addEventListener("pointerdown", e => {
-e.preventDefault();
-kpType = (kpType === "single") ? "seq" : "single";
-kpBuffer = [];
-updateKpDisplay();
+  e.preventDefault();
+  kpType = (kpType === "single") ? "seq" : "single";
+  kpBuffer = [];
+  updateKpDisplay();
 });
 kpClearBtn.addEventListener("pointerdown", e => {
-e.preventDefault();
-kpBuffer = [];
-updateKpDisplay();
+  e.preventDefault();
+  kpBuffer = [];
+  updateKpDisplay();
 });
 kpGrid.addEventListener("pointerdown", e => {
-const btn = e.target.closest(".kp-btn");
-if (!btn) return;
-e.preventDefault();
-const val = btn.dataset.val;
-if (val === "ENTER"){ closeKeypadAndCommit(); return; }
-if (kpType === "single"){
-if (kpBuffer.length >= 2) kpBuffer = [];
-kpBuffer.push(val);
-} else {
-if (kpBuffer.length >= 12) kpBuffer = [];
-kpBuffer.push(val);
-}
-updateKpDisplay();
+  const btn = e.target.closest(".kp-btn");
+  if (!btn) return;
+  e.preventDefault();
+  const val = btn.dataset.val;
+  if (val === "ENTER"){ closeKeypadAndCommit(); return; }
+  if (kpType === "single"){
+    if (kpBuffer.length >= 2) kpBuffer = [];
+    kpBuffer.push(val);
+  } else {
+    if (kpBuffer.length >= 12) kpBuffer = [];
+    kpBuffer.push(val);
+  }
+  updateKpDisplay();
 });
 (() => {
-let tapCount = 0, tapTimer = null;
-elPagerDots.addEventListener("pointerdown", e => {
-e.preventDefault();
-tapCount++;
-clearTimeout(tapTimer);
-if (tapCount >= 2){
-tapCount = 0;
-animatePress(elPagerDots);
-if (kpOverlay.classList.contains("open")) kpOverlay.classList.remove("open");
-else openKeypad();
-} else {
-tapTimer = setTimeout(() => {
-if (tapCount === 1) pushCovertDigit("9", elPagerDots);
-tapCount = 0;
-}, 250);
-}
-});
+  let tapCount = 0, tapTimer = null;
+  elPagerDots.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    tapCount++;
+    clearTimeout(tapTimer);
+    if (tapCount >= 2){
+      tapCount = 0;
+      animatePress(elPagerDots);
+      if (kpOverlay.classList.contains("open")) kpOverlay.classList.remove("open");
+      else openKeypad();
+    } else {
+      tapTimer = setTimeout(() => {
+        if (tapCount === 1) pushCovertDigit("9", elPagerDots);
+        tapCount = 0;
+      }, 250);
+    }
+  });
 })();
+/* ---------- Bottom Tab Bar Controls:
+   - Tap "World Clock" -> 17 Force Mode
+   - Tap "Alarms" -> Single Number Force Mode (.00–.99)
+   - Tap "Timers" -> Lotto Mode (18, 23, 27, 41, 56, 09)
+   - Hold any tab (>220ms) -> Emergence 3-Person Peek ---------- */
 (() => {
-const tabBar = document.getElementById("tabBar");
-const worldTab = document.getElementById("worldTab");
-const alarmTab = document.getElementById("alarmTab");
-const timerTab = document.getElementById("timerTab");
-let holdTimer = null, didHoldPeek = false;
-function showPeek(){
-didHoldPeek = true;
-if (S.emergenceList.length > 0){
-if (S.emergenceList.length === 1){
-elPkMain.textContent = String(S.emergenceList[0].largeInt);
-elPkSub.textContent = S.emergenceList[0].formatted;
-} else {
-const totalSum = S.emergenceList.reduce((acc, it) => acc + it.largeInt, 0);
-elPkMain.textContent = String(totalSum);
-elPkSub.textContent = S.emergenceList.map(it => it.formatted).join(" — ");
-}
-} else if (S.displayedMs > 0 && !S.running){
-elPkMain.textContent = String(timeToLargeInt(S.displayedMs));
-elPkSub.textContent = formatMs(S.displayedMs);
-} else {
-const modeDesc = CFG.mode === "single"
-? `1-NUM: .${p2(CFG.singleTarget)}`
-: CFG.mode === "seq"
-? `LOTTO: ${activeTargets().map(n => p2(n)).join(",")}`
-: CFG.mode === "open17"
-? "SUM TO 17"
-: "FAIR (OFF)";
-elPkMain.textContent = "0";
-elPkSub.textContent = modeDesc;
-}
-elPeekBox.classList.add("on");
-}
-function hidePeek(){
-clearTimeout(holdTimer);
-if (elPeekBox.classList.contains("on")){
-elPeekBox.classList.remove("on");
-if (S.emergenceList.length > 0) S.emergenceList = [];
-}
-}
-tabBar.addEventListener("pointerdown", () => {
-didHoldPeek = false;
-clearTimeout(holdTimer);
-holdTimer = setTimeout(showPeek, 220);
-});
-tabBar.addEventListener("pointerup", hidePeek);
-tabBar.addEventListener("pointercancel", hidePeek);
-tabBar.addEventListener("pointerleave", hidePeek);
-worldTab.addEventListener("pointerup", e => {
-if (didHoldPeek) return;
-e.preventDefault();
-animatePress(worldTab);
-CFG.mode = (CFG.mode === "open17") ? "seq" : "open17";
-S.disarmed = false;
-S.covertBuffer = [];
-saveLocal();
-syncVisualIndicators();
-pulseLockDot(450);
-});
-alarmTab.addEventListener("pointerup", e => {
-if (didHoldPeek) return;
-e.preventDefault();
-animatePress(alarmTab);
-CFG.mode = "single";
-S.disarmed = false;
-S.covertBuffer = [];
-saveLocal();
-syncVisualIndicators();
-pulseLockDot(450);
-});
-timerTab.addEventListener("pointerup", e => {
-if (didHoldPeek) return;
-e.preventDefault();
-animatePress(timerTab);
-CFG.mode = "seq";
-S.seqIndex = 0;
-reshuffleLottoTargets();
-S.disarmed = false;
-S.covertBuffer = [];
-saveLocal();
-syncVisualIndicators();
-pulseLockDot(450);
-});
+  const tabBar = document.getElementById("tabBar");
+  const worldTab = document.getElementById("worldTab");
+  const alarmTab = document.getElementById("alarmTab");
+  const timerTab = document.getElementById("timerTab");
+  let holdTimer = null, didHoldPeek = false;
+  function showPeek(){
+    didHoldPeek = true;
+    if (S.emergenceList.length > 0){
+      if (S.emergenceList.length === 1){
+        elPkMain.textContent = String(S.emergenceList[0].largeInt);
+        elPkSub.textContent = S.emergenceList[0].formatted;
+      } else {
+        const totalSum = S.emergenceList.reduce((acc, it) => acc + it.largeInt, 0);
+        elPkMain.textContent = String(totalSum);
+        elPkSub.textContent = S.emergenceList.map(it => it.formatted).join(" — ");
+      }
+    } else if (S.displayedMs > 0 && !S.running){
+      elPkMain.textContent = String(timeToLargeInt(S.displayedMs));
+      elPkSub.textContent = formatMs(S.displayedMs);
+    } else {
+      const modeDesc = CFG.mode === "single"
+        ? `1-NUM: .${p2(CFG.singleTarget)}`
+        : CFG.mode === "seq"
+        ? `LOTTO: ${activeTargets().map(n => p2(n)).join(",")}`
+        : CFG.mode === "open17"
+        ? "SUM TO 17"
+        : "FAIR (OFF)";
+      elPkMain.textContent = "0";
+      elPkSub.textContent = modeDesc;
+    }
+    elPeekBox.classList.add("on");
+  }
+  function hidePeek(){
+    clearTimeout(holdTimer);
+    if (elPeekBox.classList.contains("on")){
+      elPeekBox.classList.remove("on");
+      if (S.emergenceList.length > 0) S.emergenceList = [];
+    }
+  }
+  tabBar.addEventListener("pointerdown", () => {
+    didHoldPeek = false;
+    clearTimeout(holdTimer);
+    holdTimer = setTimeout(showPeek, 220);
+  });
+  tabBar.addEventListener("pointerup", hidePeek);
+  tabBar.addEventListener("pointercancel", hidePeek);
+  tabBar.addEventListener("pointerleave", hidePeek);
+  worldTab.addEventListener("pointerup", e => {
+    if (didHoldPeek) return;
+    e.preventDefault();
+    animatePress(worldTab);
+    CFG.mode = (CFG.mode === "open17") ? "seq" : "open17";
+    S.disarmed = false;
+    S.covertBuffer = [];
+    saveLocal();
+    syncVisualIndicators();
+    pulseLockDot(450);
+  });
+  alarmTab.addEventListener("pointerup", e => {
+    if (didHoldPeek) return;
+    e.preventDefault();
+    animatePress(alarmTab);
+    CFG.mode = "single";
+    S.disarmed = false;
+    S.covertBuffer = [];
+    saveLocal();
+    syncVisualIndicators();
+    pulseLockDot(450);
+  });
+  timerTab.addEventListener("pointerup", e => {
+    if (didHoldPeek) return;
+    e.preventDefault();
+    animatePress(timerTab);
+    CFG.mode = "seq";
+    S.seqIndex = 0;
+    reshuffleLottoTargets();
+    S.disarmed = false;
+    S.covertBuffer = [];
+    saveLocal();
+    syncVisualIndicators();
+    pulseLockDot(450);
+  });
 })();
+/* ---------- Top Corner Redirects (Top-Left = Left Redirect, Top-Right = iControl in New Safari Tab) ---------- */
 (() => {
-const cornerTL = document.getElementById("cornerTL");
-const cornerTR = document.getElementById("cornerTR");
-cornerTL.addEventListener("pointerdown", () => {
-syncCornerLinks();
-pulseLockDot(300);
-});
-cornerTL.addEventListener("click", e => {
-const dest = normalizeUrl(CFG.leftRedirectUrl || "dice");
-if (dest === "dice"){
-e.preventDefault();
-openDiceApp();
-} else if (!CFG.leftOpenSafari){
-e.preventDefault();
-window.location.href = dest;
-}
-});
-cornerTR.addEventListener("pointerdown", () => {
-syncCornerLinks();
-pulseLockDot(300);
-});
-cornerTR.addEventListener("click", e => {
-const dest = normalizeUrl(CFG.icontrolUrl || "https://icontrol-magic.onrender.com/");
-if (dest === "dice"){
-e.preventDefault();
-openDiceApp();
-} else if (CFG.icontrolOpenSafari === false){
-e.preventDefault();
-window.location.href = dest;
-}
-});
+  const cornerTL = document.getElementById("cornerTL");
+  const cornerTR = document.getElementById("cornerTR");
+  cornerTL.addEventListener("pointerdown", () => {
+    syncCornerLinks();
+    pulseLockDot(300);
+  });
+  cornerTL.addEventListener("click", e => {
+    e.preventDefault();
+    const dest = normalizeUrl(CFG.leftRedirectUrl || "dice");
+    executeRedirect(dest, !!CFG.leftOpenSafari);
+  });
+  cornerTR.addEventListener("pointerdown", () => {
+    syncCornerLinks();
+    pulseLockDot(300);
+  });
+  cornerTR.addEventListener("click", e => {
+    e.preventDefault();
+    const dest = normalizeUrl(CFG.icontrolUrl || "https://icontrol-magic.onrender.com/");
+    executeRedirect(dest, CFG.icontrolOpenSafari !== false);
+  });
 })();
+/* ---------- Settings Sheet & Saved Websites Manager ---------- */
 const sheet = document.getElementById("sheet");
 const modeList = document.getElementById("modeList");
 const singleIn = document.getElementById("singleIn");
 const slotsGrid = document.getElementById("slotsGrid");
+const scrambleLottoIn = document.getElementById("scrambleLottoIn");
+const shuffleSlotsBtn = document.getElementById("shuffleSlotsBtn");
 const leftUrlIn = document.getElementById("leftUrlIn");
 const leftSafariIn = document.getElementById("leftSafariIn");
 const leftDiceBtn = document.getElementById("leftDiceBtn");
@@ -1192,223 +1293,243 @@ const triggerIn = document.getElementById("triggerIn");
 const disarmIn = document.getElementById("disarmIn");
 const peekHistoryBox = document.getElementById("peekHistoryBox");
 let draft = null;
+
 leftDiceBtn.addEventListener("click", () => {
-leftUrlIn.value = "dice";
-leftSafariIn.checked = false;
-if (draft){ draft.leftRedirectUrl = "dice"; draft.leftOpenSafari = false; }
-renderSavedSitesInSettings();
+  leftUrlIn.value = "dice";
+  leftSafariIn.checked = false;
+  if (draft){ draft.leftRedirectUrl = "dice"; draft.leftOpenSafari = false; }
+  renderSavedSitesInSettings();
 });
 rightDiceBtn.addEventListener("click", () => {
-customSiteUrlIn.value = "dice";
-openInSafariIn.checked = false;
-if (draft){ draft.customSiteUrl = "dice"; draft.openInSafari = false; }
-renderSavedSitesInSettings();
+  customSiteUrlIn.value = "dice";
+  openInSafariIn.checked = false;
+  if (draft){ draft.customSiteUrl = "dice"; draft.openInSafari = false; }
+  renderSavedSitesInSettings();
 });
+shuffleSlotsBtn.addEventListener("click", () => {
+  const inps = Array.from(slotsGrid.querySelectorAll(".slot-in"));
+  const vals = inps.map(inp => inp.value.trim()).filter(v => v !== "");
+  if (vals.length > 1){
+    const orig = vals.join(",");
+    for (let a = 0; a < 6; a++){
+      for (let i = vals.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        const t = vals[i]; vals[i] = vals[j]; vals[j] = t;
+      }
+      if (vals.join(",") !== orig) break;
+    }
+    inps.forEach((inp, idx) => { inp.value = vals[idx] !== undefined ? vals[idx] : ""; });
+  }
+});
+
 function renderSavedSitesInSettings(){
-if (!draft) return;
-if (!Array.isArray(draft.savedSites) || !draft.savedSites.length){
-savedSitesList.innerHTML = `<div class="row" style="color:var(--gray);font-size:14px;">No saved websites yet. Add one above!</div>`;
-return;
-}
-const leftNorm = normalizeUrl(leftUrlIn.value || draft.leftRedirectUrl);
-const rightNorm = normalizeUrl(customSiteUrlIn.value || draft.customSiteUrl);
-savedSitesList.innerHTML = draft.savedSites.map((site, idx) => {
-const sNorm = normalizeUrl(site.url);
-const badges = [];
-if (sNorm === leftNorm) badges.push("L");
-if (sNorm === rightNorm) badges.push("R");
-const badgeTxt = badges.length ? `[${badges.join("+")}] ` : "";
-const safeName = (site.name || site.url).replace(/</g, "&lt;");
-const safeUrl = site.url.replace(/</g, "&lt;");
-const modeTag = sNorm === "dice" ? "Built-in" : (site.openInSafari ? "Safari Tab" : "App Clip");
-return `<div class="site-item" data-idx="${idx}">
-<div class="site-info">
-<div class="site-name">${badgeTxt}${safeName} <span style="font-size:11px;color:var(--orange);">(${modeTag})</span></div>
-<div class="site-url">${safeUrl}</div>
-</div>
-<div class="site-actions">
-<button type="button" class="pill-btn sec site-left" data-idx="${idx}">Left</button>
-<button type="button" class="pill-btn sec site-right" data-idx="${idx}">Right</button>
-<button type="button" class="site-del" data-idx="${idx}">×</button>
-</div>
-</div>`;
-}).join("");
+  if (!draft) return;
+  if (!Array.isArray(draft.savedSites) || !draft.savedSites.length){
+    savedSitesList.innerHTML = `<div class="row" style="color:var(--gray);font-size:14px;">No saved websites yet. Add one above!</div>`;
+    return;
+  }
+  const leftNorm = normalizeUrl(leftUrlIn.value || draft.leftRedirectUrl);
+  const rightNorm = normalizeUrl(customSiteUrlIn.value || draft.customSiteUrl);
+  savedSitesList.innerHTML = draft.savedSites.map((site, idx) => {
+    const sNorm = normalizeUrl(site.url);
+    const badges = [];
+    if (sNorm === leftNorm) badges.push("L");
+    if (sNorm === rightNorm) badges.push("R");
+    const badgeTxt = badges.length ? `[${badges.join("+")}] ` : "";
+    const safeName = (site.name || site.url).replace(/</g, "&lt;");
+    const safeUrl = site.url.replace(/</g, "&lt;");
+    const modeTag = sNorm === "dice" ? "Built-in" : (site.openInSafari ? "Safari Tab" : "App Clip");
+    return `<div class="site-item" data-idx="${idx}">
+      <div class="site-info">
+        <div class="site-name">${badgeTxt}${safeName} <span style="font-size:11px;color:var(--orange);">(${modeTag})</span></div>
+        <div class="site-url">${safeUrl}</div>
+      </div>
+      <div class="site-actions">
+        <button type="button" class="pill-btn sec site-left" data-idx="${idx}">Left</button>
+        <button type="button" class="pill-btn sec site-right" data-idx="${idx}">Right</button>
+        <button type="button" class="site-del" data-idx="${idx}">×</button>
+      </div>
+    </div>`;
+  }).join("");
 }
 saveSiteBtn.addEventListener("click", () => {
-if (!draft) return;
-const rawUrl = normalizeUrl(customSiteUrlIn.value);
-if (!rawUrl) return;
-let label = customSiteNameIn.value.trim();
-if (!label){
-if (rawUrl === "dice") label = "Built-in 3D Dice Roller";
-else {
-try { label = new URL(rawUrl).hostname.replace(/^www\./, ""); } catch(e){ label = rawUrl; }
-}
-}
-customSiteUrlIn.value = rawUrl;
-draft.customSiteUrl = rawUrl;
-draft.openInSafari = openInSafariIn.checked;
-const existingIdx = draft.savedSites.findIndex(s => normalizeUrl(s.url) === rawUrl);
-if (existingIdx >= 0){
-draft.savedSites[existingIdx] = { name: label, url: rawUrl, openInSafari: openInSafariIn.checked };
-} else {
-draft.savedSites.unshift({ name: label, url: rawUrl, openInSafari: openInSafariIn.checked });
-}
-customSiteNameIn.value = "";
-CFG.customSiteUrl = draft.customSiteUrl;
-CFG.openInSafari = draft.openInSafari;
-CFG.savedSites = draft.savedSites.slice();
-saveLocal();
-fetch(BACKEND_URL + "/api/sites", {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ savedSites: CFG.savedSites })
-}).catch(() => {});
-renderSavedSitesInSettings();
+  if (!draft) return;
+  const rawUrl = normalizeUrl(customSiteUrlIn.value);
+  if (!rawUrl) return;
+  let label = customSiteNameIn.value.trim();
+  if (!label){
+    if (rawUrl === "dice") label = "Built-in 3D Dice Roller";
+    else {
+      try { label = new URL(rawUrl).hostname.replace(/^www\./, ""); } catch(e){ label = rawUrl; }
+    }
+  }
+  customSiteUrlIn.value = rawUrl;
+  draft.customSiteUrl = rawUrl;
+  draft.openInSafari = openInSafariIn.checked;
+  const existingIdx = draft.savedSites.findIndex(s => normalizeUrl(s.url) === rawUrl);
+  if (existingIdx >= 0){
+    draft.savedSites[existingIdx] = { name: label, url: rawUrl, openInSafari: openInSafariIn.checked };
+  } else {
+    draft.savedSites.unshift({ name: label, url: rawUrl, openInSafari: openInSafariIn.checked });
+  }
+  customSiteNameIn.value = "";
+  CFG.customSiteUrl = draft.customSiteUrl;
+  CFG.openInSafari = draft.openInSafari;
+  CFG.savedSites = draft.savedSites.slice();
+  saveLocal();
+  fetch(BACKEND_URL + "/api/sites", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ savedSites: CFG.savedSites })
+  }).catch(() => {});
+  renderSavedSitesInSettings();
 });
 savedSitesList.addEventListener("click", e => {
-if (!draft) return;
-const delBtn = e.target.closest(".site-del");
-if (delBtn){
-e.stopPropagation();
-const idx = Number(delBtn.dataset.idx);
-draft.savedSites.splice(idx, 1);
-CFG.savedSites = draft.savedSites.slice();
-saveLocal();
-fetch(BACKEND_URL + "/api/sites", {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ savedSites: CFG.savedSites })
-}).catch(() => {});
-renderSavedSitesInSettings();
-return;
-}
-const leftBtn = e.target.closest(".site-left");
-if (leftBtn){
-e.stopPropagation();
-const idx = Number(leftBtn.dataset.idx);
-const site = draft.savedSites[idx];
-if (site){
-draft.leftRedirectUrl = normalizeUrl(site.url);
-draft.leftOpenSafari = !!site.openInSafari;
-leftUrlIn.value = draft.leftRedirectUrl;
-leftSafariIn.checked = draft.leftOpenSafari;
-renderSavedSitesInSettings();
-}
-return;
-}
-const rightBtn = e.target.closest(".site-right");
-if (rightBtn || e.target.closest(".site-item")){
-e.stopPropagation();
-const el = rightBtn || e.target.closest(".site-item");
-const idx = Number(el.dataset.idx);
-const site = draft.savedSites[idx];
-if (site){
-draft.customSiteUrl = normalizeUrl(site.url);
-draft.openInSafari = !!site.openInSafari;
-customSiteUrlIn.value = draft.customSiteUrl;
-openInSafariIn.checked = draft.openInSafari;
-renderSavedSitesInSettings();
-}
-}
+  if (!draft) return;
+  const delBtn = e.target.closest(".site-del");
+  if (delBtn){
+    e.stopPropagation();
+    const idx = Number(delBtn.dataset.idx);
+    draft.savedSites.splice(idx, 1);
+    CFG.savedSites = draft.savedSites.slice();
+    saveLocal();
+    fetch(BACKEND_URL + "/api/sites", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ savedSites: CFG.savedSites })
+    }).catch(() => {});
+    renderSavedSitesInSettings();
+    return;
+  }
+  const leftBtn = e.target.closest(".site-left");
+  if (leftBtn){
+    e.stopPropagation();
+    const idx = Number(leftBtn.dataset.idx);
+    const site = draft.savedSites[idx];
+    if (site){
+      draft.leftRedirectUrl = normalizeUrl(site.url);
+      draft.leftOpenSafari = !!site.openInSafari;
+      leftUrlIn.value = draft.leftRedirectUrl;
+      leftSafariIn.checked = draft.leftOpenSafari;
+      renderSavedSitesInSettings();
+    }
+    return;
+  }
+  const rightBtn = e.target.closest(".site-right");
+  if (rightBtn || e.target.closest(".site-item")){
+    e.stopPropagation();
+    const el = rightBtn || e.target.closest(".site-item");
+    const idx = Number(el.dataset.idx);
+    const site = draft.savedSites[idx];
+    if (site){
+      draft.customSiteUrl = normalizeUrl(site.url);
+      draft.openInSafari = !!site.openInSafari;
+      customSiteUrlIn.value = draft.customSiteUrl;
+      openInSafariIn.checked = draft.openInSafari;
+      renderSavedSitesInSettings();
+    }
+  }
 });
 function openSettings(){
-draft = JSON.parse(JSON.stringify(CFG));
-modeList.querySelectorAll(".opt").forEach(r =>
-r.classList.toggle("sel", r.dataset.mode === draft.mode));
-singleIn.value = p2(draft.singleTarget);
-slotsGrid.querySelectorAll(".slot-in").forEach(inp => {
-const idx = Number(inp.dataset.slot);
-inp.value = draft.targets[idx] !== null ? p2(draft.targets[idx]) : "";
-});
-leftUrlIn.value = draft.leftRedirectUrl || "dice";
-leftSafariIn.checked = !!draft.leftOpenSafari;
-customSiteUrlIn.value = draft.customSiteUrl || "";
-customSiteNameIn.value = "";
-openInSafariIn.checked = !!draft.openInSafari;
-icontrolUrlIn.value = draft.icontrolUrl || "https://icontrol-magic.onrender.com/";
-icontrolSafariIn.checked = (draft.icontrolOpenSafari !== false);
-triggerIn.value = draft.triggerOn;
-disarmIn.checked = draft.autoDisarm;
-renderSavedSitesInSettings();
-if (S.peekLog.length){
-peekHistoryBox.textContent = S.peekLog.map(
-e => `[${e.at}] ${e.type}: ${e.shownFormatted} (${e.largeInt})`
-).join("\n");
-} else {
-peekHistoryBox.textContent = "No stops recorded yet.";
-}
-sheet.classList.add("open");
-sheet.setAttribute("aria-hidden", "false");
+  draft = JSON.parse(JSON.stringify(CFG));
+  modeList.querySelectorAll(".opt").forEach(r =>
+    r.classList.toggle("sel", r.dataset.mode === draft.mode));
+  singleIn.value = p2(draft.singleTarget);
+  slotsGrid.querySelectorAll(".slot-in").forEach(inp => {
+    const idx = Number(inp.dataset.slot);
+    inp.value = draft.targets[idx] !== null ? p2(draft.targets[idx]) : "";
+  });
+  scrambleLottoIn.checked = !!draft.scrambleLotto;
+  leftUrlIn.value = draft.leftRedirectUrl || "dice";
+  leftSafariIn.checked = !!draft.leftOpenSafari;
+  customSiteUrlIn.value = draft.customSiteUrl || "";
+  customSiteNameIn.value = "";
+  openInSafariIn.checked = !!draft.openInSafari;
+  icontrolUrlIn.value = draft.icontrolUrl || "https://icontrol-magic.onrender.com/";
+  icontrolSafariIn.checked = (draft.icontrolOpenSafari !== false);
+  triggerIn.value = draft.triggerOn;
+  disarmIn.checked = draft.autoDisarm;
+  renderSavedSitesInSettings();
+  if (S.peekLog.length){
+    peekHistoryBox.textContent = S.peekLog.map(
+      e => `[${e.at}] ${e.type}: ${e.shownFormatted} (${e.largeInt})`
+    ).join("\n");
+  } else {
+    peekHistoryBox.textContent = "No stops recorded yet.";
+  }
+  sheet.classList.add("open");
+  sheet.setAttribute("aria-hidden", "false");
 }
 function closeSettings(save){
-if (save && draft){
-if (singleIn.value.trim() !== ""){
-draft.singleTarget = Math.max(0, Math.min(99, parseInt(singleIn.value, 10) || 0));
-}
-slotsGrid.querySelectorAll(".slot-in").forEach(inp => {
-const idx = Number(inp.dataset.slot);
-const raw = inp.value.trim();
-draft.targets[idx] = raw === "" ? null : Math.max(0, Math.min(99, parseInt(raw, 10) || 0));
-});
-draft.leftRedirectUrl = normalizeUrl(leftUrlIn.value || "dice");
-draft.leftOpenSafari = leftSafariIn.checked;
-if (customSiteUrlIn.value.trim()) draft.customSiteUrl = normalizeUrl(customSiteUrlIn.value);
-draft.openInSafari = openInSafariIn.checked;
-if (icontrolUrlIn.value.trim()) draft.icontrolUrl = normalizeUrl(icontrolUrlIn.value);
-draft.icontrolOpenSafari = icontrolSafariIn.checked;
-draft.triggerOn = triggerIn.value;
-draft.autoDisarm = disarmIn.checked;
-CFG = draft;
-S.seqIndex = 0;
-reshuffleLottoTargets();
-S.disarmed = false;
-saveLocal();
-syncVisualIndicators();
-fetch(BACKEND_URL + "/api/acaat", {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({
-mode: CFG.mode,
-singleTarget: CFG.singleTarget,
-targets: CFG.targets,
-leftRedirectUrl: CFG.leftRedirectUrl,
-leftOpenSafari: CFG.leftOpenSafari,
-rightRedirectUrl: CFG.customSiteUrl,
-rightOpenSafari: CFG.openInSafari,
-icontrolUrl: CFG.icontrolUrl,
-icontrolOpenSafari: CFG.icontrolOpenSafari,
-triggerOn: CFG.triggerOn,
-autoDisarm: CFG.autoDisarm,
-savedSites: CFG.savedSites
-})
-}).catch(() => {});
-}
-sheet.classList.remove("open");
-sheet.setAttribute("aria-hidden", "true");
+  if (save && draft){
+    if (singleIn.value.trim() !== ""){
+      draft.singleTarget = Math.max(0, Math.min(99, parseInt(singleIn.value, 10) || 0));
+    }
+    slotsGrid.querySelectorAll(".slot-in").forEach(inp => {
+      const idx = Number(inp.dataset.slot);
+      const raw = inp.value.trim();
+      draft.targets[idx] = raw === "" ? null : Math.max(0, Math.min(99, parseInt(raw, 10) || 0));
+    });
+    draft.scrambleLotto = scrambleLottoIn.checked;
+    draft.leftRedirectUrl = normalizeUrl(leftUrlIn.value || "dice");
+    draft.leftOpenSafari = leftSafariIn.checked;
+    if (customSiteUrlIn.value.trim()) draft.customSiteUrl = normalizeUrl(customSiteUrlIn.value);
+    draft.openInSafari = openInSafariIn.checked;
+    if (icontrolUrlIn.value.trim()) draft.icontrolUrl = normalizeUrl(icontrolUrlIn.value);
+    draft.icontrolOpenSafari = icontrolSafariIn.checked;
+    draft.triggerOn = triggerIn.value;
+    draft.autoDisarm = disarmIn.checked;
+    CFG = draft;
+    S.seqIndex = 0;
+    reshuffleLottoTargets();
+    S.disarmed = false;
+    saveLocal();
+    syncVisualIndicators();
+    fetch(BACKEND_URL + "/api/acaat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mode: CFG.mode,
+        singleTarget: CFG.singleTarget,
+        targets: CFG.targets,
+        scrambleLotto: CFG.scrambleLotto,
+        leftRedirectUrl: CFG.leftRedirectUrl,
+        leftOpenSafari: CFG.leftOpenSafari,
+        rightRedirectUrl: CFG.customSiteUrl,
+        rightOpenSafari: CFG.openInSafari,
+        icontrolUrl: CFG.icontrolUrl,
+        icontrolOpenSafari: CFG.icontrolOpenSafari,
+        triggerOn: CFG.triggerOn,
+        autoDisarm: CFG.autoDisarm,
+        savedSites: CFG.savedSites
+      })
+    }).catch(() => {});
+  }
+  sheet.classList.remove("open");
+  sheet.setAttribute("aria-hidden", "true");
 }
 modeList.addEventListener("click", e => {
-const r = e.target.closest(".opt");
-if (!r) return;
-draft.mode = r.dataset.mode;
-modeList.querySelectorAll(".opt").forEach(row =>
-row.classList.toggle("sel", row.dataset.mode === draft.mode));
+  const r = e.target.closest(".opt");
+  if (!r) return;
+  draft.mode = r.dataset.mode;
+  modeList.querySelectorAll(".opt").forEach(row =>
+    row.classList.toggle("sel", row.dataset.mode === draft.mode));
 });
 document.getElementById("shCancel").addEventListener("click", () => closeSettings(false));
 document.getElementById("shDone").addEventListener("click", () => closeSettings(true));
 (() => {
-const swTab = document.getElementById("swTab");
-let last = 0;
-swTab.addEventListener("pointerdown", e => {
-const now = performance.now();
-if (now - last < 320){
-e.preventDefault();
-openSettings();
-last = 0;
-} else {
-last = now;
-}
-});
+  const swTab = document.getElementById("swTab");
+  let last = 0;
+  swTab.addEventListener("pointerdown", e => {
+    const now = performance.now();
+    if (now - last < 320){
+      e.preventDefault();
+      openSettings();
+      last = 0;
+    } else {
+      last = now;
+    }
+  });
 })();
 </script>
 </body>
