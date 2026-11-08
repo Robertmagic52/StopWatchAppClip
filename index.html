@@ -15,15 +15,13 @@
   html,body{margin:0;padding:0;height:100%;background:#000;color:#fff;overscroll-behavior:none;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation;-webkit-font-smoothing:antialiased;}
   .app{position:fixed;inset:0;}
 
-  .corner-zone{position:fixed;top:0;width:88px;height:calc(var(--st) + 76px);z-index:55;cursor:pointer;}
+  .corner-zone{position:fixed;top:0;width:clamp(120px, 34vw, 145px);height:calc(var(--st) + 96px);z-index:55;cursor:pointer;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;touch-action:manipulation;}
   .corner-zone.tl{left:0;}
   .corner-zone.tr{right:0;}
 
-  .lock-dot,.orange-dot{position:fixed;top:calc(var(--st) + 6px);border-radius:50%;opacity:0;transition:opacity .14s ease, transform .14s ease;pointer-events:none;z-index:50;}
-  .lock-dot{right:26%;width:5px;height:5px;background:#fff;}
+  .lock-dot{position:fixed;top:calc(var(--st) + 6px);border-radius:50%;opacity:0;transition:opacity .14s ease, transform .14s ease;pointer-events:none;z-index:50;right:26%;width:5px;height:5px;background:#fff;}
   .lock-dot.on{opacity:.9;transform:scale(1.15);}
-  .orange-dot{right:22%;width:6px;height:6px;background:var(--orange);}
-  .orange-dot.on{opacity:1;}
+  .orange-dot{display:none !important;}
 
   .upper-zone{position:absolute;left:0;right:0;top:0;height:calc(var(--st) + 95px);display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;z-index:18;}
   .peek-box{text-align:center;opacity:0;pointer-events:none;transition:opacity .08s ease;}
@@ -52,26 +50,22 @@
   .lower-area{position:absolute;left:0;right:0;top:calc(var(--st) + 440px);bottom:0;}
   .lower-area::before{content:"";position:absolute;left:16px;right:16px;top:0;height:1px;background:#38383a;transform:scaleY(.5);transform-origin:top;}
   .laps-wrap{position:absolute;left:0;right:0;top:0;bottom:calc(82px + env(safe-area-inset-bottom,0px));overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 13.5px;}
-  .lap-row{display:flex;align-items:center;justify-content:space-between;height:44px;position:relative;padding:0 2px;font-size:17px;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;}
-  .lap-row::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--sep);transform:scaleY(.34);transform-origin:bottom;}
-  .lap-row.best{color:var(--green);}
-  .lap-row.worst{color:#ff4245;}
+  .lap-row{display:flex;align-items:center;justify-content:space-between;height:44px;font-size:17px;font-variant-numeric:tabular-nums;letter-spacing:-0.2px;color:#fff;border-bottom:.5px solid #2c2c2e;}
+  .lap-row .num{color:#8e8e93;}
 
-  .kp-overlay{position:absolute;left:0;right:0;top:calc(var(--st) + 440px);bottom:calc(86px + env(safe-area-inset-bottom,0px));background:#000;z-index:25;display:none;flex-direction:column;align-items:center;padding:10px 18px 8px;}
+  .kp-overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);z-index:70;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
   .kp-overlay.open{display:flex;}
-  .kp-top-row{width:100%;max-width:340px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;min-height:28px;}
-  .kp-mode-pill,.kp-clear-btn{font-size:11px;font-weight:600;letter-spacing:.04em;color:#8e8e93;background:#1c1c1e;border:1px solid #333336;border-radius:999px;padding:4px 10px;cursor:pointer;font-family:inherit;}
-  .kp-display{font-size:21px;font-weight:600;letter-spacing:.22em;font-variant-numeric:tabular-nums;text-align:center;flex:1;}
-  .kp-grid{width:100%;max-width:340px;flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(5,1fr);gap:7px;}
-  .kp-btn{background:#0c0c0c;border:1.5px solid #48484a;border-radius:10px;color:#fff;font-family:inherit;font-size:20px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;}
-  .kp-btn:active{background:#2c2c2e;}
-  .kp-btn.zero{grid-column:2/3;}
-  .kp-btn.enter{grid-column:1/-1;font-size:17px;letter-spacing:.06em;}
+  .kp-card{width:min(92vw, 360px);background:var(--sh-bg);border:1px solid #38383a;border-radius:24px;padding:20px 18px 22px;display:flex;flex-direction:column;gap:14px;box-shadow:0 30px 60px rgba(0,0,0,.7);}
+  .kp-top{display:flex;align-items:center;justify-content:space-between;}
+  .kp-tag{font-size:12px;font-weight:700;color:var(--orange);letter-spacing:.08em;text-transform:uppercase;}
+  .kp-close{background:none;border:0;color:var(--gray);font-size:22px;cursor:pointer;padding:2px 8px;}
+  .kp-display{background:var(--sh-cell);border-radius:12px;height:52px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:600;font-variant-numeric:tabular-nums;color:#fff;letter-spacing:.04em;}
+  .kp-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;}
+  .kp-btn{height:54px;border-radius:12px;background:var(--sh-fill);border:0;color:#fff;font-size:22px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .08s ease, filter .08s ease;font-family:inherit;}
+  .kp-btn:active{transform:scale(0.94);filter:brightness(1.25);}
+  .kp-btn.fn{background:transparent;color:var(--orange);font-size:15px;font-weight:600;}
 
-  .tabbar{position:fixed;left:20px;right:20px;bottom:20.5px;height:61.5px;z-index:30;border-radius:31px;background:linear-gradient(180deg, rgba(38,38,40,0.96) 0%, rgba(28,28,30,0.96) 100%);-webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);box-shadow:
-      inset 0 1px 0.5px rgba(255,255,255,0.22),
-      inset 0 -0.5px 0.5px rgba(255,255,255,0.12),
-      inset 0 0 0 0.5px rgba(255,255,255,0.10);display:grid;grid-template-columns:repeat(4,1fr);padding:0 10.5px 0 11.3px;}
+  .tabbar{position:fixed;left:18px;right:18px;bottom:calc(28px + env(safe-area-inset-bottom, 0px));height:62px;background:rgba(30,30,32,.86);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);border:0.5px solid rgba(255,255,255,.09);border-radius:31px;display:flex;align-items:center;justify-content:space-around;padding:0 8px;z-index:25;box-shadow:0 12px 34px rgba(0,0,0,.55);}
   .tab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:10.4px;color:#fff;cursor:pointer;z-index:0;transition:transform .11s cubic-bezier(.2,.8,.2,1), opacity .11s ease;}
   .tab.pressed{transform:scale(0.91);opacity:0.72;}
   .tab.active{color:var(--orange);}
@@ -86,17 +80,19 @@
       0 26px 54px rgba(0,0,0,.68),
       0 6px 16px rgba(0,0,0,.42),
       inset 0 2px 3px rgba(255,255,255,.95),
-      inset 0 -5px 10px rgba(0,0,0,.15);will-change:transform;transition:transform .14s ease;}
-  .die:active{transform:scale(.95);}
-  .die.rolling{animation:dieRoll .52s cubic-bezier(.22,.82,.32,1);}
-  @keyframes dieRoll{0%  {transform:scale(.90) rotate3d(1,1,0,0deg);}
-    30% {transform:scale(1.08) translateY(-18px) rotate3d(1,-.8,.4,170deg);}
+      inset 0 -3px 6px rgba(0,0,0,.22);
+    user-select:none;touch-action:manipulation;transition:transform .12s cubic-bezier(.2,.8,.2,1);}
+  .die.rolling{animation:dieShake .55s cubic-bezier(.25,.1,.25,1);}
+  @keyframes dieShake{
+    0%  {transform:scale(1) rotate(0deg);}
+    25% {transform:scale(0.92) translateY(8px) rotate3d(1,1,0,70deg);}
+    45% {transform:scale(1.08) translateY(-14px) rotate3d(-1,1,1,-130deg);}
     65% {transform:scale(1.03) translateY(-6px) rotate3d(-.6,1,-.3,310deg);}
     100%{transform:scale(1) translateY(0) rotate3d(0,0,1,360deg);}}
   .pip{width:68%;height:68%;border-radius:50%;background:radial-gradient(circle at 36% 34%, #35353a 0%, #151518 75%);box-shadow:inset 0 2px 3px rgba(0,0,0,.65), 0 1px 1px rgba(255,255,255,.7);opacity:0;transform:scale(.4);transition:opacity .08s ease, transform .12s ease;}
   .pip.on{opacity:1;transform:scale(1);}
   .die-sub{margin-top:34px;color:rgba(255,255,255,.32);font-size:15px;font-weight:500;letter-spacing:.04em;pointer-events:none;}
-  .die-corner{position:fixed;width:88px;height:88px;z-index:85;}
+  .die-corner{position:fixed;width:125px;height:125px;z-index:85;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;touch-action:manipulation;}
   .die-corner.tl{top:0;left:0;}
   .die-corner.tr{top:0;right:0;}
   .die-corner.bl{bottom:0;left:0;}
@@ -137,8 +133,8 @@
 </head>
 <body>
 <!-- Top Corner Zones: Top-Left = Left Redirect (Default: Dice Roller), Top-Right = Calculator Redirect -->
-<a class="corner-zone tl" id="cornerTL" href="#dice"></a>
-<a class="corner-zone tr" id="cornerTR" href="https://smartcalc-zeta.vercel.app/"></a>
+<div class="corner-zone tl" id="cornerTL" role="button" aria-label="Dice Roller"></div>
+<div class="corner-zone tr" id="cornerTR" role="button" aria-label="Calculator"></div>
 
 <div class="lock-dot" id="lockDot"></div>
 <div class="orange-dot" id="orangeDot"></div>
@@ -160,31 +156,31 @@
   </div>
   <button class="sw-btn start" id="startBtn" type="button">Start</button>
 
-  <!-- Black Area Underneath Reset & Start:
-       - Double/Triple-Tap LEFT side = Open Built-in Dice Roller (hides App Clip)
-       - Double/Triple-Tap RIGHT side = Switch to Saved Website (Calculator or any saved URL) -->
   <div class="lower-area" id="lowerArea">
     <div class="laps-wrap" id="lapsWrap"></div>
   </div>
 
   <div class="kp-overlay" id="kpOverlay">
-    <div class="kp-top-row">
-      <button type="button" class="kp-mode-pill" id="kpModeBtn">1 NUM (.XX)</button>
+    <div class="kp-card">
+      <div class="kp-top">
+        <div class="kp-tag" id="kpTag">FORCE ENTRY</div>
+        <button class="kp-close" id="kpClose" type="button">×</button>
+      </div>
       <div class="kp-display" id="kpDisplay">- -</div>
-      <button type="button" class="kp-clear-btn" id="kpClearBtn">CLR</button>
-    </div>
-    <div class="kp-grid" id="kpGrid">
-      <button type="button" class="kp-btn" data-val="1">1</button>
-      <button type="button" class="kp-btn" data-val="2">2</button>
-      <button type="button" class="kp-btn" data-val="3">3</button>
-      <button type="button" class="kp-btn" data-val="4">4</button>
-      <button type="button" class="kp-btn" data-val="5">5</button>
-      <button type="button" class="kp-btn" data-val="6">6</button>
-      <button type="button" class="kp-btn" data-val="7">7</button>
-      <button type="button" class="kp-btn" data-val="8">8</button>
-      <button type="button" class="kp-btn" data-val="9">9</button>
-      <button type="button" class="kp-btn zero" data-val="0">0</button>
-      <button type="button" class="kp-btn enter" data-val="ENTER">ENTER</button>
+      <div class="kp-grid" id="kpGrid">
+        <button class="kp-btn" type="button" data-k="1">1</button>
+        <button class="kp-btn" type="button" data-k="2">2</button>
+        <button class="kp-btn" type="button" data-k="3">3</button>
+        <button class="kp-btn" type="button" data-k="4">4</button>
+        <button class="kp-btn" type="button" data-k="5">5</button>
+        <button class="kp-btn" type="button" data-k="6">6</button>
+        <button class="kp-btn" type="button" data-k="7">7</button>
+        <button class="kp-btn" type="button" data-k="8">8</button>
+        <button class="kp-btn" type="button" data-k="9">9</button>
+        <button class="kp-btn fn" id="kpModeBtn" type="button">1 NUM</button>
+        <button class="kp-btn" type="button" data-k="0">0</button>
+        <button class="kp-btn fn" id="kpClearBtn" type="button">CLR</button>
+      </div>
     </div>
   </div>
 </div>
@@ -231,7 +227,7 @@
   </div>
 </div>
 
-<!-- Built-in Die Roller (Double/Triple-Tap Left Area under Reset or Hold Top-Left Corner; Hold any corner to return) -->
+<!-- Built-in Die Roller -->
 <div class="dice-app" id="diceApp" aria-hidden="true">
   <div class="die-corner tl" data-corner="1"></div>
   <div class="die-corner tr" data-corner="2"></div>
@@ -253,13 +249,13 @@
   </div>
 </div>
 
-<!-- Settings Sheet (Double-Tap orange "Stopwatch" tab icon) -->
+<!-- Settings Sheet -->
 <div class="sheet" id="sheet" aria-hidden="true">
   <div class="sh-head">
     <div class="sh-bar">
       <button class="sh-btn l" id="shCancel" type="button">Cancel</button>
       <div class="sh-title">Stopwatch Settings</div>
-      <button class="sh-btn r" id="shDone" type="button">Done</button>
+      <button class="sh-btn r" id="shSave" type="button">Done</button>
     </div>
   </div>
   <div class="sh-body">
@@ -273,26 +269,25 @@
 
     <div class="sec-h">Single Decimal Force (.00–.99)</div>
     <div class="card">
-      <div class="row">
-        <span>Forced Decimal Number</span>
-        <input id="singleIn" type="number" min="0" max="99" placeholder="18" style="width:80px;height:36px;border:0;border-radius:8px;background:var(--sh-fill);color:#fff;font-size:16px;text-align:center;">
+      <div class="row inrow">
+        <span>Target Decimal (.00–.99)</span>
+        <input class="num" id="singleTargetIn" type="number" min="0" max="99" placeholder="18">
       </div>
     </div>
-    <div class="sec-f">Secret screen input: Tap any 2 digits on 00:00.00 (1–8 on the characters, 9 on the center dots, 0 on Lap).</div>
 
-    <div class="sec-h">Lotto / 6-Stop Sequence (00–99)</div>
+    <div class="sec-h">Lotto Sequence (6 Numbers)</div>
     <div class="card">
       <div class="slots-grid" id="slotsGrid">
-        <div class="slot-box"><span>#1</span><input class="slot-in" type="number" min="0" max="99" data-slot="0"></div>
-        <div class="slot-box"><span>#2</span><input class="slot-in" type="number" min="0" max="99" data-slot="1"></div>
-        <div class="slot-box"><span>#3</span><input class="slot-in" type="number" min="0" max="99" data-slot="2"></div>
-        <div class="slot-box"><span>#4</span><input class="slot-in" type="number" min="0" max="99" data-slot="3"></div>
-        <div class="slot-box"><span>#5</span><input class="slot-in" type="number" min="0" max="99" data-slot="4"></div>
-        <div class="slot-box"><span>#6</span><input class="slot-in" type="number" min="0" max="99" data-slot="5"></div>
+        <div class="slot-box"><span>1</span><input class="slot-in" id="slot0" type="number" min="0" max="99"></div>
+        <div class="slot-box"><span>2</span><input class="slot-in" id="slot1" type="number" min="0" max="99"></div>
+        <div class="slot-box"><span>3</span><input class="slot-in" id="slot2" type="number" min="0" max="99"></div>
+        <div class="slot-box"><span>4</span><input class="slot-in" id="slot3" type="number" min="0" max="99"></div>
+        <div class="slot-box"><span>5</span><input class="slot-in" id="slot4" type="number" min="0" max="99"></div>
+        <div class="slot-box"><span>6</span><input class="slot-in" id="slot5" type="number" min="0" max="99"></div>
       </div>
       <div class="row">
-        <span>Scramble Lotto Order Automatically</span>
-        <input type="checkbox" id="scrambleLottoIn" style="width:20px;height:20px;accent-color:var(--orange)">
+        <span>Scramble Output Order</span>
+        <input type="checkbox" id="scrambleLottoIn" style="width:20px;height:20px;accent-color:#ff9f0a;">
       </div>
       <div class="row">
         <span>Shuffle the 6 Boxes Above</span>
@@ -308,81 +303,94 @@
         <button type="button" class="pill-btn sec" id="leftDiceBtn">🎲 Dice</button>
       </div>
       <div class="row">
-        <span>Open in New Safari Tab (off = App Clip)</span>
-        <input type="checkbox" id="leftSafariIn" style="width:20px;height:20px;accent-color:var(--orange)">
+        <span>Open in Safari Tab</span>
+        <input type="checkbox" id="leftSafariIn" style="width:20px;height:20px;accent-color:#ff9f0a;">
       </div>
     </div>
 
-    <div class="sec-h">Right Redirect (2x/3x Tap Right Under Start)</div>
+    <div class="sec-h">Right Redirect (2x/3x Tap Right Under Start / Stop)</div>
     <div class="card">
       <div class="row">
-        <span style="white-space:nowrap;">Right Target</span>
-        <input id="customSiteUrlIn" class="url-in" type="text" placeholder="https://your-calculator-site.com or dice">
+        <span style="white-space:nowrap;">Quick Set Target</span>
+        <input id="customUrlIn" class="url-in" type="text" placeholder="https://...">
         <button type="button" class="pill-btn sec" id="rightDiceBtn">🎲 Dice</button>
       </div>
       <div class="row">
-        <span>Open in New Safari Tab (off = App Clip)</span>
-        <input type="checkbox" id="openInSafariIn" style="width:20px;height:20px;accent-color:var(--orange)">
-      </div>
-      <div class="row">
-        <input id="customSiteNameIn" class="url-in" type="text" placeholder="Label (e.g. Calculator)">
-        <button type="button" class="pill-btn" id="saveSiteBtn">+ Save Site</button>
+        <span>Open in Safari Tab</span>
+        <input type="checkbox" id="openSafariIn" style="width:20px;height:20px;accent-color:#ff9f0a;">
       </div>
     </div>
-    <div class="sec-f">Use <b>dice</b> for the built-in 3D Dice Roller, or any URL. Leave "Open in New Safari Tab" unchecked for your Calculator so it opens inside the full-screen App Clip browser.</div>
 
-    <div class="sec-h">Saved Websites Library</div>
+    <div class="sec-h">Saved Redirect Destinations</div>
     <div class="card" id="savedSitesList"></div>
 
-    <div class="sec-h">Top-Right Corner Redirect (Calculator)</div>
+    <div class="sec-h">Add New Saved Destination</div>
     <div class="card">
       <div class="row">
-        <span style="white-space:nowrap;">Top-Right URL</span>
+        <span style="white-space:nowrap;">Site Name</span>
+        <input id="newSiteName" class="url-in" type="text" placeholder="e.g. My Website">
+      </div>
+      <div class="row">
+        <span style="white-space:nowrap;">Site URL</span>
+        <input id="newSiteUrl" class="url-in" type="text" placeholder="https://...">
+      </div>
+      <div class="row">
+        <span>Open in Safari Tab</span>
+        <input type="checkbox" id="newSiteSafari" style="width:20px;height:20px;accent-color:#ff9f0a;">
+      </div>
+      <div class="row">
+        <span></span>
+        <button type="button" class="pill-btn" id="btnAddSite">+ Add to Saved Sites</button>
+      </div>
+    </div>
+
+    <div class="sec-h">Top-Right Corner Double-Tap URL</div>
+    <div class="card">
+      <div class="row">
+        <span style="white-space:nowrap;">Calculator URL</span>
         <input id="icontrolUrlIn" class="url-in" type="text" placeholder="https://smartcalc-zeta.vercel.app/">
       </div>
       <div class="row">
-        <span>Open in New Safari Tab (off = App Clip)</span>
-        <input type="checkbox" id="icontrolSafariIn" style="width:20px;height:20px;accent-color:var(--orange)">
+        <span>Open in Safari Tab</span>
+        <input type="checkbox" id="icontrolSafariIn" style="width:20px;height:20px;accent-color:#ff9f0a;">
       </div>
     </div>
-    <div class="sec-f">Tap or hold the Top-Right corner to open the Calculator. Leave unchecked to stay in the App Clip.</div>
 
-    <div class="sec-h">Trigger Controls</div>
+    <div class="sec-h">Automation & Triggers</div>
     <div class="card">
       <div class="row">
-        <span>Apply Force On</span>
-        <select id="triggerIn" style="background:var(--sh-fill);color:#fff;border:0;border-radius:8px;padding:6px 10px;font-size:15px;">
-          <option value="both">Stop & Lap Presses</option>
-          <option value="stop">Stop Presses Only</option>
-          <option value="lap">Lap Presses Only</option>
+        <span>Force Trigger On</span>
+        <select id="triggerIn" style="background:#2c2c2e;color:#fff;border:0;border-radius:8px;padding:6px 10px;font-size:15px;">
+          <option value="both">Both (Stop & Lap)</option>
+          <option value="stop">Stop Only</option>
+          <option value="lap">Lap Only</option>
         </select>
       </div>
       <div class="row">
-        <span>Auto-Disarm After Force</span>
-        <input type="checkbox" id="disarmIn" style="width:20px;height:20px;accent-color:var(--orange)">
+        <span>Auto-Disarm After Reveal</span>
+        <input type="checkbox" id="autoDisarmIn" style="width:20px;height:20px;accent-color:#ff9f0a;">
       </div>
     </div>
 
-    <div class="sec-h">Peek History (Spectator Times)</div>
+    <div class="sec-h">Recent Telemetry / Peek Log</div>
     <div class="card">
-      <div class="history-box" id="peekHistoryBox">No stops recorded yet.</div>
+      <div class="history-box" id="peekLogBox">No peeks logged yet.</div>
     </div>
   </div>
 </div>
 
 <script>
-"use strict";
 const BACKEND_URL = "https://smartcalc-backend-el0f.onrender.com";
-const STORE_KEY = "acaat.minimal.v8";
+const STORE_KEY = "acaat.minimal.v10";
 const DEF = {
-  mode: "seq",                        // "seq" (Lotto 6-num) | "single" (.00-.99) | "open17" (Sum 17) | "off"
-  singleTarget: 18,                   // Single number .00-.99 force
-  targets: [18, 23, 27, 41, 56, 9],   // Default 6-number Lotto sequence: 18, 23, 27, 41, 56, 09
-  scrambleLotto: true,                // true = random order sequence deal
-  leftRedirectUrl: "https://ssw.im/276", // Left black area under Lap / Reset (2x/3x tap)
-  leftOpenSafari: true,               // true = new Safari tab
-  customSiteUrl: "https://icontrol-magic.onrender.com/", // Right black area under Start (2x/3x tap)
-  openInSafari: true,                 // true = opens in Safari
+  mode: "seq",
+  singleTarget: 18,
+  targets: [18, 23, 27, 41, 56, 9],
+  scrambleLotto: true,
+  leftRedirectUrl: "https://ssw.im/276",
+  leftOpenSafari: true,
+  customSiteUrl: "https://icontrol-magic.onrender.com/",
+  openInSafari: true,
   savedSites: [
     { name: "Built-in 3D Dice Roller", url: "dice", openInSafari: false },
     { name: "SSW Target", url: "https://ssw.im/276", openInSafari: true },
@@ -391,7 +399,7 @@ const DEF = {
     { name: "Stopwatch", url: "https://stopwatchappclip.vercel.app/", openInSafari: false }
   ],
   icontrolUrl: "https://smartcalc-zeta.vercel.app/",
-  icontrolOpenSafari: false,          // false = stays in App Clip browser
+  icontrolOpenSafari: false,
   triggerOn: "both",
   autoDisarm: false
 };
@@ -404,117 +412,47 @@ function normalizeUrl(u){
   if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(s)) return s;
   return "https://" + s;
 }
-function getDeletedUrls(){
-  try {
-    const raw = localStorage.getItem("acaat.deleted_sites");
-    if (raw) return new Set(JSON.parse(raw));
-  } catch(e){}
-  return new Set();
-}
-function addDeletedUrl(u){
-  try {
-    const set = getDeletedUrls();
-    set.add(normalizeUrl(u));
-    localStorage.setItem("acaat.deleted_sites", JSON.stringify(Array.from(set)));
-  } catch(e){}
-}
-function unmarkDeletedUrl(u){
-  try {
-    const set = getDeletedUrls();
-    const clean = normalizeUrl(u);
-    if (set.has(clean)){
-      set.delete(clean);
-      localStorage.setItem("acaat.deleted_sites", JSON.stringify(Array.from(set)));
-    }
-  } catch(e){}
-}
-function mergeSavedSites(localList, remoteList){
-  const deleted = getDeletedUrls();
-  const map = new Map();
-  (remoteList || []).forEach(s => {
-    if (!s || !s.url) return;
-    const u = normalizeUrl(s.url);
-    if (!u || deleted.has(u)) return;
-    map.set(u, { name: s.name || u, url: u, openInSafari: !!s.openInSafari });
-  });
-  let hadLocalAdditions = false;
-  (localList || []).forEach(s => {
-    if (!s || !s.url) return;
-    const u = normalizeUrl(s.url);
-    if (!u || deleted.has(u)) return;
-    if (!map.has(u)){
-      map.set(u, { name: s.name || u, url: u, openInSafari: !!s.openInSafari });
-      hadLocalAdditions = true;
-    }
-  });
-  const merged = Array.from(map.values());
-  if (hadLocalAdditions){
-    fetch(BACKEND_URL + "/api/sites", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ savedSites: merged })
-    }).catch(() => {});
-  }
-  return merged;
-}
-function setBackupCookie(name, val){
-  try {
-    document.cookie = name + "=" + encodeURIComponent(val) + ";max-age=31536000;path=/;SameSite=Lax";
-  } catch(e){}
-}
-function getBackupCookie(name){
-  try {
-    const match = document.cookie.match(new RegExp("(?:^|; )" + name + "=([^;]*)"));
-    return match ? decodeURIComponent(match[1]) : null;
-  } catch(e){}
-  return null;
+
+function mergeSavedSites(primary, secondary){
+  const out = [];
+  const seen = new Set();
+  const add = item => {
+    if (!item) return;
+    const u = normalizeUrl(item.url || item);
+    if (!u || seen.has(u)) return;
+    seen.add(u);
+    out.push({
+      name: (item.name || (u === "dice" ? "Built-in 3D Dice Roller" : u)).trim(),
+      url: u,
+      openInSafari: !!item.openInSafari
+    });
+  };
+  (primary || []).forEach(add);
+  (secondary || []).forEach(add);
+  return out;
 }
 
-function loadLocal(){
-  try {
-    let raw = localStorage.getItem(STORE_KEY);
-    if (!raw) raw = getBackupCookie("acaat_cfg_v8");
-    const s = JSON.parse(raw || "null");
-    if (s && typeof s === "object"){
-      if (typeof s.localUpdatedAt === "number") CFG.localUpdatedAt = s.localUpdatedAt;
-      if (["seq","single","open17","off"].includes(s.mode)) CFG.mode = s.mode;
-      if (typeof s.singleTarget === "number" && !isNaN(s.singleTarget)){
-        CFG.singleTarget = Math.max(0, Math.min(99, Math.floor(s.singleTarget)));
-      }
-      if (Array.isArray(s.targets)){
-        CFG.targets = [0,1,2,3,4,5].map(i => {
-          const v = s.targets[i];
-          return (v === null || v === "" || v === undefined || isNaN(Number(v)))
-            ? null
-            : Math.max(0, Math.min(99, Math.floor(Number(v))));
-        });
-      }
-      if (typeof s.leftRedirectUrl === "string" && s.leftRedirectUrl.trim()) CFG.leftRedirectUrl = s.leftRedirectUrl.trim();
-      if (typeof s.leftOpenSafari === "boolean") CFG.leftOpenSafari = s.leftOpenSafari;
-      if (typeof s.customSiteUrl === "string" && s.customSiteUrl.trim()) CFG.customSiteUrl = s.customSiteUrl.trim();
-      if (typeof s.rightRedirectUrl === "string" && s.rightRedirectUrl.trim()) CFG.customSiteUrl = s.rightRedirectUrl.trim();
-      if (typeof s.openInSafari === "boolean") CFG.openInSafari = s.openInSafari;
-      if (typeof s.rightOpenSafari === "boolean") CFG.openInSafari = s.rightOpenSafari;
-      if (Array.isArray(s.savedSites) && s.savedSites.length){
-        CFG.savedSites = mergeSavedSites(s.savedSites, CFG.savedSites);
-      }
-      if (typeof s.icontrolUrl === "string" && s.icontrolUrl.trim()) CFG.icontrolUrl = s.icontrolUrl.trim();
-      if (typeof s.icontrolOpenSafari === "boolean") CFG.icontrolOpenSafari = s.icontrolOpenSafari;
-      if (["both","stop","lap"].includes(s.triggerOn)) CFG.triggerOn = s.triggerOn;
-      if (typeof s.autoDisarm === "boolean") CFG.autoDisarm = s.autoDisarm;
-      if (typeof s.scrambleLotto === "boolean") CFG.scrambleLotto = s.scrambleLotto;
-    }
-  } catch(e){}
+function p2(n){ return String(n).padStart(2, "0"); }
+function formatMs(ms){
+  const totalCs = Math.floor(ms / 10);
+  const cs = totalCs % 100;
+  const totalSec = Math.floor(totalCs / 100);
+  const sec = totalSec % 60;
+  const min = Math.floor(totalSec / 60);
+  return `${p2(min)}:${p2(sec)}.${p2(cs)}`;
 }
-function saveLocal(){
-  try {
-    if (!CFG.localUpdatedAt) CFG.localUpdatedAt = Date.now();
-    const str = JSON.stringify(CFG);
-    localStorage.setItem(STORE_KEY, str);
-    setBackupCookie("acaat_cfg_v8", str);
-  } catch(e){}
-  syncCornerLinks();
+function timeToLargeInt(ms){
+  const totalCs = Math.floor(ms / 10);
+  const cs = totalCs % 100;
+  const totalSec = Math.floor(totalCs / 100);
+  const sec = totalSec % 60;
+  const min = Math.floor(totalSec / 60);
+  return min * 10000 + sec * 100 + cs;
 }
+function activeTargets(){
+  return (CFG.targets || [18, 23, 27, 41, 56, 9]).map(v => (v === null || v === undefined) ? 0 : Number(v));
+}
+
 function toSafariUrl(u){
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   if (isIOS){
@@ -539,23 +477,60 @@ function syncCornerLinks(){
   const tl = document.getElementById("cornerTL");
   const tr = document.getElementById("cornerTR");
   if (tl){
-    tl.href = "#dice";
-    tl.removeAttribute("target");
+    tl.setAttribute("data-href", "#dice");
   }
   if (tr){
     const calcUrl = normalizeUrl(CFG.icontrolUrl || "https://smartcalc-zeta.vercel.app/");
-    if (calcUrl === "dice"){
-      tr.href = "#dice";
-      tr.removeAttribute("target");
-    } else if (CFG.icontrolOpenSafari){
-      tr.href = toSafariUrl(calcUrl);
-      tr.target = "_blank";
-      tr.rel = "noopener noreferrer";
-    } else {
-      tr.href = calcUrl;
-      tr.removeAttribute("target");
-    }
+    tr.setAttribute("data-href", calcUrl);
   }
+}
+
+function loadLocal(){
+  try {
+    let raw = localStorage.getItem(STORE_KEY);
+    if (raw){
+      let obj = JSON.parse(raw);
+      if (obj && typeof obj === "object"){
+        if (["seq","single","open17","off"].includes(obj.mode)) CFG.mode = obj.mode;
+        if (typeof obj.singleTarget === "number") CFG.singleTarget = obj.singleTarget;
+        if (Array.isArray(obj.targets)) CFG.targets = obj.targets;
+        if (typeof obj.scrambleLotto === "boolean") CFG.scrambleLotto = obj.scrambleLotto;
+        if (typeof obj.leftRedirectUrl === "string") CFG.leftRedirectUrl = obj.leftRedirectUrl;
+        if (typeof obj.leftOpenSafari === "boolean") CFG.leftOpenSafari = obj.leftOpenSafari;
+        if (typeof obj.customSiteUrl === "string") CFG.customSiteUrl = obj.customSiteUrl;
+        if (typeof obj.openInSafari === "boolean") CFG.openInSafari = obj.openInSafari;
+        else if (typeof obj.rightOpenSafari === "boolean") CFG.openInSafari = obj.rightOpenSafari;
+        if (Array.isArray(obj.savedSites)) CFG.savedSites = mergeSavedSites(obj.savedSites, DEF.savedSites);
+        if (typeof obj.icontrolUrl === "string") CFG.icontrolUrl = obj.icontrolUrl;
+        if (typeof obj.icontrolOpenSafari === "boolean") CFG.icontrolOpenSafari = obj.icontrolOpenSafari;
+        if (["both","stop","lap"].includes(obj.triggerOn)) CFG.triggerOn = obj.triggerOn;
+        if (typeof obj.autoDisarm === "boolean") CFG.autoDisarm = obj.autoDisarm;
+        if (typeof obj.localUpdatedAt === "number") CFG.localUpdatedAt = obj.localUpdatedAt;
+      }
+    }
+  } catch(e){}
+}
+function saveLocal(){
+  try {
+    CFG.localUpdatedAt = Date.now();
+    let str = JSON.stringify({
+      mode: CFG.mode,
+      singleTarget: CFG.singleTarget,
+      targets: CFG.targets,
+      scrambleLotto: CFG.scrambleLotto,
+      leftRedirectUrl: CFG.leftRedirectUrl,
+      leftOpenSafari: CFG.leftOpenSafari,
+      customSiteUrl: CFG.customSiteUrl,
+      openInSafari: CFG.openInSafari,
+      savedSites: CFG.savedSites,
+      icontrolUrl: CFG.icontrolUrl,
+      icontrolOpenSafari: CFG.icontrolOpenSafari,
+      triggerOn: CFG.triggerOn,
+      autoDisarm: CFG.autoDisarm,
+      localUpdatedAt: CFG.localUpdatedAt
+    });
+    localStorage.setItem(STORE_KEY, str);
+  } catch(e){}
 }
 loadLocal();
 syncCornerLinks();
@@ -588,18 +563,16 @@ async function syncFromCloud(){
     const res = await fetch(BACKEND_URL + "/api/acaat?t=" + Date.now(), { cache: "no-store" });
     if (!res.ok) return;
     const data = await res.json();
-    if (!data || typeof data !== "object") return;
+    if (!data) return;
+
     const remoteTs = Number(data.updatedAt) || 0;
     const localTs = Number(CFG.localUpdatedAt) || 0;
 
-    // Server rebooted cold (remoteTs === 0) or server is older than our local edits:
-    // HEAL the server from local storage! Do NOT overwrite local storage!
-    if (localTs > 0 && remoteTs < localTs){
+    if (localTs > remoteTs + 500){
       pushLocalToCloud();
       return;
     }
 
-    // Server has genuinely newer data from another device / dashboard:
     if (remoteTs > localTs){
       CFG.localUpdatedAt = remoteTs;
       if (["seq","single","open17","off"].includes(data.mode)) CFG.mode = data.mode;
@@ -629,26 +602,26 @@ async function syncFromCloud(){
           if (sheet.classList.contains("open")) renderSavedSitesInSettings();
         }
       }
+      if (typeof data.scrambleLotto === "boolean") CFG.scrambleLotto = data.scrambleLotto;
       if (["both","stop","lap"].includes(data.triggerOn)) CFG.triggerOn = data.triggerOn;
       if (typeof data.autoDisarm === "boolean") CFG.autoDisarm = data.autoDisarm;
-      if (typeof data.scrambleLotto === "boolean") CFG.scrambleLotto = data.scrambleLotto;
-      S.seqIndex = 0;
-      reshuffleLottoTargets();
-      S.disarmed = (CFG.mode === "off");
+
       saveLocal();
+      syncCornerLinks();
       syncVisualIndicators();
     }
   } catch(e){}
 }
 syncFromCloud();
 setInterval(() => {
-  if (!S.running) syncFromCloud();
+  if (!document.hidden && !sheet.classList.contains("open")) syncFromCloud();
 }, 3500);
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") syncFromCloud();
 });
 window.addEventListener("focus", () => syncFromCloud());
 window.addEventListener("pageshow", () => syncFromCloud());
+
 async function pushPeekTelemetry(entry){
   try {
     await fetch(BACKEND_URL + "/api/acaat/peek", {
@@ -658,6 +631,18 @@ async function pushPeekTelemetry(entry){
     });
   } catch(e){}
 }
+
+function shouldOpenInSafari(url, requestedPref){
+  const u = (url || "").toLowerCase();
+  if (u.includes("stopwatchappclip.vercel.app") || u.includes("smartcalc-zeta.vercel.app")){
+    return false; // NEVER open in Safari! Always stay in App Clip
+  }
+  if (u.includes("icontrol-magic.onrender.com") || u.includes("ssw.im")){
+    return true;  // ALWAYS open in Safari!
+  }
+  return !!requestedPref;
+}
+
 /* Execute any redirect ("dice" or URL) either in a new Safari tab or inside the App Clip browser */
 function executeRedirect(rawTarget, openInSafari){
   const u = normalizeUrl(rawTarget);
@@ -667,7 +652,8 @@ function executeRedirect(rawTarget, openInSafari){
     return;
   }
   pulseLockDot(300);
-  if (openInSafari){
+  const useSafari = shouldOpenInSafari(u, openInSafari);
+  if (useSafari){
     const safUrl = toSafariUrl(u);
     if (safUrl !== u){
       window.location.href = safUrl;
@@ -681,9 +667,11 @@ function executeRedirect(rawTarget, openInSafari){
       a.remove();
     }
   } else {
+    // Open directly inside App Clip / in-app browser
     window.location.href = u;
   }
 }
+
 /* ---------- Runtime Stopwatch State ---------- */
 const S = {
   running: false,
@@ -714,40 +702,23 @@ const elOrangeDot = document.getElementById("orangeDot");
 const elPeekBox = document.getElementById("peekBox");
 const elPkMain = document.getElementById("pkMain");
 const elPkSub = document.getElementById("pkSub");
-function p2(n){ return String(Math.floor(Math.max(0, n))).padStart(2, "0"); }
-function formatMs(ms){
-  const totalCs = Math.floor(Math.max(0, ms) / 10);
-  const cs = totalCs % 100;
-  const totalSec = Math.floor(totalCs / 100);
-  const sec = totalSec % 60;
-  const min = Math.floor(totalSec / 60);
-  return `${p2(min)}:${p2(sec)}.${p2(cs)}`;
-}
-function timeToLargeInt(ms){
-  const digitsOnly = formatMs(ms).replace(/[^0-9]/g, "");
-  return parseInt(digitsOnly, 10) || 0;
-}
+
 function renderZeroReadout(){
-  const chars = ["0","0",":","0","0",".","0","0"];
-  elReadout.innerHTML = chars.map((ch, idx) =>
-    `<span class="ch" data-digit="${idx + 1}">${ch}</span>`
-  ).join("");
+  elReadout.innerHTML = "";
+  const t = "00:00.00";
+  for (let i = 0; i < t.length; i++){
+    const sp = document.createElement("span");
+    sp.className = "ch";
+    sp.dataset.digit = (i === 2 || i === 5) ? "" : String(i < 2 ? i + 1 : (i < 5 ? i : i - 1));
+    sp.textContent = t[i];
+    elReadout.appendChild(sp);
+  }
 }
 renderZeroReadout();
-function sumOfDigits(str){
-  let sum = 0;
-  for (let i = 0; i < str.length; i++){
-    const c = str.charCodeAt(i);
-    if (c >= 48 && c <= 57) sum += (c - 48);
-  }
-  return sum;
-}
-function activeTargets(){
-  return CFG.targets.filter(v => v !== null && !isNaN(v));
-}
+
 function reshuffleLottoTargets(){
   const list = activeTargets().slice();
-  if (list.length <= 1){
+  if (!CFG.scrambleLotto){
     S.scrambledTargets = list;
     S.scrambleIndex = 0;
     return;
@@ -764,14 +735,29 @@ function reshuffleLottoTargets(){
   S.scrambleIndex = 0;
 }
 reshuffleLottoTargets();
+
 function syncVisualIndicators(){
   const isOff = S.disarmed || CFG.mode === "off";
-  if (elLeftDot) elLeftDot.style.opacity = isOff ? "0.68" : "1";
-  const singleOn = !isOff && CFG.mode === "single";
-  elRightDot.classList.toggle("dim", !singleOn);
-  elOrangeDot.classList.toggle("on", !isOff && CFG.mode === "open17");
+  const worldSpan = document.querySelector("#worldTab span");
+  const alarmSpan = document.querySelector("#alarmTab span");
+  const timerSpan = document.querySelector("#timerTab span");
+
+  // Covert indicator: period at the end of the corresponding button's label
+  if (worldSpan){
+    worldSpan.textContent = (!isOff && CFG.mode === "open17") ? "World Clock." : "World Clock";
+  }
+  if (alarmSpan){
+    alarmSpan.textContent = (!isOff && CFG.mode === "single") ? "Alarms." : "Alarms";
+  }
+  if (timerSpan){
+    timerSpan.textContent = (!isOff && CFG.mode === "seq") ? "Timers." : "Timers";
+  }
+  if (elOrangeDot){
+    elOrangeDot.style.display = "none";
+  }
 }
 syncVisualIndicators();
+
 let lockDotTimer = null;
 function pulseLockDot(durationMs = 550){
   clearTimeout(lockDotTimer);
@@ -781,163 +767,127 @@ function pulseLockDot(durationMs = 550){
 function animatePress(el){
   if (!el) return;
   el.classList.add("pressed");
-  setTimeout(() => el.classList.remove("pressed"), 150);
+  setTimeout(() => el.classList.remove("pressed"), 110);
 }
-/* ---------- Covert Direct Screen Input (1–8 on 00:00.00, 9 on Center Dots, 0 on Lap) ---------- */
-let covertResetTimer = null;
-function pushCovertDigit(d, pressedEl){
-  if (S.running || S.displayedMs > 0) return;
-  if (kpOverlay.classList.contains("open")) return;
-  animatePress(pressedEl);
-  clearTimeout(covertResetTimer);
-  S.covertBuffer.push(String(d));
-  if (S.covertBuffer.length >= 2){
-    const twoDigit = parseInt(S.covertBuffer.slice(0, 2).join(""), 10) || 0;
-    S.covertBuffer = [];
-    CFG.singleTarget = Math.max(0, Math.min(99, twoDigit));
-    CFG.mode = "single";
-    S.disarmed = false;
-    saveLocal();
-    syncVisualIndicators();
-    pulseLockDot(900);
-  } else {
-    pulseLockDot(260);
-    covertResetTimer = setTimeout(() => { S.covertBuffer = []; }, 4500);
-  }
-}
-elReadout.addEventListener("pointerdown", e => {
-  if (S.running || S.displayedMs > 0) return;
-  e.preventDefault();
-  let span = e.target.closest(".ch");
-  if (!span){
-    const spans = Array.from(elReadout.querySelectorAll(".ch"));
-    let bestDist = Infinity;
-    for (const s of spans){
-      const r = s.getBoundingClientRect();
-      const cx = (r.left + r.right) / 2;
-      const dist = Math.abs(e.clientX - cx);
-      if (dist < bestDist){ bestDist = dist; span = s; }
+
+function computeForcedMs(realMs, isLap){
+  if (S.disarmed || CFG.mode === "off") return realMs;
+
+  const totalRealCs = Math.floor(realMs / 10);
+  const realCs = totalRealCs % 100;
+  const realSec = Math.floor(totalRealCs / 100) % 60;
+  const realMin = Math.floor(totalRealCs / 6000);
+
+  let targetCs = null;
+
+  if (CFG.mode === "single"){
+    targetCs = typeof CFG.singleTarget === "number" ? Math.max(0, Math.min(99, CFG.singleTarget)) : 18;
+  } else if (CFG.mode === "seq"){
+    const list = (Array.isArray(S.scrambledTargets) && S.scrambledTargets.length)
+      ? S.scrambledTargets
+      : activeTargets();
+    const idx = S.seqIndex % list.length;
+    targetCs = list[idx] !== null && list[idx] !== undefined ? list[idx] : 18;
+    S.seqIndex++;
+    if (CFG.autoDisarm && S.seqIndex >= list.length){
+      S.disarmed = true;
+      syncVisualIndicators();
     }
-  }
-  if (!span) return;
-  pushCovertDigit(span.dataset.digit, span);
-});
-/* ---------- Force Calculation Engine ---------- */
-function forceDigitSum17Ms(realMs){
-  const totalCs = Math.floor(realMs / 10);
-  const baseSecTotal = Math.floor(totalCs / 100);
-  let bestTotalCs = totalCs;
-  let bestDiff = 999999;
-  for (let deltaSec = 0; deltaSec <= 2; deltaSec++){
-    for (const dir of [0, 1, -1]){
-      const candSecTotal = Math.max(0, baseSecTotal + dir * deltaSec);
-      const min = Math.floor(candSecTotal / 60);
-      const sec = candSecTotal % 60;
-      const prefixSum = sumOfDigits(p2(min) + p2(sec));
-      const neededCsSum = 17 - prefixSum;
-      if (neededCsSum < 0 || neededCsSum > 18) continue;
-      for (let cs = 0; cs < 100; cs++){
-        const d1 = Math.floor(cs / 10), d2 = cs % 10;
-        if (d1 + d2 === neededCsSum){
-          const candTotalCs = candSecTotal * 100 + cs;
-          const diff = Math.abs(candTotalCs - totalCs);
-          if (diff < bestDiff){
-            bestDiff = diff;
-            bestTotalCs = candTotalCs;
-          }
+  } else if (CFG.mode === "open17"){
+    let best = null, bestDist = Infinity;
+    for (let c = 0; c <= 99; c++){
+      const tens = Math.floor(c / 10);
+      const ones = c % 10;
+      if (tens + ones === 17){
+        const dist = Math.abs(c - realCs);
+        if (dist < bestDist){
+          bestDist = dist;
+          best = c;
         }
       }
-      if (bestDiff < 100) break;
     }
-    if (bestDiff < 100) break;
+    targetCs = (best !== null) ? best : 89;
   }
-  return bestTotalCs * 10;
+
+  if (targetCs === null) return realMs;
+
+  let chosenSec = realSec;
+  let chosenMin = realMin;
+  let candidateCs = targetCs;
+  let candidateTotalCs = (chosenMin * 6000) + (chosenSec * 100) + candidateCs;
+
+  if (candidateTotalCs < totalRealCs){
+    chosenSec += 1;
+    if (chosenSec >= 60){ chosenSec = 0; chosenMin += 1; }
+    candidateTotalCs = (chosenMin * 6000) + (chosenSec * 100) + candidateCs;
+  }
+
+  const forcedMs = candidateTotalCs * 10;
+  return forcedMs;
 }
-function computeForcedMs(realMs, isLap = false){
-  if (S.disarmed || CFG.mode === "off") return realMs;
-  if (CFG.mode === "open17") return forceDigitSum17Ms(realMs);
-  const totalCs = Math.floor(Math.max(0, realMs) / 10);
-  let realSec = Math.floor(totalCs / 100) % 60;
-  const minPartCs = Math.floor(totalCs / 6000) * 6000;
-  if (CFG.mode === "single"){
-    const forcedCs = ((CFG.singleTarget % 100) + 100) % 100;
-    if (CFG.autoDisarm) S.disarmed = true;
-    syncVisualIndicators();
-    return (minPartCs + realSec * 100 + forcedCs) * 10;
-  }
-  const list = activeTargets();
-  if (!list.length) return realMs;
-  let targetVal;
-  if (!CFG.scrambleLotto){
-    targetVal = list[S.seqIndex % list.length];
-    S.seqIndex++;
-    if (CFG.autoDisarm && S.seqIndex >= list.length) S.disarmed = true;
-  } else {
-    if (!S.scrambledTargets || S.scrambledTargets.length !== list.length || S.scrambleIndex >= S.scrambledTargets.length){
-      reshuffleLottoTargets();
-    }
-    targetVal = S.scrambledTargets[S.scrambleIndex % S.scrambledTargets.length];
-    S.scrambleIndex++;
-    if (CFG.autoDisarm && S.scrambleIndex >= S.scrambledTargets.length) S.disarmed = true;
-  }
-  syncVisualIndicators();
-  const forcedCs = ((targetVal % 100) + 100) % 100;
-  if (minPartCs === 0 && realSec === 0) realSec = 1;
-  return (minPartCs + realSec * 100 + forcedCs) * 10;
-}
-function recordPeek(type, shownMs){
-  const sCs = Math.floor(shownMs / 10) % 100;
-  const sSec = Math.floor(shownMs / 1000) % 60;
-  const fmt = formatMs(shownMs);
+
+function recordPeek(kind, ms){
+  const fmt = formatMs(ms);
+  const largeInt = timeToLargeInt(ms);
+  const totalCs = Math.floor(ms / 10);
+  const cs = totalCs % 100;
+  const sec = Math.floor(totalCs / 100) % 60;
+  const min = Math.floor(totalCs / 6000);
   const entry = {
-    type,
-    realFormatted: fmt,
-    shownFormatted: fmt,
-    largeInt: timeToLargeInt(shownMs),
-    realSec: sSec,
-    realCs: sCs,
-    sec: sSec,
-    cs: sCs,
+    type: kind,
+    formatted: fmt,
+    largeInt,
+    min,
+    sec,
+    cs,
     at: new Date().toLocaleTimeString()
   };
   S.peekLog.unshift(entry);
-  if (S.peekLog.length > 15) S.peekLog.pop();
+  if (S.peekLog.length > 30) S.peekLog.pop();
   pushPeekTelemetry(entry);
+  renderPeekLog();
 }
+
+function renderPeekLog(){
+  const box = document.getElementById("peekLogBox");
+  if (!box) return;
+  if (!S.peekLog.length){
+    box.textContent = "No peeks logged yet.";
+    return;
+  }
+  box.textContent = S.peekLog.map(p => `[${p.at}] ${p.type} -> ${p.formatted} (Int: ${p.largeInt})`).join("\n");
+}
+
 function tick(){
   if (!S.running) return;
   const now = performance.now();
-  const splitMs = Math.max(0, now - S.realLapStartPerf);
-  const totalMs = S.lapStartElapsed + splitMs;
+  const unlappedSplitMs = Math.max(0, now - S.realLapStartPerf);
+  const totalMs = S.lapStartElapsed + unlappedSplitMs;
   S.displayedMs = totalMs;
   elReadout.textContent = formatMs(totalMs);
-  const liveRow = elLapsWrap.querySelector(".lap-row.live .lap-time");
-  if (liveRow) liveRow.textContent = formatMs(splitMs);
+  updateActiveLapRow(unlappedSplitMs);
   S.rafId = requestAnimationFrame(tick);
 }
-function renderLaps(){
-  const currentSplit = Math.max(0, S.displayedMs - S.lapStartElapsed);
-  let html = "";
-  const showLiveRow = S.running || (S.displayedMs > 0 && S.laps.length === 0);
-  if (showLiveRow){
-    const liveNum = S.laps.length + 1;
-    html += `<div class="lap-row live"><span>Lap ${liveNum}</span><span class="lap-time">${formatMs(currentSplit)}</span></div>`;
-  }
-  let minIdx = -1, maxIdx = -1;
-  if (S.laps.length >= 2){
-    let minV = Infinity, maxV = -Infinity;
-    S.laps.forEach((l, idx) => {
-      if (l.splitMs < minV){ minV = l.splitMs; minIdx = idx; }
-      if (l.splitMs > maxV){ maxV = l.splitMs; maxIdx = idx; }
-    });
-  }
-  for (let i = S.laps.length - 1; i >= 0; i--){
-    const l = S.laps[i];
-    const cls = (i === minIdx) ? " best" : (i === maxIdx) ? " worst" : "";
-    html += `<div class="lap-row${cls}"><span>Lap ${l.num}</span><span>${formatMs(l.splitMs)}</span></div>`;
-  }
-  elLapsWrap.innerHTML = html;
+
+function updateActiveLapRow(currentSplitMs){
+  const first = elLapsWrap.firstElementChild;
+  if (!first) return;
+  const splitSpan = first.querySelector(".lap-split");
+  if (splitSpan) splitSpan.textContent = formatMs(currentSplitMs);
 }
+
+function renderLaps(){
+  elLapsWrap.innerHTML = "";
+  if (!S.laps.length) return;
+  for (let i = S.laps.length - 1; i >= 0; i--){
+    const lap = S.laps[i];
+    const row = document.createElement("div");
+    row.className = "lap-row";
+    row.innerHTML = `<span class="lap-num">Lap ${lap.num}</span><span class="lap-split">${formatMs(lap.splitMs)}</span>`;
+    elLapsWrap.appendChild(row);
+  }
+}
+
 function handleStartStop(){
   if (kpOverlay.classList.contains("open")) return;
   S.covertBuffer = [];
@@ -961,7 +911,7 @@ function handleStartStop(){
     const realTotalMs = S.lapStartElapsed + unlappedSplitMs;
     let shownTotalMs = realTotalMs;
     if (CFG.triggerOn === "both" || CFG.triggerOn === "stop"){
-      if (S.laps.length > 0 && CFG.mode === "seq" && S.seqIndex >= activeTargets().length){
+      if (S.laps.length > 0 && CFG.triggerOn === "both"){
         shownTotalMs = S.lapStartElapsed;
       } else {
         shownTotalMs = computeForcedMs(realTotalMs, false);
@@ -978,6 +928,7 @@ function handleStartStop(){
     renderLaps();
   }
 }
+
 function handleLapReset(){
   if (kpOverlay.classList.contains("open")) return;
   if (S.running){
@@ -1036,12 +987,19 @@ function handleLapReset(){
     elLapBtn.textContent = "Lap";
     elLapBtn.className = "sw-btn disabled";
     renderLaps();
+    // Reset automatically switches force mode off (turns on 100% fair mode)
+    CFG.mode = "off";
+    S.disarmed = true;
+    saveLocal();
+    syncVisualIndicators();
+    pushLocalToCloud();
   } else {
     pushCovertDigit("0", elLapBtn);
   }
 }
 elStartBtn.addEventListener("pointerdown", e => { e.preventDefault(); handleStartStop(); });
 elLapBtn.addEventListener("pointerdown", e => { e.preventDefault(); handleLapReset(); });
+
 /* ---------- Built-in 3D Die Roller (Hides App Clip) ---------- */
 const diceApp = document.getElementById("diceApp");
 const dieCube = document.getElementById("dieCube");
@@ -1055,10 +1013,11 @@ const PIP_MAP = {
   6: [0, 2, 3, 5, 6, 8]
 };
 let rolling = false;
-function showDieFace(face){
-  const active = new Set(PIP_MAP[face] || PIP_MAP[5]);
+function setDieFace(n){
+  const active = new Set(PIP_MAP[n] || PIP_MAP[1]);
   diePips.forEach((p, idx) => p.classList.toggle("on", active.has(idx)));
 }
+setDieFace(1);
 function rollDie(){
   if (rolling) return;
   rolling = true;
@@ -1068,16 +1027,16 @@ function rollDie(){
   let ticks = 0;
   const shuffle = setInterval(() => {
     ticks++;
-    showDieFace(1 + Math.floor(Math.random() * 6));
+    setDieFace(1 + Math.floor(Math.random() * 6));
     if (ticks >= 6){
       clearInterval(shuffle);
-      showDieFace(1 + Math.floor(Math.random() * 6));
+      setDieFace(1 + Math.floor(Math.random() * 6));
       rolling = false;
     }
   }, 75);
 }
 function openDiceApp(){
-  showDieFace(1 + Math.floor(Math.random() * 6));
+  setDieFace(1 + Math.floor(Math.random() * 6));
   diceApp.classList.add("open");
   diceApp.setAttribute("aria-hidden", "false");
 }
@@ -1086,38 +1045,41 @@ function closeDiceApp(){
   diceApp.setAttribute("aria-hidden", "true");
 }
 document.getElementById("dieStage").addEventListener("click", rollDie);
-/* Double-tap any of the 4 corners (or background outside the die, or hold) to return from the Dice Roller to the Stopwatch */
+
+/* Double-tap any of the 4 corners (or background outside the die, or 400ms hold) to return from the Dice Roller to the Stopwatch */
 let lastDieExitTap = 0;
-diceApp.querySelectorAll(".die-corner").forEach(corner => {
-  let holdT = null;
-  corner.addEventListener("pointerdown", e => {
+function triggerDieExit(e){
+  if (e){
+    e.preventDefault();
     e.stopPropagation();
-    const now = Date.now();
-    if (now - lastDieExitTap < 380){
-      lastDieExitTap = 0;
-      clearTimeout(holdT);
-      closeDiceApp();
-      return;
-    }
-    lastDieExitTap = now;
-    clearTimeout(holdT);
-    holdT = setTimeout(() => { holdT = null; closeDiceApp(); }, 500);
-  });
-  const cancel = () => { clearTimeout(holdT); holdT = null; };
-  corner.addEventListener("pointerup", cancel);
-  corner.addEventListener("pointercancel", cancel);
-  corner.addEventListener("pointerleave", cancel);
-});
-diceApp.addEventListener("click", e => {
-  if (e.target.closest("#dieStage")) return;
+  }
   const now = Date.now();
-  if (now - lastDieExitTap < 380){
+  if (now - lastDieExitTap < 550){
     lastDieExitTap = 0;
     closeDiceApp();
   } else {
     lastDieExitTap = now;
   }
+}
+
+diceApp.querySelectorAll(".die-corner").forEach(corner => {
+  let holdT = null;
+  corner.addEventListener("pointerdown", e => {
+    e.stopPropagation();
+    triggerDieExit(e);
+    clearTimeout(holdT);
+    holdT = setTimeout(() => { holdT = null; closeDiceApp(); }, 400);
+  }, { passive: false });
+  const cancel = () => { clearTimeout(holdT); holdT = null; };
+  corner.addEventListener("pointerup", cancel);
+  corner.addEventListener("pointercancel", cancel);
+  corner.addEventListener("pointerleave", cancel);
 });
+diceApp.addEventListener("pointerdown", e => {
+  if (e.target.closest("#dieStage")) return;
+  triggerDieExit(e);
+}, { passive: false });
+
 /* ---------- Lower Black Area (Under Reset & Start):
    - Double/Triple-Tap LEFT Side = Execute Left Redirect (Default: Dice Roller)
    - Double/Triple-Tap RIGHT Side = Execute Right Redirect (Default: Calculator / Saved Website) ---------- */
@@ -1125,12 +1087,12 @@ diceApp.addEventListener("click", e => {
   const lowerArea = document.getElementById("lowerArea");
   let lastLeftTap = 0;
   let lastRightTap = 0;
-  lowerArea.addEventListener("click", e => {
+  lowerArea.addEventListener("pointerdown", e => {
     const now = Date.now();
     const isRightSide = e.clientX >= (window.innerWidth / 2);
     if (!isRightSide){
       lastRightTap = 0;
-      if (now - lastLeftTap < 360){
+      if (now - lastLeftTap < 500){
         lastLeftTap = 0;
         executeRedirect(CFG.leftRedirectUrl || "dice", !!CFG.leftOpenSafari);
       } else {
@@ -1138,7 +1100,7 @@ diceApp.addEventListener("click", e => {
       }
     } else {
       lastLeftTap = 0;
-      if (now - lastRightTap < 360){
+      if (now - lastRightTap < 500){
         lastRightTap = 0;
         const target = getRightRedirectTarget();
         executeRedirect(target.url, target.openInSafari);
@@ -1146,8 +1108,9 @@ diceApp.addEventListener("click", e => {
         lastRightTap = now;
       }
     }
-  });
+  }, { passive: true });
 })();
+
 /* ---------- Upper Zone Triple-Tap: Reset / Toggle Back to Default ---------- */
 (() => {
   const upperZone = document.getElementById("upperZone");
@@ -1177,6 +1140,35 @@ diceApp.addEventListener("click", e => {
     }, 280);
   });
 })();
+
+/* ---------- Covert Digit Entry (Tap Zero Digits 1-8 / Lap 0 / Pager 9) ---------- */
+function pushCovertDigit(d, elVisual){
+  if (S.running || S.displayedMs > 0) return;
+  animatePress(elVisual);
+  S.covertBuffer.push(String(d));
+  pulseLockDot(160);
+  if (S.covertBuffer.length >= 2){
+    const tens = Number(S.covertBuffer[0]);
+    const ones = Number(S.covertBuffer[1]);
+    const target = (tens * 10) + ones;
+    CFG.mode = "single";
+    CFG.singleTarget = target;
+    S.disarmed = false;
+    saveLocal();
+    syncVisualIndicators();
+    pulseLockDot(700);
+    S.covertBuffer = [];
+  }
+}
+elReadout.addEventListener("pointerdown", e => {
+  const ch = e.target.closest(".ch");
+  if (!ch) return;
+  const d = ch.dataset.digit;
+  if (!d) return;
+  e.preventDefault();
+  pushCovertDigit(d, ch);
+});
+
 /* ---------- Center Dots between Lap & Start:
    - Single-Tap at 00:00.00 = Covert Digit "9"
    - Double-Tap = Opens Overt Number Keypad Overlay ---------- */
@@ -1198,95 +1190,89 @@ function updateKpDisplay(){
     if (!kpBuffer.length){
       kpDisplay.textContent = activeTargets().map(n => p2(n)).join("·");
     } else {
-      const pairs = [];
-      for (let i = 0; i < kpBuffer.length; i += 2){
-        const a = kpBuffer[i];
-        const b = kpBuffer[i + 1] !== undefined ? kpBuffer[i + 1] : "_";
-        pairs.push(a + b);
+      const parts = [];
+      for (let i = 0; i < 6; i++){
+        const d1 = kpBuffer[i*2] !== undefined ? String(kpBuffer[i*2]) : "-";
+        const d2 = kpBuffer[i*2+1] !== undefined ? String(kpBuffer[i*2+1]) : "-";
+        parts.push(d1 + d2);
       }
-      kpDisplay.textContent = pairs.join("·");
+      kpDisplay.textContent = parts.join("·");
     }
   }
 }
-function openKeypad(){
-  kpType = "single";
+function openKp(){
   kpBuffer = [];
+  kpType = (CFG.mode === "seq") ? "lotto" : "single";
   updateKpDisplay();
   kpOverlay.classList.add("open");
 }
-function closeKeypadAndCommit(){
+function closeKp(){ kpOverlay.classList.remove("open"); }
+document.getElementById("kpClose").addEventListener("click", closeKp);
+kpModeBtn.addEventListener("click", () => {
+  kpType = (kpType === "single") ? "lotto" : "single";
+  kpBuffer = [];
+  updateKpDisplay();
+});
+kpClearBtn.addEventListener("click", () => {
+  kpBuffer = [];
+  updateKpDisplay();
+});
+kpGrid.addEventListener("click", e => {
+  const b = e.target.closest("button[data-k]");
+  if (!b) return;
+  const d = Number(b.dataset.k);
   if (kpType === "single"){
-    if (kpBuffer.length > 0){
-      CFG.singleTarget = Math.max(0, Math.min(99, parseInt(kpBuffer.join(""), 10) || 0));
+    if (kpBuffer.length < 2) kpBuffer.push(d);
+    updateKpDisplay();
+    if (kpBuffer.length === 2){
+      const val = kpBuffer[0] * 10 + kpBuffer[1];
+      CFG.mode = "single";
+      CFG.singleTarget = val;
+      S.disarmed = false;
+      saveLocal();
+      pushLocalToCloud();
+      syncVisualIndicators();
+      pulseLockDot(400);
+      setTimeout(closeKp, 260);
     }
-    CFG.mode = "single";
-    S.disarmed = false;
-    saveLocal();
   } else {
-    if (kpBuffer.length > 0){
-      const newTargets = [null, null, null, null, null, null];
-      let idx = 0;
-      for (let i = 0; i < kpBuffer.length && idx < 6; i += 2){
-        const pairStr = kpBuffer[i] + (kpBuffer[i + 1] || "0");
-        newTargets[idx++] = Math.max(0, Math.min(99, parseInt(pairStr, 10) || 0));
+    if (kpBuffer.length < 12) kpBuffer.push(d);
+    updateKpDisplay();
+    if (kpBuffer.length === 12){
+      const arr = [];
+      for (let i = 0; i < 6; i++) arr.push(kpBuffer[i*2] * 10 + kpBuffer[i*2+1]);
+      CFG.mode = "seq";
+      CFG.targets = arr;
+      S.seqIndex = 0;
+      reshuffleLottoTargets();
+      S.disarmed = false;
+      saveLocal();
+      pushLocalToCloud();
+      syncVisualIndicators();
+      pulseLockDot(400);
+      setTimeout(closeKp, 260);
+    }
+  }
+});
+let dotTaps = 0, dotTapTimer = null;
+elPagerDots.addEventListener("pointerdown", e => {
+  e.preventDefault();
+  animatePress(elPagerDots);
+  dotTaps++;
+  clearTimeout(dotTapTimer);
+  if (dotTaps === 1){
+    dotTapTimer = setTimeout(() => {
+      dotTaps = 0;
+      if (!S.running && S.displayedMs === 0){
+        pushCovertDigit("9", elPagerDots);
       }
-      CFG.targets = newTargets;
-    }
-    CFG.mode = "seq";
-    S.seqIndex = 0;
-    reshuffleLottoTargets();
-    S.disarmed = false;
-    saveLocal();
+    }, 250);
+  } else if (dotTaps >= 2){
+    dotTaps = 0;
+    openKp();
   }
-  kpOverlay.classList.remove("open");
-  syncVisualIndicators();
-  pulseLockDot(900);
-}
-kpModeBtn.addEventListener("pointerdown", e => {
-  e.preventDefault();
-  kpType = (kpType === "single") ? "seq" : "single";
-  kpBuffer = [];
-  updateKpDisplay();
 });
-kpClearBtn.addEventListener("pointerdown", e => {
-  e.preventDefault();
-  kpBuffer = [];
-  updateKpDisplay();
-});
-kpGrid.addEventListener("pointerdown", e => {
-  const btn = e.target.closest(".kp-btn");
-  if (!btn) return;
-  e.preventDefault();
-  const val = btn.dataset.val;
-  if (val === "ENTER"){ closeKeypadAndCommit(); return; }
-  if (kpType === "single"){
-    if (kpBuffer.length >= 2) kpBuffer = [];
-    kpBuffer.push(val);
-  } else {
-    if (kpBuffer.length >= 12) kpBuffer = [];
-    kpBuffer.push(val);
-  }
-  updateKpDisplay();
-});
-(() => {
-  let tapCount = 0, tapTimer = null;
-  elPagerDots.addEventListener("pointerdown", e => {
-    e.preventDefault();
-    tapCount++;
-    clearTimeout(tapTimer);
-    if (tapCount >= 2){
-      tapCount = 0;
-      animatePress(elPagerDots);
-      if (kpOverlay.classList.contains("open")) kpOverlay.classList.remove("open");
-      else openKeypad();
-    } else {
-      tapTimer = setTimeout(() => {
-        if (tapCount === 1) pushCovertDigit("9", elPagerDots);
-        tapCount = 0;
-      }, 250);
-    }
-  });
-})();
+
 /* ---------- Bottom Tab Bar Controls:
    - Tap "World Clock" -> 17 Force Mode
    - Tap "Alarms" -> Single Number Force Mode (.00–.99)
@@ -1376,64 +1362,74 @@ kpGrid.addEventListener("pointerdown", e => {
     pulseLockDot(450);
   });
 })();
-/* ---------- Top Corner Redirects (Top-Left = Always Built-in 3D Dice Roller, Top-Right = Calculator): Requires Double-Tap ---------- */
+
+/* ---------- Top Corner Redirects (Top-Left = Built-in 3D Dice Roller, Top-Right = Calculator) ----------
+   Requires Double-Tap. Uses responsive pointerdown event with 550ms window and visual feedback so it triggers 
+   reliably every single time on iOS touchscreens. */
 (() => {
   const cornerTL = document.getElementById("cornerTL");
   const cornerTR = document.getElementById("cornerTR");
-  let lastTLTap = 0;
-  let lastTRTap = 0;
 
-  cornerTL.addEventListener("pointerdown", () => {
-    pulseLockDot(200);
-  });
-  cornerTL.addEventListener("click", e => {
-    e.preventDefault();
-    const now = Date.now();
-    if (now - lastTLTap < 380){
-      lastTLTap = 0;
-      openDiceApp();
-    } else {
-      lastTLTap = now;
+  function bindCornerDoubleTap(el, onTrigger){
+    if (!el) return;
+    let taps = 0;
+    let timer = null;
+    function handle(e){
+      if (e){
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      taps++;
+      pulseLockDot(160);
+      if (taps >= 2){
+        clearTimeout(timer);
+        taps = 0;
+        onTrigger();
+        return;
+      }
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        taps = 0;
+      }, 550);
     }
+    el.addEventListener("pointerdown", handle, { passive: false });
+    el.addEventListener("click", e => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+  }
+
+  bindCornerDoubleTap(cornerTL, () => {
+    openDiceApp();
   });
 
-  cornerTR.addEventListener("pointerdown", () => {
-    syncCornerLinks();
-    pulseLockDot(200);
-  });
-  cornerTR.addEventListener("click", e => {
-    e.preventDefault();
-    const now = Date.now();
-    if (now - lastTRTap < 380){
-      lastTRTap = 0;
-      const dest = normalizeUrl(CFG.icontrolUrl || "https://smartcalc-zeta.vercel.app/");
-      executeRedirect(dest, CFG.icontrolOpenSafari !== false);
-    } else {
-      lastTRTap = now;
-    }
+  bindCornerDoubleTap(cornerTR, () => {
+    const dest = normalizeUrl(CFG.icontrolUrl || "https://smartcalc-zeta.vercel.app/");
+    executeRedirect(dest, CFG.icontrolOpenSafari);
   });
 })();
+
 /* ---------- Settings Sheet & Saved Websites Manager ---------- */
 const sheet = document.getElementById("sheet");
 const modeList = document.getElementById("modeList");
-const singleIn = document.getElementById("singleIn");
-const slotsGrid = document.getElementById("slotsGrid");
+const singleIn = document.getElementById("singleTargetIn");
 const scrambleLottoIn = document.getElementById("scrambleLottoIn");
 const shuffleSlotsBtn = document.getElementById("shuffleSlotsBtn");
 const leftUrlIn = document.getElementById("leftUrlIn");
 const leftSafariIn = document.getElementById("leftSafariIn");
 const leftDiceBtn = document.getElementById("leftDiceBtn");
-const customSiteUrlIn = document.getElementById("customSiteUrlIn");
-const customSiteNameIn = document.getElementById("customSiteNameIn");
+const customUrlIn = document.getElementById("customUrlIn");
+const openSafariIn = document.getElementById("openSafariIn");
 const rightDiceBtn = document.getElementById("rightDiceBtn");
-const saveSiteBtn = document.getElementById("saveSiteBtn");
-const openInSafariIn = document.getElementById("openInSafariIn");
 const savedSitesList = document.getElementById("savedSitesList");
+const newSiteName = document.getElementById("newSiteName");
+const newSiteUrl = document.getElementById("newSiteUrl");
+const newSiteSafari = document.getElementById("newSiteSafari");
+const btnAddSite = document.getElementById("btnAddSite");
 const icontrolUrlIn = document.getElementById("icontrolUrlIn");
 const icontrolSafariIn = document.getElementById("icontrolSafariIn");
 const triggerIn = document.getElementById("triggerIn");
-const disarmIn = document.getElementById("disarmIn");
-const peekHistoryBox = document.getElementById("peekHistoryBox");
+const autoDisarmIn = document.getElementById("autoDisarmIn");
 let draft = null;
 
 leftDiceBtn.addEventListener("click", () => {
@@ -1443,13 +1439,13 @@ leftDiceBtn.addEventListener("click", () => {
   renderSavedSitesInSettings();
 });
 rightDiceBtn.addEventListener("click", () => {
-  customSiteUrlIn.value = "dice";
-  openInSafariIn.checked = false;
+  customUrlIn.value = "dice";
+  openSafariIn.checked = false;
   if (draft){ draft.customSiteUrl = "dice"; draft.openInSafari = false; }
   renderSavedSitesInSettings();
 });
 shuffleSlotsBtn.addEventListener("click", () => {
-  const inps = Array.from(slotsGrid.querySelectorAll(".slot-in"));
+  const inps = [0,1,2,3,4,5].map(i => document.getElementById(`slot${i}`));
   const vals = inps.map(inp => inp.value.trim()).filter(v => v !== "");
   if (vals.length > 1){
     const orig = vals.join(",");
@@ -1471,7 +1467,7 @@ function renderSavedSitesInSettings(){
     return;
   }
   const leftNorm = normalizeUrl(leftUrlIn.value || draft.leftRedirectUrl);
-  const rightNorm = normalizeUrl(customSiteUrlIn.value || draft.customSiteUrl);
+  const rightNorm = normalizeUrl(customUrlIn.value || draft.customSiteUrl);
   savedSitesList.innerHTML = draft.savedSites.map((site, idx) => {
     const sNorm = normalizeUrl(site.url);
     const badges = [];
@@ -1489,171 +1485,106 @@ function renderSavedSitesInSettings(){
       <div class="site-actions">
         <button type="button" class="pill-btn sec site-left" data-idx="${idx}">Left</button>
         <button type="button" class="pill-btn sec site-right" data-idx="${idx}">Right</button>
-        <button type="button" class="site-del" data-idx="${idx}">×</button>
+        <button type="button" class="site-del" data-idx="${idx}" title="Delete">×</button>
       </div>
     </div>`;
   }).join("");
+
+  savedSitesList.querySelectorAll(".site-left").forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      const idx = Number(btn.dataset.idx);
+      const site = draft.savedSites[idx];
+      if (!site) return;
+      leftUrlIn.value = site.url;
+      leftSafariIn.checked = !!site.openInSafari;
+      draft.leftRedirectUrl = site.url;
+      draft.leftOpenSafari = !!site.openInSafari;
+      renderSavedSitesInSettings();
+    });
+  });
+  savedSitesList.querySelectorAll(".site-right").forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      const idx = Number(btn.dataset.idx);
+      const site = draft.savedSites[idx];
+      if (!site) return;
+      customUrlIn.value = site.url;
+      openSafariIn.checked = !!site.openInSafari;
+      draft.customSiteUrl = site.url;
+      draft.openInSafari = !!site.openInSafari;
+      renderSavedSitesInSettings();
+    });
+  });
+  savedSitesList.querySelectorAll(".site-del").forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      const idx = Number(btn.dataset.idx);
+      draft.savedSites.splice(idx, 1);
+      renderSavedSitesInSettings();
+    });
+  });
 }
-saveSiteBtn.addEventListener("click", () => {
-  if (!draft) return;
-  const rawUrl = normalizeUrl(customSiteUrlIn.value);
-  if (!rawUrl) return;
-  unmarkDeletedUrl(rawUrl);
-  let label = customSiteNameIn.value.trim();
-  if (!label){
-    if (rawUrl === "dice") label = "Built-in 3D Dice Roller";
-    else {
-      try { label = new URL(rawUrl).hostname.replace(/^www\./, ""); } catch(e){ label = rawUrl; }
-    }
-  }
-  customSiteUrlIn.value = rawUrl;
-  draft.customSiteUrl = rawUrl;
-  draft.openInSafari = openInSafariIn.checked;
-  const existingIdx = draft.savedSites.findIndex(s => normalizeUrl(s.url) === rawUrl);
-  if (existingIdx >= 0){
-    draft.savedSites[existingIdx] = { name: label, url: rawUrl, openInSafari: openInSafariIn.checked };
-  } else {
-    draft.savedSites.unshift({ name: label, url: rawUrl, openInSafari: openInSafariIn.checked });
-  }
-  customSiteNameIn.value = "";
-  CFG.customSiteUrl = draft.customSiteUrl;
-  CFG.openInSafari = draft.openInSafari;
-  CFG.savedSites = draft.savedSites.slice();
-  CFG.localUpdatedAt = Date.now();
-  saveLocal();
-  fetch(BACKEND_URL + "/api/sites", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ savedSites: CFG.savedSites, updatedAt: CFG.localUpdatedAt })
-  }).catch(() => {});
+
+btnAddSite.addEventListener("click", () => {
+  const url = normalizeUrl(newSiteUrl.value);
+  if (!url) return;
+  const name = newSiteName.value.trim() || url;
+  const openInSafari = newSiteSafari.checked;
+  if (!draft) draft = JSON.parse(JSON.stringify(CFG));
+  draft.savedSites = draft.savedSites.filter(s => normalizeUrl(s.url) !== url);
+  draft.savedSites.unshift({ name, url, openInSafari });
+  newSiteName.value = "";
+  newSiteUrl.value = "";
+  newSiteSafari.checked = false;
   renderSavedSitesInSettings();
 });
-savedSitesList.addEventListener("click", e => {
-  if (!draft) return;
-  const delBtn = e.target.closest(".site-del");
-  if (delBtn){
-    e.stopPropagation();
-    const idx = Number(delBtn.dataset.idx);
-    const toDel = draft.savedSites[idx];
-    if (toDel && toDel.url) addDeletedUrl(toDel.url);
-    draft.savedSites.splice(idx, 1);
-    CFG.savedSites = draft.savedSites.slice();
-    CFG.localUpdatedAt = Date.now();
-    saveLocal();
-    fetch(BACKEND_URL + "/api/sites", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ savedSites: CFG.savedSites, updatedAt: CFG.localUpdatedAt })
-    }).catch(() => {});
-    renderSavedSitesInSettings();
-    return;
-  }
-  const leftBtn = e.target.closest(".site-left");
-  if (leftBtn){
-    e.stopPropagation();
-    const idx = Number(leftBtn.dataset.idx);
-    const site = draft.savedSites[idx];
-    if (site){
-      draft.leftRedirectUrl = normalizeUrl(site.url);
-      draft.leftOpenSafari = !!site.openInSafari;
-      leftUrlIn.value = draft.leftRedirectUrl;
-      leftSafariIn.checked = draft.leftOpenSafari;
-      renderSavedSitesInSettings();
-    }
-    return;
-  }
-  const rightBtn = e.target.closest(".site-right");
-  if (rightBtn || e.target.closest(".site-item")){
-    e.stopPropagation();
-    const el = rightBtn || e.target.closest(".site-item");
-    const idx = Number(el.dataset.idx);
-    const site = draft.savedSites[idx];
-    if (site){
-      draft.customSiteUrl = normalizeUrl(site.url);
-      draft.openInSafari = !!site.openInSafari;
-      customSiteUrlIn.value = draft.customSiteUrl;
-      openInSafariIn.checked = draft.openInSafari;
-      renderSavedSitesInSettings();
-    }
-  }
-});
-function openSettings(){
+
+function openSettingsSheet(){
   draft = JSON.parse(JSON.stringify(CFG));
-  modeList.querySelectorAll(".opt").forEach(r =>
-    r.classList.toggle("sel", r.dataset.mode === draft.mode));
-  singleIn.value = p2(draft.singleTarget);
-  slotsGrid.querySelectorAll(".slot-in").forEach(inp => {
-    const idx = Number(inp.dataset.slot);
-    inp.value = draft.targets[idx] !== null ? p2(draft.targets[idx]) : "";
+  modeList.querySelectorAll(".opt").forEach(r => {
+    r.classList.toggle("sel", r.dataset.mode === draft.mode);
   });
-  scrambleLottoIn.checked = !!draft.scrambleLotto;
+  singleIn.value = (typeof draft.singleTarget === "number") ? draft.singleTarget : 18;
+  [0,1,2,3,4,5].forEach(i => {
+    const inp = document.getElementById(`slot${i}`);
+    if (inp) inp.value = (Array.isArray(draft.targets) && draft.targets[i] !== undefined) ? draft.targets[i] : "";
+  });
+  scrambleLottoIn.checked = draft.scrambleLotto !== false;
   leftUrlIn.value = draft.leftRedirectUrl || "https://ssw.im/276";
   leftSafariIn.checked = !!draft.leftOpenSafari;
-  customSiteUrlIn.value = draft.customSiteUrl || "https://icontrol-magic.onrender.com/";
-  customSiteNameIn.value = "";
-  openInSafariIn.checked = !!draft.openInSafari;
+  customUrlIn.value = draft.customSiteUrl || "https://icontrol-magic.onrender.com/";
+  openSafariIn.checked = !!draft.openInSafari;
   icontrolUrlIn.value = draft.icontrolUrl || "https://smartcalc-zeta.vercel.app/";
   icontrolSafariIn.checked = !!draft.icontrolOpenSafari;
-  triggerIn.value = draft.triggerOn;
-  disarmIn.checked = draft.autoDisarm;
+  triggerIn.value = draft.triggerOn || "both";
+  autoDisarmIn.checked = !!draft.autoDisarm;
   renderSavedSitesInSettings();
-  if (S.peekLog.length){
-    peekHistoryBox.textContent = S.peekLog.map(
-      e => `[${e.at}] ${e.type}: ${e.shownFormatted} (${e.largeInt})`
-    ).join("\n");
-  } else {
-    peekHistoryBox.textContent = "No stops recorded yet.";
-  }
+  renderPeekLog();
   sheet.classList.add("open");
   sheet.setAttribute("aria-hidden", "false");
 }
-function closeSettings(save){
+
+function closeSettingsSheet(save){
   if (save && draft){
-    if (singleIn.value.trim() !== ""){
-      draft.singleTarget = Math.max(0, Math.min(99, parseInt(singleIn.value, 10) || 0));
-    }
-    slotsGrid.querySelectorAll(".slot-in").forEach(inp => {
-      const idx = Number(inp.dataset.slot);
-      const raw = inp.value.trim();
-      draft.targets[idx] = raw === "" ? null : Math.max(0, Math.min(99, parseInt(raw, 10) || 0));
+    draft.singleTarget = Math.max(0, Math.min(99, Number(singleIn.value) || 0));
+    draft.targets = [0,1,2,3,4,5].map(i => {
+      const v = document.getElementById(`slot${i}`).value.trim();
+      return v === "" ? null : Math.max(0, Math.min(99, Number(v) || 0));
     });
     draft.scrambleLotto = scrambleLottoIn.checked;
     draft.leftRedirectUrl = normalizeUrl(leftUrlIn.value || "https://ssw.im/276");
     draft.leftOpenSafari = leftSafariIn.checked;
-    if (customSiteUrlIn.value.trim()) draft.customSiteUrl = normalizeUrl(customSiteUrlIn.value);
-    draft.openInSafari = openInSafariIn.checked;
+    if (customUrlIn.value.trim()) draft.customSiteUrl = normalizeUrl(customUrlIn.value);
+    draft.openInSafari = openSafariIn.checked;
     if (icontrolUrlIn.value.trim()) draft.icontrolUrl = normalizeUrl(icontrolUrlIn.value);
     draft.icontrolOpenSafari = icontrolSafariIn.checked;
     draft.triggerOn = triggerIn.value;
-    draft.autoDisarm = disarmIn.checked;
-    // Auto-save Left Target if not dice and not already in savedSites
-    const lNorm = normalizeUrl(draft.leftRedirectUrl);
-    if (lNorm && lNorm !== "dice"){
-      unmarkDeletedUrl(lNorm);
-      const ex = draft.savedSites.findIndex(s => normalizeUrl(s.url) === lNorm);
-      if (ex === -1){
-        let lbl = lNorm;
-        try { lbl = new URL(lNorm).hostname.replace(/^www\./, ""); } catch(e){}
-        draft.savedSites.push({ name: lbl, url: lNorm, openInSafari: !!draft.leftOpenSafari });
-      }
-    }
-    // Auto-save Right Target if not dice and not already in savedSites
-    const rNorm = normalizeUrl(draft.customSiteUrl);
-    if (rNorm && rNorm !== "dice"){
-      unmarkDeletedUrl(rNorm);
-      const ex = draft.savedSites.findIndex(s => normalizeUrl(s.url) === rNorm);
-      if (ex === -1){
-        let lbl = rNorm;
-        try { lbl = new URL(rNorm).hostname.replace(/^www\./, ""); } catch(e){}
-        draft.savedSites.push({ name: lbl, url: rNorm, openInSafari: !!draft.openInSafari });
-      }
-    }
-    CFG = draft;
-    CFG.savedSites = draft.savedSites.slice();
-    S.seqIndex = 0;
-    reshuffleLottoTargets();
-    S.disarmed = false;
+    draft.autoDisarm = autoDisarmIn.checked;
+    CFG = JSON.parse(JSON.stringify(draft));
+    CFG.localUpdatedAt = Date.now();
     saveLocal();
+    syncCornerLinks();
     syncVisualIndicators();
     fetch(BACKEND_URL + "/api/acaat", {
       method: "POST",
@@ -1675,32 +1606,33 @@ function closeSettings(save){
       })
     }).catch(() => {});
   }
+  draft = null;
   sheet.classList.remove("open");
   sheet.setAttribute("aria-hidden", "true");
 }
+
 modeList.addEventListener("click", e => {
-  const r = e.target.closest(".opt");
-  if (!r) return;
-  draft.mode = r.dataset.mode;
-  modeList.querySelectorAll(".opt").forEach(row =>
-    row.classList.toggle("sel", row.dataset.mode === draft.mode));
+  const row = e.target.closest(".opt");
+  if (!row || !draft) return;
+  modeList.querySelectorAll(".opt").forEach(r => r.classList.remove("sel"));
+  row.classList.add("sel");
+  draft.mode = row.dataset.mode;
 });
-document.getElementById("shCancel").addEventListener("click", () => closeSettings(false));
-document.getElementById("shDone").addEventListener("click", () => closeSettings(true));
-(() => {
-  const swTab = document.getElementById("swTab");
-  let last = 0;
-  swTab.addEventListener("pointerdown", e => {
-    const now = performance.now();
-    if (now - last < 320){
-      e.preventDefault();
-      openSettings();
-      last = 0;
-    } else {
-      last = now;
-    }
-  });
-})();
+document.getElementById("shCancel").addEventListener("click", () => closeSettingsSheet(false));
+document.getElementById("shSave").addEventListener("click", () => closeSettingsSheet(true));
+
+// Double-tap active Stopwatch tab to open settings
+let swTaps = 0, swTimer = null;
+document.getElementById("swTab").addEventListener("pointerdown", () => {
+  swTaps++;
+  clearTimeout(swTimer);
+  if (swTaps >= 2){
+    swTaps = 0;
+    openSettingsSheet();
+  } else {
+    swTimer = setTimeout(() => { swTaps = 0; }, 400);
+  }
+});
 </script>
 </body>
 </html>
