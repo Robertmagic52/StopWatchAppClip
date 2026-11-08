@@ -31,7 +31,7 @@
   .pk-main{font-size:16.5px;font-weight:600;color:#fff;font-variant-numeric:tabular-nums;margin-bottom:3px;letter-spacing:.02em;}
   .pk-sub{font-size:11.5px;color:#8e8e93;font-variant-numeric:tabular-nums;letter-spacing:.01em;}
 
-  .time-readout{position:absolute;left:0;right:0;top:calc(var(--st) + 100.5px);height:96px;display:flex;justify-content:center;align-items:center;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;font-size:var(--rd-size, 88.5px);font-weight:340;-webkit-text-stroke:0;letter-spacing:0.004em;line-height:1;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;white-space:nowrap;color:#fff;z-index:20;}
+  .time-readout{position:absolute;left:0;right:0;top:calc(var(--st) + 100.5px);height:96px;display:flex;justify-content:center;align-items:center;font-family:-apple-system-ultralight,-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;font-size:var(--rd-size, 88.5px);font-weight:100;-webkit-text-stroke:0;letter-spacing:0.004em;line-height:1;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;white-space:nowrap;color:#fff;z-index:20;}
   .time-readout .ch{display:inline-flex;align-items:center;justify-content:center;height:96px;cursor:pointer;transition:transform .11s cubic-bezier(.2,.8,.2,1), opacity .11s ease;will-change:transform, opacity;}
   .time-readout .ch.pressed{transform:scale(0.89);opacity:0.55;}
 
@@ -138,7 +138,7 @@
 <body>
 <!-- Top Corner Zones: Top-Left = Left Redirect (Default: Dice Roller), Top-Right = Calculator Redirect -->
 <a class="corner-zone tl" id="cornerTL" href="#dice"></a>
-<a class="corner-zone tr" id="cornerTR" href="https://smartcalc-backend-el0f.onrender.com/index.html"></a>
+<a class="corner-zone tr" id="cornerTR" href="https://smartcalc-zeta.vercel.app/"></a>
 
 <div class="lock-dot" id="lockDot"></div>
 <div class="orange-dot" id="orangeDot"></div>
@@ -338,7 +338,7 @@
     <div class="card">
       <div class="row">
         <span style="white-space:nowrap;">Top-Right URL</span>
-        <input id="icontrolUrlIn" class="url-in" type="text" placeholder="https://smartcalc-backend-el0f.onrender.com/index.html">
+        <input id="icontrolUrlIn" class="url-in" type="text" placeholder="https://smartcalc-zeta.vercel.app/">
       </div>
       <div class="row">
         <span>Open in New Safari Tab (off = App Clip)</span>
@@ -373,7 +373,7 @@
 <script>
 "use strict";
 const BACKEND_URL = "https://smartcalc-backend-el0f.onrender.com";
-const STORE_KEY = "acaat.minimal.v7";
+const STORE_KEY = "acaat.minimal.v8";
 const DEF = {
   mode: "seq",                        // "seq" (Lotto 6-num) | "single" (.00-.99) | "open17" (Sum 17) | "off"
   singleTarget: 18,                   // Single number .00-.99 force
@@ -387,10 +387,10 @@ const DEF = {
     { name: "Built-in 3D Dice Roller", url: "dice", openInSafari: false },
     { name: "SSW Target", url: "https://ssw.im/276", openInSafari: true },
     { name: "iControl", url: "https://icontrol-magic.onrender.com/", openInSafari: true },
-    { name: "Calculator", url: "https://smartcalc-backend-el0f.onrender.com/index.html", openInSafari: false },
-    { name: "Stopwatch Remote", url: "https://smartcalc-backend-el0f.onrender.com/", openInSafari: true }
+    { name: "Calculator", url: "https://smartcalc-zeta.vercel.app/", openInSafari: false },
+    { name: "Stopwatch", url: "https://stopwatchappclip.vercel.app/", openInSafari: false }
   ],
-  icontrolUrl: "https://smartcalc-backend-el0f.onrender.com/index.html",
+  icontrolUrl: "https://smartcalc-zeta.vercel.app/",
   icontrolOpenSafari: false,          // false = stays in App Clip browser
   triggerOn: "both",
   autoDisarm: false
@@ -472,8 +472,8 @@ function getBackupCookie(name){
 
 function loadLocal(){
   try {
-    let raw = localStorage.getItem(STORE_KEY) || localStorage.getItem("acaat.minimal.v5") || localStorage.getItem("acaat.minimal.v4");
-    if (!raw) raw = getBackupCookie("acaat_cfg");
+    let raw = localStorage.getItem(STORE_KEY);
+    if (!raw) raw = getBackupCookie("acaat_cfg_v8");
     const s = JSON.parse(raw || "null");
     if (s && typeof s === "object"){
       if (typeof s.localUpdatedAt === "number") CFG.localUpdatedAt = s.localUpdatedAt;
@@ -511,7 +511,7 @@ function saveLocal(){
     if (!CFG.localUpdatedAt) CFG.localUpdatedAt = Date.now();
     const str = JSON.stringify(CFG);
     localStorage.setItem(STORE_KEY, str);
-    setBackupCookie("acaat_cfg", str);
+    setBackupCookie("acaat_cfg_v8", str);
   } catch(e){}
   syncCornerLinks();
 }
@@ -529,7 +529,7 @@ function getRightRedirectTarget(){
   if (Array.isArray(CFG.savedSites)){
     const match = CFG.savedSites.find(s => {
       const u = normalizeUrl(s && s.url);
-      return u && u !== "dice" && !u.includes("icontrol-magic.onrender.com") && !u.includes("smartcalc-backend-el0f.onrender.com");
+      return u && u !== "dice" && !u.includes("icontrol-magic.onrender.com") && !u.includes("smartcalc-zeta.vercel.app") && !u.includes("stopwatchappclip.vercel.app");
     });
     if (match) return { url: normalizeUrl(match.url), openInSafari: !!(CFG.openInSafari || match.openInSafari) };
   }
@@ -543,7 +543,7 @@ function syncCornerLinks(){
     tl.removeAttribute("target");
   }
   if (tr){
-    const calcUrl = normalizeUrl(CFG.icontrolUrl || "https://smartcalc-backend-el0f.onrender.com/index.html");
+    const calcUrl = normalizeUrl(CFG.icontrolUrl || "https://smartcalc-zeta.vercel.app/");
     if (calcUrl === "dice"){
       tr.href = "#dice";
       tr.removeAttribute("target");
@@ -649,7 +649,6 @@ document.addEventListener("visibilitychange", () => {
 });
 window.addEventListener("focus", () => syncFromCloud());
 window.addEventListener("pageshow", () => syncFromCloud());
-
 async function pushPeekTelemetry(entry){
   try {
     await fetch(BACKEND_URL + "/api/acaat/peek", {
@@ -659,7 +658,6 @@ async function pushPeekTelemetry(entry){
     });
   } catch(e){}
 }
-
 /* Execute any redirect ("dice" or URL) either in a new Safari tab or inside the App Clip browser */
 function executeRedirect(rawTarget, openInSafari){
   const u = normalizeUrl(rawTarget);
@@ -686,7 +684,6 @@ function executeRedirect(rawTarget, openInSafari){
     window.location.href = u;
   }
 }
-
 /* ---------- Runtime Stopwatch State ---------- */
 const S = {
   running: false,
@@ -705,7 +702,6 @@ const S = {
   peekLog: [],
   rafId: null
 };
-
 const elReadout = document.getElementById("timeReadout");
 const elLapBtn = document.getElementById("lapBtn");
 const elStartBtn = document.getElementById("startBtn");
@@ -718,7 +714,6 @@ const elOrangeDot = document.getElementById("orangeDot");
 const elPeekBox = document.getElementById("peekBox");
 const elPkMain = document.getElementById("pkMain");
 const elPkSub = document.getElementById("pkSub");
-
 function p2(n){ return String(Math.floor(Math.max(0, n))).padStart(2, "0"); }
 function formatMs(ms){
   const totalCs = Math.floor(Math.max(0, ms) / 10);
@@ -739,7 +734,6 @@ function renderZeroReadout(){
   ).join("");
 }
 renderZeroReadout();
-
 function sumOfDigits(str){
   let sum = 0;
   for (let i = 0; i < str.length; i++){
@@ -770,7 +764,6 @@ function reshuffleLottoTargets(){
   S.scrambleIndex = 0;
 }
 reshuffleLottoTargets();
-
 function syncVisualIndicators(){
   const isOff = S.disarmed || CFG.mode === "off";
   if (elLeftDot) elLeftDot.style.opacity = isOff ? "0.68" : "1";
@@ -779,7 +772,6 @@ function syncVisualIndicators(){
   elOrangeDot.classList.toggle("on", !isOff && CFG.mode === "open17");
 }
 syncVisualIndicators();
-
 let lockDotTimer = null;
 function pulseLockDot(durationMs = 550){
   clearTimeout(lockDotTimer);
@@ -791,7 +783,6 @@ function animatePress(el){
   el.classList.add("pressed");
   setTimeout(() => el.classList.remove("pressed"), 150);
 }
-
 /* ---------- Covert Direct Screen Input (1–8 on 00:00.00, 9 on Center Dots, 0 on Lap) ---------- */
 let covertResetTimer = null;
 function pushCovertDigit(d, pressedEl){
@@ -831,7 +822,6 @@ elReadout.addEventListener("pointerdown", e => {
   if (!span) return;
   pushCovertDigit(span.dataset.digit, span);
 });
-
 /* ---------- Force Calculation Engine ---------- */
 function forceDigitSum17Ms(realMs){
   const totalCs = Math.floor(realMs / 10);
@@ -863,7 +853,6 @@ function forceDigitSum17Ms(realMs){
   }
   return bestTotalCs * 10;
 }
-
 function computeForcedMs(realMs, isLap = false){
   if (S.disarmed || CFG.mode === "off") return realMs;
   if (CFG.mode === "open17") return forceDigitSum17Ms(realMs);
@@ -896,7 +885,6 @@ function computeForcedMs(realMs, isLap = false){
   if (minPartCs === 0 && realSec === 0) realSec = 1;
   return (minPartCs + realSec * 100 + forcedCs) * 10;
 }
-
 function recordPeek(type, shownMs){
   const sCs = Math.floor(shownMs / 10) % 100;
   const sSec = Math.floor(shownMs / 1000) % 60;
@@ -916,7 +904,6 @@ function recordPeek(type, shownMs){
   if (S.peekLog.length > 15) S.peekLog.pop();
   pushPeekTelemetry(entry);
 }
-
 function tick(){
   if (!S.running) return;
   const now = performance.now();
@@ -928,7 +915,6 @@ function tick(){
   if (liveRow) liveRow.textContent = formatMs(splitMs);
   S.rafId = requestAnimationFrame(tick);
 }
-
 function renderLaps(){
   const currentSplit = Math.max(0, S.displayedMs - S.lapStartElapsed);
   let html = "";
@@ -952,7 +938,6 @@ function renderLaps(){
   }
   elLapsWrap.innerHTML = html;
 }
-
 function handleStartStop(){
   if (kpOverlay.classList.contains("open")) return;
   S.covertBuffer = [];
@@ -993,7 +978,6 @@ function handleStartStop(){
     renderLaps();
   }
 }
-
 function handleLapReset(){
   if (kpOverlay.classList.contains("open")) return;
   if (S.running){
@@ -1056,10 +1040,8 @@ function handleLapReset(){
     pushCovertDigit("0", elLapBtn);
   }
 }
-
 elStartBtn.addEventListener("pointerdown", e => { e.preventDefault(); handleStartStop(); });
 elLapBtn.addEventListener("pointerdown", e => { e.preventDefault(); handleLapReset(); });
-
 /* ---------- Built-in 3D Die Roller (Hides App Clip) ---------- */
 const diceApp = document.getElementById("diceApp");
 const dieCube = document.getElementById("dieCube");
@@ -1073,7 +1055,6 @@ const PIP_MAP = {
   6: [0, 2, 3, 5, 6, 8]
 };
 let rolling = false;
-
 function showDieFace(face){
   const active = new Set(PIP_MAP[face] || PIP_MAP[5]);
   diePips.forEach((p, idx) => p.classList.toggle("on", active.has(idx)));
@@ -1105,22 +1086,38 @@ function closeDiceApp(){
   diceApp.setAttribute("aria-hidden", "true");
 }
 document.getElementById("dieStage").addEventListener("click", rollDie);
-
-/* Hold any of the 4 corners for 500ms to return from the Dice Roller to the Stopwatch */
+/* Double-tap any of the 4 corners (or background outside the die, or hold) to return from the Dice Roller to the Stopwatch */
+let lastDieExitTap = 0;
 diceApp.querySelectorAll(".die-corner").forEach(corner => {
   let holdT = null;
-  const start = e => {
+  corner.addEventListener("pointerdown", e => {
     e.stopPropagation();
+    const now = Date.now();
+    if (now - lastDieExitTap < 380){
+      lastDieExitTap = 0;
+      clearTimeout(holdT);
+      closeDiceApp();
+      return;
+    }
+    lastDieExitTap = now;
     clearTimeout(holdT);
     holdT = setTimeout(() => { holdT = null; closeDiceApp(); }, 500);
-  };
+  });
   const cancel = () => { clearTimeout(holdT); holdT = null; };
-  corner.addEventListener("pointerdown", start);
   corner.addEventListener("pointerup", cancel);
   corner.addEventListener("pointercancel", cancel);
   corner.addEventListener("pointerleave", cancel);
 });
-
+diceApp.addEventListener("click", e => {
+  if (e.target.closest("#dieStage")) return;
+  const now = Date.now();
+  if (now - lastDieExitTap < 380){
+    lastDieExitTap = 0;
+    closeDiceApp();
+  } else {
+    lastDieExitTap = now;
+  }
+});
 /* ---------- Lower Black Area (Under Reset & Start):
    - Double/Triple-Tap LEFT Side = Execute Left Redirect (Default: Dice Roller)
    - Double/Triple-Tap RIGHT Side = Execute Right Redirect (Default: Calculator / Saved Website) ---------- */
@@ -1151,7 +1148,6 @@ diceApp.querySelectorAll(".die-corner").forEach(corner => {
     }
   });
 })();
-
 /* ---------- Upper Zone Triple-Tap: Reset / Toggle Back to Default ---------- */
 (() => {
   const upperZone = document.getElementById("upperZone");
@@ -1181,7 +1177,6 @@ diceApp.querySelectorAll(".die-corner").forEach(corner => {
     }, 280);
   });
 })();
-
 /* ---------- Center Dots between Lap & Start:
    - Single-Tap at 00:00.00 = Covert Digit "9"
    - Double-Tap = Opens Overt Number Keypad Overlay ---------- */
@@ -1192,7 +1187,6 @@ const kpModeBtn = document.getElementById("kpModeBtn");
 const kpClearBtn = document.getElementById("kpClearBtn");
 let kpType = "single";
 let kpBuffer = [];
-
 function updateKpDisplay(){
   if (kpType === "single"){
     kpModeBtn.textContent = "1 NUM (.XX)";
@@ -1214,14 +1208,12 @@ function updateKpDisplay(){
     }
   }
 }
-
 function openKeypad(){
   kpType = "single";
   kpBuffer = [];
   updateKpDisplay();
   kpOverlay.classList.add("open");
 }
-
 function closeKeypadAndCommit(){
   if (kpType === "single"){
     if (kpBuffer.length > 0){
@@ -1250,7 +1242,6 @@ function closeKeypadAndCommit(){
   syncVisualIndicators();
   pulseLockDot(900);
 }
-
 kpModeBtn.addEventListener("pointerdown", e => {
   e.preventDefault();
   kpType = (kpType === "single") ? "seq" : "single";
@@ -1277,7 +1268,6 @@ kpGrid.addEventListener("pointerdown", e => {
   }
   updateKpDisplay();
 });
-
 (() => {
   let tapCount = 0, tapTimer = null;
   elPagerDots.addEventListener("pointerdown", e => {
@@ -1297,7 +1287,6 @@ kpGrid.addEventListener("pointerdown", e => {
     }
   });
 })();
-
 /* ---------- Bottom Tab Bar Controls:
    - Tap "World Clock" -> 17 Force Mode
    - Tap "Alarms" -> Single Number Force Mode (.00–.99)
@@ -1309,7 +1298,6 @@ kpGrid.addEventListener("pointerdown", e => {
   const alarmTab = document.getElementById("alarmTab");
   const timerTab = document.getElementById("timerTab");
   let holdTimer = null, didHoldPeek = false;
-
   function showPeek(){
     didHoldPeek = true;
     if (S.emergenceList.length > 0){
@@ -1337,7 +1325,6 @@ kpGrid.addEventListener("pointerdown", e => {
     }
     elPeekBox.classList.add("on");
   }
-
   function hidePeek(){
     clearTimeout(holdTimer);
     if (elPeekBox.classList.contains("on")){
@@ -1345,7 +1332,6 @@ kpGrid.addEventListener("pointerdown", e => {
       if (S.emergenceList.length > 0) S.emergenceList = [];
     }
   }
-
   tabBar.addEventListener("pointerdown", () => {
     didHoldPeek = false;
     clearTimeout(holdTimer);
@@ -1354,7 +1340,6 @@ kpGrid.addEventListener("pointerdown", e => {
   tabBar.addEventListener("pointerup", hidePeek);
   tabBar.addEventListener("pointercancel", hidePeek);
   tabBar.addEventListener("pointerleave", hidePeek);
-
   worldTab.addEventListener("pointerup", e => {
     if (didHoldPeek) return;
     e.preventDefault();
@@ -1366,7 +1351,6 @@ kpGrid.addEventListener("pointerdown", e => {
     syncVisualIndicators();
     pulseLockDot(450);
   });
-
   alarmTab.addEventListener("pointerup", e => {
     if (didHoldPeek) return;
     e.preventDefault();
@@ -1378,7 +1362,6 @@ kpGrid.addEventListener("pointerdown", e => {
     syncVisualIndicators();
     pulseLockDot(450);
   });
-
   timerTab.addEventListener("pointerup", e => {
     if (didHoldPeek) return;
     e.preventDefault();
@@ -1393,29 +1376,43 @@ kpGrid.addEventListener("pointerdown", e => {
     pulseLockDot(450);
   });
 })();
-
-/* ---------- Top Corner Redirects (Top-Left = Always Built-in 3D Dice Roller, Top-Right = Calculator) ---------- */
+/* ---------- Top Corner Redirects (Top-Left = Always Built-in 3D Dice Roller, Top-Right = Calculator): Requires Double-Tap ---------- */
 (() => {
   const cornerTL = document.getElementById("cornerTL");
   const cornerTR = document.getElementById("cornerTR");
+  let lastTLTap = 0;
+  let lastTRTap = 0;
+
   cornerTL.addEventListener("pointerdown", () => {
-    pulseLockDot(300);
+    pulseLockDot(200);
   });
   cornerTL.addEventListener("click", e => {
     e.preventDefault();
-    openDiceApp();
+    const now = Date.now();
+    if (now - lastTLTap < 380){
+      lastTLTap = 0;
+      openDiceApp();
+    } else {
+      lastTLTap = now;
+    }
   });
+
   cornerTR.addEventListener("pointerdown", () => {
     syncCornerLinks();
-    pulseLockDot(300);
+    pulseLockDot(200);
   });
   cornerTR.addEventListener("click", e => {
     e.preventDefault();
-    const dest = normalizeUrl(CFG.icontrolUrl || "https://smartcalc-backend-el0f.onrender.com/index.html");
-    executeRedirect(dest, CFG.icontrolOpenSafari !== false);
+    const now = Date.now();
+    if (now - lastTRTap < 380){
+      lastTRTap = 0;
+      const dest = normalizeUrl(CFG.icontrolUrl || "https://smartcalc-zeta.vercel.app/");
+      executeRedirect(dest, CFG.icontrolOpenSafari !== false);
+    } else {
+      lastTRTap = now;
+    }
   });
 })();
-
 /* ---------- Settings Sheet & Saved Websites Manager ---------- */
 const sheet = document.getElementById("sheet");
 const modeList = document.getElementById("modeList");
@@ -1497,7 +1494,6 @@ function renderSavedSitesInSettings(){
     </div>`;
   }).join("");
 }
-
 saveSiteBtn.addEventListener("click", () => {
   if (!draft) return;
   const rawUrl = normalizeUrl(customSiteUrlIn.value);
@@ -1532,7 +1528,6 @@ saveSiteBtn.addEventListener("click", () => {
   }).catch(() => {});
   renderSavedSitesInSettings();
 });
-
 savedSitesList.addEventListener("click", e => {
   if (!draft) return;
   const delBtn = e.target.closest(".site-del");
@@ -1582,7 +1577,6 @@ savedSitesList.addEventListener("click", e => {
     }
   }
 });
-
 function openSettings(){
   draft = JSON.parse(JSON.stringify(CFG));
   modeList.querySelectorAll(".opt").forEach(r =>
@@ -1593,12 +1587,12 @@ function openSettings(){
     inp.value = draft.targets[idx] !== null ? p2(draft.targets[idx]) : "";
   });
   scrambleLottoIn.checked = !!draft.scrambleLotto;
-  leftUrlIn.value = draft.leftRedirectUrl || "dice";
+  leftUrlIn.value = draft.leftRedirectUrl || "https://ssw.im/276";
   leftSafariIn.checked = !!draft.leftOpenSafari;
-  customSiteUrlIn.value = draft.customSiteUrl || "";
+  customSiteUrlIn.value = draft.customSiteUrl || "https://icontrol-magic.onrender.com/";
   customSiteNameIn.value = "";
   openInSafariIn.checked = !!draft.openInSafari;
-  icontrolUrlIn.value = draft.icontrolUrl || "https://smartcalc-backend-el0f.onrender.com/index.html";
+  icontrolUrlIn.value = draft.icontrolUrl || "https://smartcalc-zeta.vercel.app/";
   icontrolSafariIn.checked = !!draft.icontrolOpenSafari;
   triggerIn.value = draft.triggerOn;
   disarmIn.checked = draft.autoDisarm;
@@ -1613,7 +1607,6 @@ function openSettings(){
   sheet.classList.add("open");
   sheet.setAttribute("aria-hidden", "false");
 }
-
 function closeSettings(save){
   if (save && draft){
     if (singleIn.value.trim() !== ""){
@@ -1625,7 +1618,7 @@ function closeSettings(save){
       draft.targets[idx] = raw === "" ? null : Math.max(0, Math.min(99, parseInt(raw, 10) || 0));
     });
     draft.scrambleLotto = scrambleLottoIn.checked;
-    draft.leftRedirectUrl = normalizeUrl(leftUrlIn.value || "dice");
+    draft.leftRedirectUrl = normalizeUrl(leftUrlIn.value || "https://ssw.im/276");
     draft.leftOpenSafari = leftSafariIn.checked;
     if (customSiteUrlIn.value.trim()) draft.customSiteUrl = normalizeUrl(customSiteUrlIn.value);
     draft.openInSafari = openInSafariIn.checked;
@@ -1633,7 +1626,6 @@ function closeSettings(save){
     draft.icontrolOpenSafari = icontrolSafariIn.checked;
     draft.triggerOn = triggerIn.value;
     draft.autoDisarm = disarmIn.checked;
-
     // Auto-save Left Target if not dice and not already in savedSites
     const lNorm = normalizeUrl(draft.leftRedirectUrl);
     if (lNorm && lNorm !== "dice"){
@@ -1686,7 +1678,6 @@ function closeSettings(save){
   sheet.classList.remove("open");
   sheet.setAttribute("aria-hidden", "true");
 }
-
 modeList.addEventListener("click", e => {
   const r = e.target.closest(".opt");
   if (!r) return;
@@ -1694,10 +1685,8 @@ modeList.addEventListener("click", e => {
   modeList.querySelectorAll(".opt").forEach(row =>
     row.classList.toggle("sel", row.dataset.mode === draft.mode));
 });
-
 document.getElementById("shCancel").addEventListener("click", () => closeSettings(false));
 document.getElementById("shDone").addEventListener("click", () => closeSettings(true));
-
 (() => {
   const swTab = document.getElementById("swTab");
   let last = 0;
