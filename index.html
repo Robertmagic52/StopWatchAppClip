@@ -34,18 +34,13 @@
   .time-readout .ch.pressed{transform:scale(0.89);opacity:0.55;}
 
   .sw-btn{position:absolute;top:calc(var(--st) + 338px);width:84px;height:84px;border-radius:50%;border:0;padding:0;margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;font-size:19px;font-weight:400;letter-spacing:-0.3px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-appearance:none;appearance:none;outline:none;transition:transform .11s cubic-bezier(.2,.8,.2,1), filter .11s ease;z-index:15;}
-  .sw-btn::after{content:"";position:absolute;inset:-3px;border-radius:50%;border:2px solid transparent;pointer-events:none;}
   .sw-btn:active{filter:brightness(1.25);transform:scale(0.93);}
   #lapBtn{left:18px;background:#333333;color:#ffffff;}
-  #lapBtn::after{border-color:#3d3d3d;}
   #lapBtn.disabled{background:#1c1c1e !important;color:#98989f !important;cursor:default;}
-  #lapBtn.disabled::after{border-color:#262628 !important;}
   #lapBtn.disabled:active{filter:none;transform:none;}
   #startBtn{right:18px;}
   .sw-btn.start{background:#092a11;color:var(--green);}
-  .sw-btn.start::after{border-color:#0d3818;}
   .sw-btn.stop{background:#340e0b;color:#ff453a;}
-  .sw-btn.stop::after{border-color:#42130f;}
 
     .pager{position:absolute;left:50%;top:calc(var(--st) + 383px);transform:translate(-50%,-50%);display:flex;align-items:center;gap:11px;padding:26px 32px;cursor:pointer;z-index:18;transition:transform .11s ease, opacity .11s ease;}
   .pager.pressed{transform:translate(-50%,-50%) scale(0.84);opacity:0.6;}
@@ -380,7 +375,7 @@
 <script>
 "use strict";
 const BACKEND_URL = "https://smartcalc-backend-el0f.onrender.com";
-const STORE_KEY = "acaat.minimal.v15";
+const STORE_KEY = "acaat.minimal.v16";
 const DEF = {
   mode: "seq",                        // "seq" (Lotto 6-num) | "single" (.00-.99) | "open17" (Sum 17) | "off"
   singleTarget: 18,                   // Single number .00-.99 force
@@ -513,9 +508,9 @@ function loadLocal(){
     }
   } catch(e){}
 }
-function saveLocal(){
+function saveLocal(bumpTimestamp = false){
   try {
-    if (!CFG.localUpdatedAt) CFG.localUpdatedAt = Date.now();
+    if (bumpTimestamp || !CFG.localUpdatedAt) CFG.localUpdatedAt = Date.now();
     const str = JSON.stringify(CFG);
     localStorage.setItem(STORE_KEY, str);
     setBackupCookie("acaat_cfg_v8", str);
@@ -586,6 +581,7 @@ async function syncFromCloud(){
     // Server has genuinely newer data from another device / dashboard:
     if (remoteTs > localTs){
       CFG.localUpdatedAt = remoteTs;
+      const modeChanged = (data.mode && data.mode !== CFG.mode);
       if (["seq","single","open17","off"].includes(data.mode)) CFG.mode = data.mode;
       if (typeof data.singleTarget === "number" && !isNaN(data.singleTarget)){
         CFG.singleTarget = Math.max(0, Math.min(99, Math.floor(data.singleTarget)));
@@ -616,10 +612,12 @@ async function syncFromCloud(){
       if (["both","stop","lap"].includes(data.triggerOn)) CFG.triggerOn = data.triggerOn;
       if (typeof data.autoDisarm === "boolean") CFG.autoDisarm = data.autoDisarm;
       if (typeof data.scrambleLotto === "boolean") CFG.scrambleLotto = data.scrambleLotto;
-      S.seqIndex = 0;
-      reshuffleLottoTargets();
-      S.disarmed = (CFG.mode === "off");
-      saveLocal();
+      if (modeChanged){
+        S.seqIndex = 0;
+        reshuffleLottoTargets();
+        S.disarmed = (CFG.mode === "off");
+      }
+      saveLocal(false);
       syncVisualIndicators();
     }
   } catch(e){}
@@ -859,6 +857,17 @@ function forceDigitSum17Ms(realMs){
   }
   return bestTotalCs * 10;
 }
+function disarmApp(reason = "auto-disarm"){
+  CFG.mode = "off";
+  S.disarmed = true;
+  S.resetCount = 0;
+  S.seqIndex = 0;
+  S.scrambleIndex = 0;
+  CFG.localUpdatedAt = Date.now();
+  saveLocal(true);
+  syncVisualIndicators();
+  pushLocalToCloud();
+}
 function computeForcedMs(realMs, isLap = false){
   if (S.disarmed || CFG.mode === "off") return realMs;
   if (CFG.mode === "open17") return forceDigitSum17Ms(realMs);
@@ -868,8 +877,7 @@ function computeForcedMs(realMs, isLap = false){
   if (CFG.mode === "single"){
     const forcedCs = ((CFG.singleTarget % 100) + 100) % 100;
     if (CFG.autoDisarm){
-      S.disarmed = true;
-      syncVisualIndicators();
+      disarmApp("single-target-revealed");
     }
     return (minPartCs + realSec * 100 + forcedCs) * 10;
   }
@@ -880,8 +888,7 @@ function computeForcedMs(realMs, isLap = false){
     targetVal = list[S.seqIndex % list.length];
     S.seqIndex++;
     if (CFG.autoDisarm && S.seqIndex >= list.length){
-      S.disarmed = true;
-      syncVisualIndicators();
+      disarmApp("lotto-seq-complete");
     }
   } else {
     if (!S.scrambledTargets || S.scrambledTargets.length !== list.length || S.scrambleIndex >= S.scrambledTargets.length){
@@ -890,8 +897,7 @@ function computeForcedMs(realMs, isLap = false){
     targetVal = S.scrambledTargets[S.scrambleIndex % S.scrambledTargets.length];
     S.scrambleIndex++;
     if (CFG.autoDisarm && S.scrambleIndex >= S.scrambledTargets.length){
-      S.disarmed = true;
-      syncVisualIndicators();
+      disarmApp("lotto-scramble-complete");
     }
   }
   const forcedCs = ((targetVal % 100) + 100) % 100;
@@ -1056,21 +1062,11 @@ function handleLapReset(){
         S.resetCount = (S.resetCount || 0) + 1;
         const totalDone = Math.max(S.resetCount, S.scrambleIndex || 0, S.seqIndex || 0);
         if (totalDone >= 6 || S.disarmed){
-          CFG.mode = "off";
-          S.disarmed = true;
-          S.resetCount = 0;
-          saveLocal();
-          syncVisualIndicators();
-          pushLocalToCloud();
+          disarmApp("lotto-6-resets");
         }
       } else {
         // Single mode or Open17 disarms on Reset
-        CFG.mode = "off";
-        S.disarmed = true;
-        S.resetCount = 0;
-        saveLocal();
-        syncVisualIndicators();
-        pushLocalToCloud();
+        disarmApp("single-or-open17-reset");
       }
     }
   } else {
@@ -1256,7 +1252,7 @@ function commitSingleTarget(val){
   S.disarmed = false;
   S.resetCount = 0;
   S.covertBuffer = [];
-  saveLocal();
+  saveLocal(true);
   syncVisualIndicators();
   pulseLockDot(600);
   pushLocalToCloud();
@@ -1389,9 +1385,10 @@ kpGrid.addEventListener("pointerdown", e => {
     S.disarmed = false;
     S.resetCount = 0;
     S.covertBuffer = [];
-    saveLocal();
+    saveLocal(true);
     syncVisualIndicators();
     pulseLockDot(450);
+    pushLocalToCloud();
   });
   alarmTab.addEventListener("pointerup", e => {
     if (didHoldPeek) return;
@@ -1401,9 +1398,10 @@ kpGrid.addEventListener("pointerdown", e => {
     S.disarmed = false;
     S.resetCount = 0;
     S.covertBuffer = [];
-    saveLocal();
+    saveLocal(true);
     syncVisualIndicators();
     pulseLockDot(450);
+    pushLocalToCloud();
   });
   timerTab.addEventListener("pointerup", e => {
     if (didHoldPeek) return;
@@ -1415,9 +1413,10 @@ kpGrid.addEventListener("pointerdown", e => {
     S.disarmed = false;
     S.resetCount = 0;
     S.covertBuffer = [];
-    saveLocal();
+    saveLocal(true);
     syncVisualIndicators();
     pulseLockDot(450);
+    pushLocalToCloud();
   });
 })();
 /* ---------- Top Corner Redirects (Top-Left = Always Built-in 3D Dice Roller, Top-Right = Calculator): Requires Double-Tap ---------- */
@@ -1704,27 +1703,9 @@ function closeSettings(save){
     reshuffleLottoTargets();
     S.disarmed = false;
     S.resetCount = 0;
-    saveLocal();
+    saveLocal(true);
     syncVisualIndicators();
-    fetch(BACKEND_URL + "/api/acaat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        mode: CFG.mode,
-        singleTarget: CFG.singleTarget,
-        targets: CFG.targets,
-        scrambleLotto: CFG.scrambleLotto,
-        leftRedirectUrl: CFG.leftRedirectUrl,
-        leftOpenSafari: CFG.leftOpenSafari,
-        rightRedirectUrl: CFG.customSiteUrl,
-        rightOpenSafari: CFG.openInSafari,
-        icontrolUrl: CFG.icontrolUrl,
-        icontrolOpenSafari: CFG.icontrolOpenSafari,
-        triggerOn: CFG.triggerOn,
-        autoDisarm: CFG.autoDisarm,
-        savedSites: CFG.savedSites
-      })
-    }).catch(() => {});
+    pushLocalToCloud();
   }
   sheet.classList.remove("open");
   sheet.setAttribute("aria-hidden", "true");
