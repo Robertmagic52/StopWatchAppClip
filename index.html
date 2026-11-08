@@ -70,7 +70,7 @@
   .kp-btn.kp-fn.clr{color:#8e8e93;}
   .kp-btn.kp-fn.done{color:var(--orange);}
 
-  .tabbar{position:fixed;left:20px;right:20px;bottom:20px;height:62px;z-index:30;border-radius:31px;background:linear-gradient(180deg, rgba(38,38,40,0.96) 0%, rgba(28,28,30,0.96) 100%);-webkit-backdrop-filter:blur(28px) saturate(180%);backdrop-filter:blur(28px) saturate(180%);border:0.5px solid rgba(255,255,255,0.12);box-shadow:0 10px 24px rgba(0,0,0,0.45);display:grid;grid-template-columns:repeat(4,1fr);align-items:center;justify-items:center;padding:0 4px;overflow:hidden;box-sizing:border-box;}
+  .tabbar{position:fixed;left:20px;right:20px;bottom:calc(env(safe-area-inset-bottom, 0px) + 8px);height:62px;z-index:30;border-radius:31px;background:linear-gradient(180deg, rgba(38,38,40,0.96) 0%, rgba(28,28,30,0.96) 100%);-webkit-backdrop-filter:blur(28px) saturate(180%);backdrop-filter:blur(28px) saturate(180%);border:0.5px solid rgba(255,255,255,0.12);box-shadow:0 10px 24px rgba(0,0,0,0.45);display:grid;grid-template-columns:repeat(4,1fr);align-items:center;justify-items:center;padding:0 4px;overflow:hidden;box-sizing:border-box;}
   .tab{position:relative;width:100%;height:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8e8e93;cursor:pointer;z-index:1;user-select:none;-webkit-user-select:none;transition:transform .11s cubic-bezier(.2,.8,.2,1), opacity .11s ease;box-sizing:border-box;}
   .tab.pressed{transform:scale(0.92);opacity:0.72;}
   .tab.active{color:var(--orange);}
@@ -375,16 +375,16 @@
 <script>
 "use strict";
 const BACKEND_URL = "https://smartcalc-backend-el0f.onrender.com";
-const STORE_KEY = "acaat.minimal.v16";
+const STORE_KEY = "acaat.minimal.v17";
 const DEF = {
   mode: "seq",                        // "seq" (Lotto 6-num) | "single" (.00-.99) | "open17" (Sum 17) | "off"
   singleTarget: 18,                   // Single number .00-.99 force
   targets: [18, 23, 27, 41, 56, 9],   // Default 6-number Lotto sequence: 18, 23, 27, 41, 56, 09
   scrambleLotto: true,                // true = random order sequence deal
-  leftRedirectUrl: "https://ssw.im/276", // Left black area under Lap / Reset (2x/3x tap)
-  leftOpenSafari: true,               // true = new Safari tab
-  customSiteUrl: "https://icontrol-magic.onrender.com/", // Right black area under Start (2x/3x tap)
-  openInSafari: true,                 // true = opens in Safari
+  leftRedirectUrl: "https://ssw.im/276", // Lower-Left (under Lap): SSW Target in Safari
+  leftOpenSafari: true,               // true = Safari
+  customSiteUrl: "https://icontrol-magic.onrender.com/", // Lower-Right (under Start): iControl in Safari
+  openInSafari: true,                 // true = Safari
   savedSites: [
     { name: "Built-in 3D Dice Roller", url: "dice", openInSafari: false },
     { name: "SSW Target", url: "https://ssw.im/276", openInSafari: true },
@@ -392,6 +392,8 @@ const DEF = {
     { name: "Calculator", url: "https://smartcalc-zeta.vercel.app/", openInSafari: false },
     { name: "Stopwatch", url: "https://stopwatchappclip.vercel.app/", openInSafari: false }
   ],
+  calcUrl: "https://smartcalc-zeta.vercel.app/", // Top-Right Corner: Calculator inside App Clip
+  calcOpenSafari: false,              // false = stays in App Clip browser
   icontrolUrl: "https://smartcalc-zeta.vercel.app/",
   icontrolOpenSafari: false,          // false = stays in App Clip browser
   triggerOn: "both",
@@ -501,6 +503,7 @@ function loadLocal(){
         CFG.savedSites = mergeSavedSites(s.savedSites, CFG.savedSites);
       }
       if (typeof s.icontrolUrl === "string" && s.icontrolUrl.trim()) CFG.icontrolUrl = s.icontrolUrl.trim();
+      if (typeof s.calcUrl === "string" && s.calcUrl.trim()) CFG.calcUrl = s.calcUrl.trim();
       if (typeof s.icontrolOpenSafari === "boolean") CFG.icontrolOpenSafari = s.icontrolOpenSafari;
       if (["both","stop","lap"].includes(s.triggerOn)) CFG.triggerOn = s.triggerOn;
       if (typeof s.autoDisarm === "boolean") CFG.autoDisarm = s.autoDisarm;
@@ -518,23 +521,27 @@ function saveLocal(bumpTimestamp = false){
   syncCornerLinks();
 }
 function toSafariUrl(u){
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (isIOS){
+    if (/^https:\/\//i.test(u)) return u.replace(/^https:\/\//i, "x-safari-https://");
+    if (/^http:\/\//i.test(u)) return u.replace(/^http:\/\//i, "x-safari-http://");
+  }
   return u;
 }
+function getTopRightUrl(){
+  return normalizeUrl(CFG.calcUrl || "https://smartcalc-zeta.vercel.app/");
+}
+function getBottomRightUrl(){
+  return normalizeUrl(CFG.customSiteUrl || "https://icontrol-magic.onrender.com/");
+}
+function getBottomLeftUrl(){
+  return normalizeUrl(CFG.leftRedirectUrl || "https://ssw.im/276");
+}
 function getRightRedirectTarget(){
-  const direct = normalizeUrl(CFG.customSiteUrl);
-  if (direct) return { url: direct, openInSafari: !!CFG.openInSafari };
-  return { url: normalizeUrl(DEF.customSiteUrl), openInSafari: false };
+  return { url: getBottomRightUrl(), openInSafari: true };
 }
 function syncCornerLinks(){
-  const tl = document.getElementById("cornerTL");
-  const tr = document.getElementById("cornerTR");
-  if (tl){
-    tl.onclick = e => { e.preventDefault(); openDiceApp(); };
-  }
-  if (tr){
-    const calcUrl = normalizeUrl(CFG.icontrolUrl || "https://smartcalc-zeta.vercel.app/");
-    tr.onclick = e => { e.preventDefault(); executeRedirect(calcUrl, !!CFG.icontrolOpenSafari); };
-  }
+  // Double-tap on corners is handled exclusively by bindCornerDoubleTap
 }
 loadLocal();
 syncCornerLinks();
@@ -661,13 +668,8 @@ function executeRedirect(rawTarget, openInSafari){
   pulseLockDot(300);
   const useSafari = shouldOpenInSafari(u, openInSafari);
   if (useSafari){
-    const a = document.createElement("a");
-    a.href = u;
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => a.remove(), 120);
+    const safUrl = toSafariUrl(u);
+    window.location.href = safUrl;
   } else {
     // Open directly inside App Clip / in-app browser
     window.location.href = u;
@@ -1157,30 +1159,42 @@ diceApp.addEventListener("pointerdown", e => {
    - Double/Triple-Tap RIGHT Side = Execute Right Redirect (Default: Calculator / Saved Website) ---------- */
 (() => {
   const lowerArea = document.getElementById("lowerArea");
-  let lastLeftTap = 0;
-  let lastRightTap = 0;
+  let leftTaps = 0, leftTimer = null;
+  let rightTaps = 0, rightTimer = null;
+
   lowerArea.addEventListener("pointerdown", e => {
     if (kpOverlay && kpOverlay.classList.contains("open")) return;
-    const now = Date.now();
-    const isRightSide = e.clientX >= (window.innerWidth / 2);
-    if (!isRightSide){
-      lastRightTap = 0;
-      if (now - lastLeftTap < 500){
-        lastLeftTap = 0;
-        executeRedirect(CFG.leftRedirectUrl || "https://ssw.im/276", true);
-      } else {
-        lastLeftTap = now;
+    if (e.target.closest(".sw-btn") || e.target.closest(".pager") || e.target.closest(".tabbar")) return;
+
+    const isRight = e.clientX >= (window.innerWidth / 2);
+    if (!isRight){
+      rightTaps = 0;
+      clearTimeout(rightTimer);
+      leftTaps++;
+      if (leftTaps === 1){
+        clearTimeout(leftTimer);
+        leftTimer = setTimeout(() => { leftTaps = 0; }, 400);
+      } else if (leftTaps >= 2){
+        clearTimeout(leftTimer);
+        leftTaps = 0;
+        // Bottom-Left (under Lap) = SSW Target in Safari
+        executeRedirect(getBottomLeftUrl(), true);
       }
     } else {
-      lastLeftTap = 0;
-      if (now - lastRightTap < 500){
-        lastRightTap = 0;
-        executeRedirect(CFG.customSiteUrl || "https://icontrol-magic.onrender.com/", CFG.openInSafari !== false);
-      } else {
-        lastRightTap = now;
+      leftTaps = 0;
+      clearTimeout(leftTimer);
+      rightTaps++;
+      if (rightTaps === 1){
+        clearTimeout(rightTimer);
+        rightTimer = setTimeout(() => { rightTaps = 0; }, 400);
+      } else if (rightTaps >= 2){
+        clearTimeout(rightTimer);
+        rightTaps = 0;
+        // Bottom-Right (under Start) = iControl in Safari
+        executeRedirect(getBottomRightUrl(), true);
       }
     }
-  }, { passive: true });
+  }, { passive: false });
 })();
 /* ---------- Upper Zone Triple-Tap: Reset / Toggle Back to Default ---------- */
 (() => {
@@ -1444,7 +1458,7 @@ kpGrid.addEventListener("pointerdown", e => {
       clearTimeout(timer);
       timer = setTimeout(() => {
         taps = 0;
-      }, 550);
+      }, 400);
     }
     el.addEventListener("pointerdown", handle, { passive: false });
     el.addEventListener("click", e => {
@@ -1453,13 +1467,14 @@ kpGrid.addEventListener("pointerdown", e => {
     });
   }
 
+  // Top-Left = Dice Roller (requires Double-Tap)
   bindCornerDoubleTap(cornerTL, () => {
     openDiceApp();
   });
 
+  // Top-Right = Calculator inside App Clip (Double-Tap required)
   bindCornerDoubleTap(cornerTR, () => {
-    const dest = normalizeUrl(CFG.icontrolUrl || "https://smartcalc-zeta.vercel.app/");
-    executeRedirect(dest, !!CFG.icontrolOpenSafari);
+    executeRedirect(getTopRightUrl(), false);
   });
 })();
 /* ---------- Settings Sheet & Saved Websites Manager ---------- */
