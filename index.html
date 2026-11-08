@@ -33,7 +33,7 @@
   .time-readout .ch{display:inline-flex;align-items:center;justify-content:center;height:96px;cursor:pointer;transition:transform .11s cubic-bezier(.2,.8,.2,1), opacity .11s ease;will-change:transform, opacity;}
   .time-readout .ch.pressed{transform:scale(0.89);opacity:0.55;}
 
-  .sw-btn{position:absolute;top:calc(var(--st) + 338px);width:84px;height:84px;border-radius:50%;border:0;padding:0;margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;font-size:19px;font-weight:400;letter-spacing:-0.3px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-appearance:none;appearance:none;outline:none;transition:transform .11s cubic-bezier(.2,.8,.2,1), filter .11s ease;z-index:15;}
+  .sw-btn{position:absolute;top:calc(var(--st) + 338px);width:84px;height:84px;border-radius:50%;border:0;padding:0;margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;font-size:16.5px;font-weight:400;letter-spacing:-0.2px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-appearance:none;appearance:none;outline:none;transition:transform .11s cubic-bezier(.2,.8,.2,1), filter .11s ease;z-index:15;}
   .sw-btn:active{filter:brightness(1.25);transform:scale(0.93);}
   #lapBtn{left:18px;background:#333333;color:#ffffff;}
   #lapBtn.disabled{background:#1c1c1e !important;color:#98989f !important;cursor:default;}
@@ -42,9 +42,9 @@
   .sw-btn.start{background:#092a11;color:var(--green);}
   .sw-btn.stop{background:#340e0b;color:#ff453a;}
 
-    .pager{position:absolute;left:50%;top:calc(var(--st) + 383px);transform:translate(-50%,-50%);display:flex;align-items:center;gap:11px;padding:26px 32px;cursor:pointer;z-index:18;transition:transform .11s ease, opacity .11s ease;}
+    .pager{position:absolute;left:50%;top:calc(var(--st) + 383px);transform:translate(-50%,-50%);display:flex;align-items:center;gap:10px;padding:26px 32px;cursor:pointer;z-index:18;transition:transform .11s ease, opacity .11s ease;}
   .pager.pressed{transform:translate(-50%,-50%) scale(0.84);opacity:0.6;}
-  .dot{width:9.5px;height:9.5px;border-radius:50%;background:#fff;transition:background .15s ease;}
+  .dot{width:7px;height:7px;border-radius:50%;background:#fff;transition:background .15s ease;}
   .dot.dim{background:#636366;}
 
     .lower-area{position:absolute;left:0;right:0;top:calc(var(--st) + 440px);bottom:0;}
@@ -375,7 +375,7 @@
 <script>
 "use strict";
 const BACKEND_URL = "https://smartcalc-backend-el0f.onrender.com";
-const STORE_KEY = "acaat.minimal.v17";
+const STORE_KEY = "acaat.minimal.v18";
 const DEF = {
   mode: "seq",                        // "seq" (Lotto 6-num) | "single" (.00-.99) | "open17" (Sum 17) | "off"
   singleTarget: 18,                   // Single number .00-.99 force
