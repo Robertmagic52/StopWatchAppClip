@@ -49,29 +49,30 @@
 
   .lower-area{position:absolute;left:0;right:0;top:calc(var(--st) + 440px);bottom:0;}
   .lower-area::before{content:"";position:absolute;left:16px;right:16px;top:0;height:1px;background:#38383a;transform:scaleY(.5);transform-origin:top;}
-  .laps-wrap{position:absolute;left:0;right:0;top:0;bottom:calc(82px + env(safe-area-inset-bottom,0px));overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 13.5px;}
-  .lap-row{display:flex;align-items:center;justify-content:space-between;height:44px;font-size:17px;font-variant-numeric:tabular-nums;letter-spacing:-0.2px;color:#fff;border-bottom:.5px solid #2c2c2e;}
-  .lap-row .num{color:#8e8e93;}
+  .laps-wrap{position:absolute;left:0;right:0;top:0;bottom:94px;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 13.5px;}
+  .lap-row{display:flex;align-items:center;justify-content:space-between;height:44px;position:relative;padding:0 2px;font-size:17px;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;}
+  .lap-row::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--sep);transform:scaleY(.34);transform-origin:bottom;}
+  .lap-row.best{color:var(--green);}
+  .lap-row.worst{color:#ff4245;}
 
-  .kp-overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);z-index:70;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+  .kp-overlay{position:absolute;left:0;right:0;top:calc(var(--st) + 440px);bottom:94px;background:#000;z-index:25;display:none;flex-direction:column;align-items:center;padding:10px 18px 8px;}
   .kp-overlay.open{display:flex;}
-  .kp-card{width:min(92vw, 360px);background:var(--sh-bg);border:1px solid #38383a;border-radius:24px;padding:20px 18px 22px;display:flex;flex-direction:column;gap:14px;box-shadow:0 30px 60px rgba(0,0,0,.7);}
-  .kp-top{display:flex;align-items:center;justify-content:space-between;}
-  .kp-tag{font-size:12px;font-weight:700;color:var(--orange);letter-spacing:.08em;text-transform:uppercase;}
-  .kp-close{background:none;border:0;color:var(--gray);font-size:22px;cursor:pointer;padding:2px 8px;}
-  .kp-display{background:var(--sh-cell);border-radius:12px;height:52px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:600;font-variant-numeric:tabular-nums;color:#fff;letter-spacing:.04em;}
-  .kp-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;}
-  .kp-btn{height:54px;border-radius:12px;background:var(--sh-fill);border:0;color:#fff;font-size:22px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .08s ease, filter .08s ease;font-family:inherit;}
-  .kp-btn:active{transform:scale(0.94);filter:brightness(1.25);}
-  .kp-btn.fn{background:transparent;color:var(--orange);font-size:15px;font-weight:600;}
+  .kp-top-row{width:100%;max-width:340px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;min-height:28px;}
+  .kp-mode-pill,.kp-clear-btn{font-size:11px;font-weight:600;letter-spacing:.04em;color:#8e8e93;background:#1c1c1e;border:1px solid #333336;border-radius:999px;padding:4px 10px;cursor:pointer;font-family:inherit;}
+  .kp-display{font-size:21px;font-weight:600;letter-spacing:.22em;font-variant-numeric:tabular-nums;text-align:center;flex:1;}
+  .kp-grid{width:100%;max-width:340px;flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(5,1fr);gap:7px;}
+  .kp-btn{background:#0c0c0c;border:1.5px solid #48484a;border-radius:10px;color:#fff;font-family:inherit;font-size:20px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;}
+  .kp-btn:active{background:#2c2c2e;}
+  .kp-btn.zero{grid-column:2/3;}
+  .kp-btn.enter{grid-column:1/-1;font-size:17px;letter-spacing:.06em;}
 
-  .tabbar{position:fixed;left:18px;right:18px;bottom:calc(28px + env(safe-area-inset-bottom, 0px));height:62px;background:rgba(30,30,32,.86);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);border:0.5px solid rgba(255,255,255,.09);border-radius:31px;display:flex;align-items:center;justify-content:space-around;padding:0 8px;z-index:25;box-shadow:0 12px 34px rgba(0,0,0,.55);}
-  .tab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:10.4px;color:#fff;cursor:pointer;z-index:0;transition:transform .11s cubic-bezier(.2,.8,.2,1), opacity .11s ease;}
-  .tab.pressed{transform:scale(0.91);opacity:0.72;}
+  .tabbar{position:fixed;left:20px;right:20px;bottom:20px;height:62px;z-index:30;border-radius:31px;background:linear-gradient(180deg, rgba(38,38,40,0.96) 0%, rgba(28,28,30,0.96) 100%);-webkit-backdrop-filter:blur(28px) saturate(180%);backdrop-filter:blur(28px) saturate(180%);border:0.5px solid rgba(255,255,255,0.12);box-shadow:0 10px 24px rgba(0,0,0,0.45);display:grid;grid-template-columns:repeat(4,1fr);align-items:center;justify-items:center;padding:0 4px;overflow:hidden;box-sizing:border-box;}
+  .tab{position:relative;width:100%;height:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8e8e93;cursor:pointer;z-index:1;user-select:none;-webkit-user-select:none;transition:transform .11s cubic-bezier(.2,.8,.2,1), opacity .11s ease;box-sizing:border-box;}
+  .tab.pressed{transform:scale(0.92);opacity:0.72;}
   .tab.active{color:var(--orange);}
-  .tab.active::before{content:"";position:absolute;top:4px;bottom:4px;left:50%;width:96px;transform:translateX(-50%);border-radius:27px;background:#0a0a0a;z-index:-1;}
-  .tab svg{width:25.5px;height:25.5px;display:block;}
-  .tab span{margin-top:2.2px;font-size:10px;font-weight:600;line-height:12px;white-space:nowrap;}
+  .tab.active::before{content:"";position:absolute;top:5px;bottom:5px;left:50%;width:min(100%, 98px);transform:translateX(-50%);border-radius:26px;background:#0a0a0a;z-index:-1;}
+  .tab svg{width:25px;height:25px;display:block;flex-shrink:0;}
+  .tab span{font-size:10px;font-weight:500;line-height:12px;letter-spacing:-0.1px;white-space:nowrap;}
 
   .dice-app{position:fixed;inset:0;z-index:80;background:radial-gradient(circle at 50% 42%, #1d1d22 0%, #0a0a0c 74%);display:none;flex-direction:column;align-items:center;justify-content:center;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
   .dice-app.open{display:flex;}
@@ -80,13 +81,11 @@
       0 26px 54px rgba(0,0,0,.68),
       0 6px 16px rgba(0,0,0,.42),
       inset 0 2px 3px rgba(255,255,255,.95),
-      inset 0 -3px 6px rgba(0,0,0,.22);
-    user-select:none;touch-action:manipulation;transition:transform .12s cubic-bezier(.2,.8,.2,1);}
-  .die.rolling{animation:dieShake .55s cubic-bezier(.25,.1,.25,1);}
-  @keyframes dieShake{
-    0%  {transform:scale(1) rotate(0deg);}
-    25% {transform:scale(0.92) translateY(8px) rotate3d(1,1,0,70deg);}
-    45% {transform:scale(1.08) translateY(-14px) rotate3d(-1,1,1,-130deg);}
+      inset 0 -5px 10px rgba(0,0,0,.15);will-change:transform;transition:transform .14s ease;}
+  .die:active{transform:scale(.95);}
+  .die.rolling{animation:dieRoll .52s cubic-bezier(.22,.82,.32,1);}
+  @keyframes dieRoll{0%  {transform:scale(.90) rotate3d(1,1,0,0deg);}
+    30% {transform:scale(1.08) translateY(-18px) rotate3d(1,-.8,.4,170deg);}
     65% {transform:scale(1.03) translateY(-6px) rotate3d(-.6,1,-.3,310deg);}
     100%{transform:scale(1) translateY(0) rotate3d(0,0,1,360deg);}}
   .pip{width:68%;height:68%;border-radius:50%;background:radial-gradient(circle at 36% 34%, #35353a 0%, #151518 75%);box-shadow:inset 0 2px 3px rgba(0,0,0,.65), 0 1px 1px rgba(255,255,255,.7);opacity:0;transform:scale(.4);transition:opacity .08s ease, transform .12s ease;}
@@ -185,7 +184,7 @@
   </div>
 </div>
 
-<!-- iOS 26 Floating Tab Bar (Pixel-matched SVGs) -->
+<!-- iOS Floating Tab Bar (Pixel-matched SVGs) -->
 <div class="tabbar" id="tabBar">
   <div class="tab" id="worldTab">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65">
@@ -381,7 +380,7 @@
 
 <script>
 const BACKEND_URL = "https://smartcalc-backend-el0f.onrender.com";
-const STORE_KEY = "acaat.minimal.v10";
+const STORE_KEY = "acaat.minimal.v11";
 const DEF = {
   mode: "seq",
   singleTarget: 18,
@@ -1169,9 +1168,7 @@ elReadout.addEventListener("pointerdown", e => {
   pushCovertDigit(d, ch);
 });
 
-/* ---------- Center Dots between Lap & Start:
-   - Single-Tap at 00:00.00 = Covert Digit "9"
-   - Double-Tap = Opens Overt Number Keypad Overlay ---------- */
+/* ---------- Center Dots between Lap & Start: Keypad Overlay ---------- */
 const kpOverlay = document.getElementById("kpOverlay");
 const kpDisplay = document.getElementById("kpDisplay");
 const kpGrid = document.getElementById("kpGrid");
