@@ -381,6 +381,7 @@ const DEF = {
   singleTarget: 18,                   // Single number .00-.99 force
   targets: [18, 23, 27, 41, 56, 9],   // Default 6-number Lotto sequence: 18, 23, 27, 41, 56, 09
   scrambleLotto: true,                // true = random order sequence deal
+  emergenceCount: 3,                  // Configurable Emergence spectators (default: 3)
   leftRedirectUrl: "https://ssw.im/276", // Lower-Left (under Lap): SSW Target in Safari
   leftOpenSafari: true,               // true = Safari
   customSiteUrl: "https://icontrol-magic.onrender.com/", // Lower-Right (under Start): iControl in Safari
@@ -619,6 +620,9 @@ async function syncFromCloud(){
       if (["both","stop","lap"].includes(data.triggerOn)) CFG.triggerOn = data.triggerOn;
       if (typeof data.autoDisarm === "boolean") CFG.autoDisarm = data.autoDisarm;
       if (typeof data.scrambleLotto === "boolean") CFG.scrambleLotto = data.scrambleLotto;
+      if (typeof data.emergenceCount === "number" && !isNaN(data.emergenceCount)) {
+        CFG.emergenceCount = Math.max(2, Math.min(10, Math.floor(data.emergenceCount)));
+      }
       if (modeChanged){
         S.seqIndex = 0;
         reshuffleLottoTargets();
@@ -893,17 +897,64 @@ function computeForcedMs(realMs, isLap = false){
       disarmApp("lotto-seq-complete");
     }
   } else {
-    if (!S.scrambledTargets || S.scrambledTargets.length !== list.length || S.scrambleIndex >= S.scrambledTargets.length){
-      reshuffleLottoTargets();
+    // Smart Rank-Aware Lotto Target Matching:
+    // Ensures fastest physical clicks receive lower numbers and display as fastest laps
+    if (!S.remainingTargets || S.remainingTargets.length === 0){
+      S.remainingTargets = activeTargets().slice().sort((a,b) => a - b);
+      S.lastRealLapMs = null;
+      S.lastForcedCs = null;
     }
-    targetVal = S.scrambledTargets[S.scrambleIndex % S.scrambledTargets.length];
+
+    const pool = S.remainingTargets;
+    let chosenIdx = 0;
+
+    if (pool.length === 1) {
+      chosenIdx = 0;
+    } else {
+      // 1. Natural speed tier:
+      let targetRatio = 0.5;
+      if (realMs < 750) targetRatio = 0.15;
+      else if (realMs < 1400) targetRatio = 0.35;
+      else if (realMs < 2200) targetRatio = 0.65;
+      else targetRatio = 0.90;
+
+      chosenIdx = Math.min(pool.length - 1, Math.max(0, Math.round(targetRatio * (pool.length - 1))));
+
+      // 2. Relative ordering preservation against previous lap:
+      if (S.lastRealLapMs !== null && S.lastForcedCs !== null) {
+        if (realMs < S.lastRealLapMs) {
+          // Faster tap than previous: pick target <= lastForcedCs
+          const fasterIndices = [];
+          pool.forEach((v, idx) => { if (v < S.lastForcedCs) fasterIndices.push(idx); });
+          if (fasterIndices.length > 0) {
+            chosenIdx = fasterIndices[fasterIndices.length - 1];
+          } else {
+            chosenIdx = 0;
+          }
+        } else if (realMs > S.lastRealLapMs) {
+          // Slower tap than previous: pick target >= lastForcedCs
+          const slowerIndices = [];
+          pool.forEach((v, idx) => { if (v > S.lastForcedCs) slowerIndices.push(idx); });
+          if (slowerIndices.length > 0) {
+            chosenIdx = slowerIndices[0];
+          } else {
+            chosenIdx = pool.length - 1;
+          }
+        }
+      }
+    }
+
+    targetVal = pool.splice(chosenIdx, 1)[0];
+    S.lastRealLapMs = realMs;
+    S.lastForcedCs = targetVal;
     S.scrambleIndex++;
-    if (CFG.autoDisarm && S.scrambleIndex >= S.scrambledTargets.length){
+
+    if (CFG.autoDisarm && pool.length === 0){
       disarmApp("lotto-scramble-complete");
     }
   }
   const forcedCs = ((targetVal % 100) + 100) % 100;
-  if (minPartCs === 0 && realSec === 0) realSec = 1;
+  // Natural sub-second display: 00:00.xx for rapid taps under 1s
   return (minPartCs + realSec * 100 + forcedCs) * 10;
 }
 function recordPeek(type, shownMs){
@@ -1023,30 +1074,42 @@ function handleLapReset(){
     renderLaps();
   } else if (S.displayedMs > 0){
     const stoppedMs = S.displayedMs;
+    const targetCount = CFG.emergenceCount || 3;
     const item = {
       formatted: formatMs(stoppedMs),
       largeInt: timeToLargeInt(stoppedMs),
       ms: stoppedMs
     };
-    if (S.emergenceList.length >= 3) S.emergenceList = [];
-    S.emergenceList.push(item);
-    const totalSum = S.emergenceList.reduce((acc, it) => acc + it.largeInt, 0);
-    const slotsStr = S.emergenceList.map(it => it.formatted).join(" — ");
-    const sSec = Math.floor(stoppedMs / 1000) % 60;
-    const sCs = Math.floor(stoppedMs / 10) % 100;
-    pushPeekTelemetry({
-      type: `RESET #${S.emergenceList.length} (SUM: ${totalSum})`,
-      realFormatted: slotsStr,
-      shownFormatted: `${item.formatted} (${item.largeInt})`,
-      largeInt: item.largeInt,
-      emergenceSum: totalSum,
-      emergenceSlots: slotsStr,
-      realSec: sSec,
-      realCs: sCs,
-      sec: sSec,
-      cs: sCs,
-      at: new Date().toLocaleTimeString()
-    });
+    if (!S.emergenceList) S.emergenceList = [];
+    // Option A Locking: If target count reached, keep locked in place so accidental taps don't overwrite
+    if (S.emergenceList.length >= targetCount){
+      // Round complete and locked
+    } else {
+      S.emergenceList.push(item);
+      const totalSum = S.emergenceList.reduce((acc, it) => acc + it.largeInt, 0);
+      const slotsStr = S.emergenceList.map(it => it.formatted).join(" — ");
+      const sSec = Math.floor(stoppedMs / 1000) % 60;
+      const sCs = Math.floor(stoppedMs / 10) % 100;
+      pushPeekTelemetry({
+        type: `RESET #${S.emergenceList.length} (SUM: ${totalSum})`,
+        slotNum: S.emergenceList.length,
+        totalCount: targetCount,
+        emergenceList: S.emergenceList,
+        emergenceSum: totalSum,
+        emergenceSlots: slotsStr,
+        realFormatted: slotsStr,
+        shownFormatted: `${item.formatted} (${item.largeInt})`,
+        largeInt: item.largeInt,
+        realSec: sSec,
+        realCs: sCs,
+        sec: sSec,
+        cs: sCs,
+        at: new Date().toLocaleTimeString()
+      });
+    }
+    S.remainingTargets = null;
+    S.lastRealLapMs = null;
+    S.lastForcedCs = null;
     S.elapsedBefore = 0;
     S.lapStartElapsed = 0;
     S.realLapStartPerf = 0;
@@ -1379,7 +1442,6 @@ kpGrid.addEventListener("pointerdown", e => {
     clearTimeout(holdTimer);
     if (elPeekBox.classList.contains("on")){
       elPeekBox.classList.remove("on");
-      if (S.emergenceList.length > 0) S.emergenceList = [];
     }
   }
   tabBar.addEventListener("pointerdown", e => {
