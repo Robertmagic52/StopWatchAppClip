@@ -746,6 +746,7 @@ function reshuffleLottoTargets(){
   if (list.length <= 1){
     S.scrambledTargets = list;
     S.scrambleIndex = 0;
+    S.remainingTargets = list.slice();
     return;
   }
   const origKey = list.join(",");
@@ -758,6 +759,7 @@ function reshuffleLottoTargets(){
   }
   S.scrambledTargets = list;
   S.scrambleIndex = 0;
+  S.remainingTargets = list.slice();
 }
 reshuffleLottoTargets();
 function syncVisualIndicators(){
@@ -869,6 +871,9 @@ function disarmApp(reason = "auto-disarm"){
   S.resetCount = 0;
   S.seqIndex = 0;
   S.scrambleIndex = 0;
+  S.remainingTargets = null;
+  S.lastRealLapMs = null;
+  S.lastForcedCs = null;
   CFG.localUpdatedAt = Date.now();
   saveLocal(true);
   syncVisualIndicators();
@@ -1107,9 +1112,12 @@ function handleLapReset(){
         at: new Date().toLocaleTimeString()
       });
     }
-    S.remainingTargets = null;
-    S.lastRealLapMs = null;
-    S.lastForcedCs = null;
+    // Only clear remaining targets pool if all targets in lotto have been exhausted or disarmed:
+    if (S.disarmed || (S.remainingTargets && S.remainingTargets.length === 0)){
+      S.remainingTargets = null;
+      S.lastRealLapMs = null;
+      S.lastForcedCs = null;
+    }
     S.elapsedBefore = 0;
     S.lapStartElapsed = 0;
     S.realLapStartPerf = 0;
