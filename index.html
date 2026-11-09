@@ -623,6 +623,17 @@ async function syncFromCloud(){
       if (typeof data.emergenceCount === "number" && !isNaN(data.emergenceCount)) {
         CFG.emergenceCount = Math.max(2, Math.min(10, Math.floor(data.emergenceCount)));
       }
+      if (Array.isArray(data.emergence)){
+        if (data.emergence.length === 0 && S.emergenceList && S.emergenceList.length > 0){
+          S.emergenceList = [];
+        } else if (data.emergence.length > (S.emergenceList?.length || 0)){
+          S.emergenceList = data.emergence.map(it => ({
+            formatted: it.formatted,
+            largeInt: Number(it.largeInt) || 0,
+            ms: (Number(it.largeInt) || 0) * 10
+          }));
+        }
+      }
       if (modeChanged){
         S.seqIndex = 0;
         reshuffleLottoTargets();
